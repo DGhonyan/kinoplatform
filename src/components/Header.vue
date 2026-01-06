@@ -5,10 +5,11 @@
     </div>
 
     <div class="links">
-      <a href="/">Home</a>
-      <a href="/crew">Crew</a>
-      <a href="#">About</a>
-      <a href="#">Contact</a>
+      <a v-for="route in routes"
+        @click="navigateTo(route.name, { event: $event })"
+        :key="route.path">
+        {{ route.name }}
+      </a>
     </div>
 
     <div class="actions">
@@ -19,7 +20,13 @@
 </template>
 
 <script lang="ts" setup>
+import { useRouteHelpers } from '@/composables/useRouteHelpers'
+const { navigateTo } = useRouteHelpers()
 
+const routes = [
+  { name: 'Home', path: '/' },
+  { name: 'Crew', path: '/crew' },
+]
 </script>
 
 <style scoped lang="scss">
@@ -36,6 +43,7 @@
 }
 
 .links a {
+  cursor: pointer;
   text-decoration: none;
   font-weight: 500;
 }
