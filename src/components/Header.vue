@@ -5,7 +5,8 @@
     </div>
 
     <div class="links">
-      <a href="#">Home</a>
+      <a href="/">Home</a>
+      <a href="/crew">Crew</a>
       <a href="#">About</a>
       <a href="#">Contact</a>
     </div>

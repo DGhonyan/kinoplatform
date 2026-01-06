@@ -4,12 +4,9 @@
   <div class="layout-content">
     <slot />
   </div>
-
-  <AppFooter />
 </template>
 
 <script lang="ts" setup>
-import AppFooter from '@/components/AppFooter.vue'
 import Header from '@/components/Header.vue'
 </script>
 
