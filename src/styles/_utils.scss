@@ -1,0 +1,7 @@
+@function color($var, $opacity: 1) {
+  @if $opacity == 1 {
+    @return rgb(var($var));
+  } @else {
+    @return rgba(var($var), $opacity);
+  }
+}
