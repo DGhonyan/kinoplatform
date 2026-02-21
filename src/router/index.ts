@@ -5,9 +5,10 @@
  */
 
 // Composables
+import { useAuthStore } from '@/stores/auth'
 import { createRouter, createWebHistory } from 'vue-router'
 
-const routes = [
+export const routes = [
   {
     name: 'Home',
     path: '/',
@@ -17,6 +18,16 @@ const routes = [
     name: 'Crew',
     path: '/crew',
     component: () => import('@/modules/home/views/CrewView.vue'),
+  },
+  {
+    name: 'Login',
+    path: '/login',
+    component: () => import('@/modules/auth/views/AuthView.vue'),
+  },
+  {
+    name: 'Profile',
+    path: '/profile',
+    component: () => import('@/modules/home/views/ProfileView.vue'),
   },
 ]
 
@@ -43,5 +54,33 @@ router.onError((err, to) => {
 router.isReady().then(() => {
   localStorage.removeItem('vuetify:dynamic-reload')
 })
+
+router.beforeEach(async (to, from, next) => {
+  const authStore = useAuthStore();
+  const user = await authStore.getUser();
+
+  // Allow access to login page without authentication
+  if (to.name === 'Login') {
+    if (user) {
+      next({ name: 'Home' });
+      return;
+    }
+
+    next();
+    return;
+  }
+  
+  if ((user && !user.active) && to.name !== 'Profile') {
+    next({ name: 'Profile' });
+    return;
+  }
+
+  if (!user) {
+    next({ name: 'Login' });
+    return;
+  }
+
+  next();
+});
 
 export default router

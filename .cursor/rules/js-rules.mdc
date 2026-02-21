@@ -1,0 +1,7 @@
+---
+description: JavaScript Rules
+globs:
+alwaysApply: true
+---
+
+Always end the code with a semicolon.

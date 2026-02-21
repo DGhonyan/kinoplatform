@@ -13,8 +13,8 @@
     </div>
 
     <div class="actions">
-      <v-btn variant="text" color="primary">Login</v-btn>
-      <v-btn variant="text" color="primary">Register</v-btn>
+      <v-btn v-if="!user" variant="text" color="primary" @click="navigateTo('Login', { newTab: true })">Login</v-btn>
+      <v-btn v-else variant="text" color="primary" @click="logout()">Logout</v-btn>
     </div>
   </div>
 </template>
@@ -22,11 +22,17 @@
 <script lang="ts" setup>
 import { useRouteHelpers } from '@/composables/useRouteHelpers'
 const { navigateTo } = useRouteHelpers()
+import { routes } from '@/router'
+import { useAuthStore } from '@/stores/auth'
+import { storeToRefs } from 'pinia'
 
-const routes = [
-  { name: 'Home', path: '/' },
-  { name: 'Crew', path: '/crew' },
-]
+const authStore = useAuthStore();
+const { user } = storeToRefs(authStore);
+
+const logout = async () => {
+  await authStore.logout();
+  navigateTo('Login');
+}
 </script>
 
 <style scoped lang="scss">

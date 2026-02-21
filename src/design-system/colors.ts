@@ -10,7 +10,7 @@ export const lightColors: Record<string, string> = {
   primary300: '#A8D2E8',
   primary400: '#7EBADC',
   primary500: '#60A0D1',
-  primary: '#528CC6',
+  primary: '#9e2c24',
   primary700: '#4275B3',
   primary800: '#3B5F92',
   primary900: '#335075',
