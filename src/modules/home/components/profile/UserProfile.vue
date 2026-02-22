@@ -143,7 +143,7 @@
 <script lang="ts" setup>
 import { useAuthStore } from '@/stores/auth';
 import { useEventStore } from '@/stores/event';
-import { onMounted, ref, computed } from 'vue';
+import { onMounted, ref, computed, watch } from 'vue';
 import type { User, Event } from '@/types/user';
 import { useUserStore } from '@/stores/user';
 
@@ -288,7 +288,7 @@ const goToToday = () => {
   focusedDate.value = new Date();
 };
 
-onMounted(async () => {
+const loadUserData = async () => {
   const currentUser = getUser();
 
   try {
@@ -304,6 +304,14 @@ onMounted(async () => {
   } catch (error) {
     console.error('Failed to get user by id', error);
   }
+};
+
+onMounted(() => {
+  loadUserData();
+});
+
+watch(() => props.userId, () => {
+  loadUserData();
 });
 </script>
 
