@@ -14,7 +14,18 @@ export type PersonalInfoProject = {
   link: string;
 }
 
+export type Event = {
+  _id?: string;
+  user_id: string;
+  date: string;
+  title: string;
+  color?: string;
+  start?: string;
+  end?: string;
+}
+
 export type User = {
+  _id: string;
   password: string;
   email: string;
   type: UserType;

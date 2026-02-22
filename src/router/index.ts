@@ -25,8 +25,13 @@ export const routes = [
     component: () => import('@/modules/auth/views/AuthView.vue'),
   },
   {
-    name: 'Profile',
-    path: '/profile',
+    name: 'User',
+    path: '/user',
+    component: () => import('@/modules/home/views/ProfileView.vue'),  
+  },
+  {
+    name: 'Users',
+    path: '/users/:id',
     component: () => import('@/modules/home/views/ProfileView.vue'),
   },
 ]
@@ -70,8 +75,8 @@ router.beforeEach(async (to, from, next) => {
     return;
   }
   
-  if ((user && !user.active) && to.name !== 'Profile') {
-    next({ name: 'Profile' });
+  if ((user && !user.active) && to.name !== 'User') {
+    next({ name: 'User' });
     return;
   }
 

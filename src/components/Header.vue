@@ -5,10 +5,10 @@
     </div>
 
     <div class="links">
-      <a v-for="route in routes"
-        @click="navigateTo(route.name, { event: $event })"
-        :key="route.path">
-        {{ route.name }}
+      <a v-for="link in headerLinks"
+        @click="navigateTo(link, { event: $event })"
+        :key="link">
+        {{ link }}
       </a>
     </div>
 
@@ -22,12 +22,13 @@
 <script lang="ts" setup>
 import { useRouteHelpers } from '@/composables/useRouteHelpers'
 const { navigateTo } = useRouteHelpers()
-import { routes } from '@/router'
 import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
 
 const authStore = useAuthStore();
 const { user } = storeToRefs(authStore);
+
+const headerLinks = ["Home", "Crew", "User"];
 
 const logout = async () => {
   await authStore.logout();

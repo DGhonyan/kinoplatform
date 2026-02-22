@@ -18,10 +18,15 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
-import Input from '@/components/Input.vue'
-import { useApi } from '@/common/api'
-import { validateFields } from '@/common/utils'
+import { ref } from 'vue';
+import Input from '@/components/Input.vue';
+import { useApi } from '@/common/api';
+import { validateFields } from '@/common/utils';
+import { useRouteHelpers } from '@/composables/useRouteHelpers';
+import { useAuthStore } from '@/stores/auth';
+
+const { navigateTo } = useRouteHelpers();
+const authStore = useAuthStore();
 
 const fields = {
   email: {
@@ -47,18 +52,12 @@ const fields = {
 const handleRegister = async () => {
   if (validateFields(fields)) return;
 
-  const { data, error } = await useApi('/user/create').post({
-    email: fields.email.model.value,
-    password: fields.password.model.value,
-    confirmPassword: fields.confirmPassword.model.value,
-  });
-
-  if (!data.value || error.value) {
-    console.error('Failed to register user');
-    return;
+  try {
+    await authStore.register(fields.email.model.value, fields.password.model.value, fields.confirmPassword.model.value);
+    navigateTo('Home');
+  } catch (error) {
+    console.error('Failed to register user', error);
   }
-
-  console.log('User registered successfully');
 }
 </script>
 

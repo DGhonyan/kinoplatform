@@ -10,7 +10,7 @@ export const useAuthStore = defineStore('auth', {
   }),
   actions: {
     async login(email: string, password: string) {
-      const { data, error } = await useApi('/user/login').post({
+      const { data, error } = await useApi('/users/login').post({
         email,
         password,
       }).json();
@@ -41,7 +41,7 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async register(email: string, password: string, confirmPassword: string) {
-      const { data, error } = await useApi('/user/register').post({
+      const { data, error } = await useApi('/users/create').post({
         email,
         password,
         confirmPassword,
