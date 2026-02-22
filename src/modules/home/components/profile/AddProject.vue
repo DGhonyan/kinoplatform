@@ -1,7 +1,7 @@
 <template>
   <div class="add-project">
     <div class="add-project-header">
-      <div class="label">Projects</div>
+      <div class="label">Projects (optional)</div>
       <div class="error-message" v-if="error">
         <span>{{ error }}</span>
       </div>
