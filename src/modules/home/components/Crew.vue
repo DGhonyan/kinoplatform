@@ -44,7 +44,7 @@ const { getAllUsers } = userStore;
 
 const filteredUsers = computed(() => {
   return users.value.filter((user) => user.first_name.toLowerCase().includes(search.value.toLowerCase()) 
-    || user.last_name.toLowerCase().includes(search.value.toLowerCase()))
+    || user.last_name.toLowerCase().includes(search.value.toLowerCase()) || user.profession.some((profession) => profession.toLowerCase().includes(search.value.toLowerCase())))
 })
 
 const search = ref('')
