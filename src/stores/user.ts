@@ -23,7 +23,7 @@ export const useUserStore = defineStore('user', {
           }).json();
 
           if (!data.value || error.value) {
-            appStore.showMessage('Failed to update profile', 'error');
+            // appStore.showMessage(error.message);
             throw new Error('Failed to update user');
           }
 

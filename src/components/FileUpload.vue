@@ -11,7 +11,6 @@
           v-model="selectedFile"
           :accept="accept"
           variant="outlined"
-          prepend-inner-icon="mdi-paperclip"
           :label="placeholder"
           hide-details="auto"
           :error-messages="errorMessages"
