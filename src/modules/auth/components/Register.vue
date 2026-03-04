@@ -20,7 +20,6 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import Input from '@/components/Input.vue';
-import { useApi } from '@/common/api';
 import { validateFields } from '@/common/utils';
 import { useRouteHelpers } from '@/composables/useRouteHelpers';
 import { useAuthStore } from '@/stores/auth';
@@ -37,7 +36,7 @@ const fields = {
   },
   password: {
     model: ref(''),
-    label: 'Password',
+    label: 'Password (min 8 characters)',
     type: 'password',
     errorMessages: ref(''),
   },

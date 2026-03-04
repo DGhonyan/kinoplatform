@@ -1,5 +1,14 @@
 <template>
   <div class="add-personal-info">
+    <FileUpload
+      label="Profile Photo"
+      accept="image/*"
+      placeholder="Upload your photo"
+      helper-text="Upload a profile photo (JPG, PNG, WebP)"
+      v-model="avatarBlobName"
+      @upload:error="handleUploadError"
+    />
+
     <template v-for="field in Object.values(fields)" :key="field.label">
       <component
         :is="field.component"
@@ -32,6 +41,7 @@
 import Input from '@/components/Input.vue';
 import Select from '@/components/Select.vue';
 import TextArea from '@/components/TextArea.vue';
+import FileUpload from '@/components/FileUpload.vue';
 import AddProject from './AddProject.vue';
 import { ref, type Ref, type Component } from 'vue';
 import type { PersonalInfoProject } from '@/types/user';
@@ -42,6 +52,8 @@ import { useRouteHelpers } from '@/composables/useRouteHelpers';
 const { navigateTo } = useRouteHelpers();
 
 const userStore = useUserStore();
+
+const avatarBlobName = ref('');
 
 const professions = ref([
   'Camera Operator',
@@ -93,6 +105,10 @@ const updateProjects = (newProjects: PersonalInfoProject[]) => {
   projects.value = newProjects;
 };
 
+const handleUploadError = (error: Error) => {
+  console.error('File upload error:', error);
+};
+
 const addPersonalInfo = async () => {
   professionsErrorMessages.value = '';
 
@@ -110,6 +126,7 @@ const addPersonalInfo = async () => {
       portfolio: fields.portfolio?.model.value,
       projects: projects.value,
       profession: currentProfessions.value,
+      avatar: avatarBlobName.value || undefined,
     });
 
     navigateTo('Home');

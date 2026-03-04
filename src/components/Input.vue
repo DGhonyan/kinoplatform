@@ -11,7 +11,7 @@
       v-bind="$attrs"
       variant="outlined"
       :color="color"
-      :base-color="color"
+      :base-color="required ? 'primary' : color"
       :disabled="disabled"
       :type="type"
       hide-details="auto"
@@ -33,7 +33,7 @@ const props = withDefaults(defineProps<{
   required?: boolean,
   errorMessages?: string | string[],
 }>(), {
-  color: 'primary',
+  color: 'grey',
   disabled: false,
   label: '',
   type: 'textarea',

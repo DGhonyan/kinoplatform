@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import type { User } from '@/types/user'
 import { useApi } from '@/common/api'
+import { useAppStore } from './app'
 
 export const useAuthStore = defineStore('auth', {
   state: (): {
@@ -10,18 +11,26 @@ export const useAuthStore = defineStore('auth', {
   }),
   actions: {
     async login(email: string, password: string) {
-      const { data, error } = await useApi('/users/login').post({
-        email,
-        password,
-      }).json();
+      const appStore = useAppStore();
+      
+      try {
+        const { data, error } = await useApi('/users/login').post({
+          email,
+          password,
+        }).json();
 
-      if (error.value) {
-        throw new Error(error.value.message);
+        if (error.value) {
+          appStore.showMessage(error.value.message || 'Login failed', 'error');
+          throw new Error(error.value.message);
+        }
+
+        this.setUser(data.value as User);
+
+        return data.value;
+      } catch (error) {
+        appStore.showMessage('Login failed. Please try again.', 'error');
+        throw error;
       }
-
-      this.setUser(data.value as User);
-
-      return data.value;
     },
 
     getUser() {
@@ -41,19 +50,27 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async register(email: string, password: string, confirmPassword: string) {
-      const { data, error } = await useApi('/users/create').post({
-        email,
-        password,
-        confirmPassword,
-      }).json();
+      const appStore = useAppStore();
+      
+      try {
+        const { data, error } = await useApi('/users/create').post({
+          email,
+          password,
+          confirmPassword,
+        }).json();
 
-      if (error.value) {
-        throw new Error(error.value.message);
+        if (error.value) {
+          appStore.showMessage(error.value.message || 'Registration failed', 'error');
+          throw new Error(error.value.message);
+        }
+
+        this.setUser(data.value as User);
+
+        return data.value;
+      } catch (error) {
+        appStore.showMessage('Registration failed. Please try again.', 'error');
+        throw error;
       }
-
-      this.setUser(data.value as User);
-
-      return data.value;
     },
   },
 }) 

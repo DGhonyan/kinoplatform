@@ -1,9 +1,14 @@
 <template>
   <div class="user-profile">
     <div class="left">
-      <div class="personal-info">
-        <span class="name">{{ user?.first_name }} {{ user?.last_name }}</span>
-        <span class="profession">{{ user?.profession.join(', ') }}</span>
+      <div class="profile-header">
+        <div v-if="user?.avatar" class="avatar-section">
+          <img :src="getUserAvatar()" alt="User Avatar" class="user-avatar" />
+        </div>
+        <div class="personal-info">
+          <span class="name">{{ user?.first_name }} {{ user?.last_name }}</span>
+          <span class="profession">{{ user?.profession.join(', ') }}</span>
+        </div>
       </div>
       <div class="bio">
         <span class="bio-title">Biography</span>
@@ -54,7 +59,7 @@
             </v-btn>
           </div>
           <v-calendar
-            v-model="focusedDate"
+            v-model="calendarDate"
             :events="calendarEvents"
             :view-mode="calendarView"
             @click:event="onEventClick"
@@ -72,33 +77,49 @@
           <span class="text-h5">Manage Availability</span>
         </v-card-title>
         <v-card-text>
-          <v-form>
-            <v-text-field
+          <v-form class="availability-form">
+            <Input
               v-model="newAvailability.title"
-              label="Title (e.g., Available for shoot)"
-              variant="outlined"
-            />
-            <v-text-field
-              v-model="newAvailability.date"
-              label="Date"
-              type="date"
-              variant="outlined"
+              label="Title"
+              required
+              :error-messages="titleError"
+              @update:model-value="titleError = ''"
             />
             <v-row>
               <v-col cols="6">
-                <v-text-field
-                  v-model="newAvailability.start"
-                  label="Start Time (optional)"
-                  type="time"
-                  variant="outlined"
+                <Input
+                  v-model="newAvailability.start_date"
+                  label="Start Date"
+                  type="date"
+                  required
+                  :error-messages="startDateError"
+                  @update:model-value="onStartDateChange"
                 />
               </v-col>
               <v-col cols="6">
-                <v-text-field
-                  v-model="newAvailability.end"
-                  label="End Time (optional)"
+                <Input
+                  v-model="newAvailability.end_date"
+                  label="End Date"
+                  type="date"
+                  required
+                  :error-messages="endDateError"
+                  @update:model-value="endDateError = ''"
+                />
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="6">
+                <Input
+                  v-model="newAvailability.start_time"
+                  label="Start Time"
                   type="time"
-                  variant="outlined"
+                />
+              </v-col>
+              <v-col cols="6">
+                <Input
+                  v-model="newAvailability.end_time"
+                  label="End Time"
+                  type="time"
                 />
               </v-col>
             </v-row>
@@ -107,17 +128,23 @@
               label="Color"
               :items="colorOptions"
               variant="outlined"
+              hide-details
             />
           </v-form>
 
           <div v-if="userEvents.length > 0" class="existing-availability">
             <h4>Current Availability</h4>
-            <div v-for="event in userEvents" :key="event._id" class="availability-item">
+            <div v-for="event in validUserEvents" :key="event._id" class="availability-item">
               <div class="availability-item-info">
-                <span class="availability-date">{{ formatDate(event.date) }}</span>
+                <span class="availability-date">
+                  {{ formatDate(event.start_date) }}
+                  <template v-if="event.start_date !== event.end_date">
+                    - {{ formatDate(event.end_date) }}
+                  </template>
+                </span>
                 <span class="availability-title">{{ event.title }}</span>
-                <span v-if="event.start && event.end" class="availability-time">
-                  {{ event.start }} - {{ event.end }}
+                <span v-if="event.start_time && event.end_time" class="availability-time">
+                  {{ event.start_time }} - {{ event.end_time }}
                 </span>
               </div>
               <v-btn
@@ -143,9 +170,11 @@
 <script lang="ts" setup>
 import { useAuthStore } from '@/stores/auth';
 import { useEventStore } from '@/stores/event';
+import { useFileStore } from '@/stores/file';
 import { onMounted, ref, computed, watch } from 'vue';
 import type { User, Event } from '@/types/user';
 import { useUserStore } from '@/stores/user';
+import Input from '@/components/Input.vue';
 
 const props = defineProps<{
   userId: string | undefined;
@@ -160,6 +189,8 @@ const { getUserById } = userStore;
 const eventStore = useEventStore();
 const { createEvent, getEventsByUserId, deleteEvent } = eventStore;
 
+const fileStore = useFileStore();
+
 const user = ref<User | null>(null);
 const userEvents = ref<Event[]>([]);
 
@@ -170,15 +201,32 @@ const canEdit = computed(() => {
 
 const showAvailabilityDialog = ref(false);
 const calendarView = ref('month');
-const focusedDate = ref(new Date());
+const focusedDate = ref<Date | string | string[]>(new Date());
+
+const normalizeDate = (date: Date | string | string[]): Date => {
+  if (date instanceof Date) return date;
+  if (Array.isArray(date)) return new Date(date[0] || new Date());
+  if (typeof date === 'string') return new Date(date);
+  return new Date();
+};
+
+const calendarDate = computed({
+  get: () => normalizeDate(focusedDate.value),
+  set: (value) => { focusedDate.value = value; },
+});
 
 const newAvailability = ref<Omit<Event, '_id' | 'user_id'>>({
-  date: '',
+  start_date: '',
+  end_date: '',
   title: '',
   color: 'primary',
-  start: '',
-  end: '',
+  start_time: '',
+  end_time: '',
 });
+
+const titleError = ref('');
+const startDateError = ref('');
+const endDateError = ref('');
 
 const colorOptions = [
   { title: 'Primary', value: 'primary' },
@@ -192,14 +240,38 @@ const hasAvailability = computed(() => {
   return userEvents.value.length > 0;
 });
 
-const calendarEvents = computed(() => {
-  return userEvents.value.map(event => ({
-    title: event.title,
-    start: event.start ? `${event.date}T${event.start}` : event.date,
-    end: event.end ? `${event.date}T${event.end}` : event.date,
-    color: event.color || 'primary',
-  }));
+const validUserEvents = computed(() => {
+  return userEvents.value.filter(event => 
+    event.start_date && event.end_date && event.title
+  );
 });
+
+const calendarEvents = computed(() => {
+  return userEvents.value
+    .filter(event => event.start_date && event.end_date)
+    .map(event => {
+      const startDateTime = event.start_time 
+        ? `${event.start_date}T${event.start_time}` 
+        : event.start_date;
+      const endDateTime = event.end_time 
+        ? `${event.end_date}T${event.end_time}` 
+        : event.end_date;
+      
+      return {
+        title: event.title,
+        start: startDateTime,
+        end: endDateTime,
+        color: event.color || 'primary',
+      };
+    });
+});
+
+const getUserAvatar = () => {
+  if (user.value?.avatar) {
+    return fileStore.composeFileUrl(user.value.avatar);
+  }
+  return new URL(`@/assets/default.jpg`, import.meta.url).href;
+};
 
 const fetchUserEvents = async (userId: string) => {
   try {
@@ -209,6 +281,50 @@ const fetchUserEvents = async (userId: string) => {
     console.error('Failed to fetch user events', error);
     userEvents.value = [];
   }
+};
+
+const onStartDateChange = (value: string) => {
+  startDateError.value = '';
+  
+  // Auto-set end_date to start_date if empty
+  if (!newAvailability.value.end_date) {
+    newAvailability.value.end_date = value;
+  }
+  
+  // Validate date range
+  if (newAvailability.value.end_date && newAvailability.value.end_date < value) {
+    endDateError.value = 'End date must be after or equal to start date';
+  } else {
+    endDateError.value = '';
+  }
+};
+
+const validateForm = (): boolean => {
+  let isValid = true;
+  
+  if (!newAvailability.value.title) {
+    titleError.value = 'Title is required';
+    isValid = false;
+  }
+  
+  if (!newAvailability.value.start_date) {
+    startDateError.value = 'Start date is required';
+    isValid = false;
+  }
+  
+  if (!newAvailability.value.end_date) {
+    endDateError.value = 'End date is required';
+    isValid = false;
+  }
+  
+  if (newAvailability.value.start_date && newAvailability.value.end_date) {
+    if (newAvailability.value.end_date < newAvailability.value.start_date) {
+      endDateError.value = 'End date must be after or equal to start date';
+      isValid = false;
+    }
+  }
+  
+  return isValid;
 };
 
 const openAvailabilityDialog = () => {
@@ -222,16 +338,20 @@ const closeAvailabilityDialog = () => {
 
 const resetNewAvailability = () => {
   newAvailability.value = {
-    date: '',
+    start_date: '',
+    end_date: '',
     title: '',
     color: 'primary',
-    start: '',
-    end: '',
+    start_time: '',
+    end_time: '',
   };
+  titleError.value = '';
+  startDateError.value = '';
+  endDateError.value = '';
 };
 
 const addAvailability = async () => {
-  if (!newAvailability.value.date || !newAvailability.value.title) {
+  if (!validateForm()) {
     return;
   }
 
@@ -257,7 +377,8 @@ const onEventClick = (event: any) => {
   console.log('Event clicked:', event);
 };
 
-const formatDate = (date: string) => {
+const formatDate = (date?: string) => {
+  if (!date) return '';
   return new Date(date).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
@@ -265,23 +386,23 @@ const formatDate = (date: string) => {
   });
 };
 
-const formatMonthYear = (date: Date) => {
-  return date.toLocaleDateString('en-US', {
+const formatMonthYear = (date: Date | string | string[]) => {
+  return normalizeDate(date).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
   });
 };
 
 const previousMonth = () => {
-  const newDate = new Date(focusedDate.value);
-  newDate.setMonth(newDate.getMonth() - 1);
-  focusedDate.value = newDate;
+  const currentDate = normalizeDate(focusedDate.value);
+  currentDate.setMonth(currentDate.getMonth() - 1);
+  focusedDate.value = currentDate;
 };
 
 const nextMonth = () => {
-  const newDate = new Date(focusedDate.value);
-  newDate.setMonth(newDate.getMonth() + 1);
-  focusedDate.value = newDate;
+  const currentDate = normalizeDate(focusedDate.value);
+  currentDate.setMonth(currentDate.getMonth() + 1);
+  focusedDate.value = currentDate;
 };
 
 const goToToday = () => {
@@ -333,6 +454,24 @@ watch(() => props.userId, () => {
     text-decoration: none;
     color: color(--v-theme-primary);
   }
+}
+
+.profile-header {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+.avatar-section {
+  flex-shrink: 0;
+}
+
+.user-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(var(--v-theme-primary), 0.2);
 }
 
 .personal-info {
@@ -434,6 +573,12 @@ watch(() => props.userId, () => {
   font-size: 14px;
   border: 1px dashed rgba(var(--v-theme-primary), 0.3);
   border-radius: 8px;
+}
+
+.availability-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .existing-availability {

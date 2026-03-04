@@ -17,11 +17,12 @@ export type PersonalInfoProject = {
 export type Event = {
   _id?: string;
   user_id: string;
-  date: string;
+  start_date: string;
+  end_date: string;
   title: string;
   color?: string;
-  start?: string;
-  end?: string;
+  start_time?: string;
+  end_time?: string;
 }
 
 export type User = {
@@ -36,4 +37,5 @@ export type User = {
   portfolio: string;
   projects: PersonalInfoProject[];
   profession: string[];
+  avatar?: string;
 };

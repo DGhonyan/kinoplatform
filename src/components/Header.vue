@@ -16,7 +16,7 @@
     <div class="actions">
       <a v-if="user" :class="['user-link', route.name === 'User' && 'active']" @click="navigateTo('User', { event: $event })">{{ user.first_name + ' ' + user.last_name }}</a>
       <v-btn v-if="!user" variant="text" color="primary" @click="navigateTo('Login', { newTab: true })">Login</v-btn>
-      <v-btn v-else variant="text" color="primary" @click="showLogoutDialog = true">Logout</v-btn>
+      <v-btn v-else variant="text" color="gray" @click="showLogoutDialog = true">Logout</v-btn>
     </div>
 
     <v-dialog v-model="showLogoutDialog" max-width="400px">
@@ -96,6 +96,8 @@ a.active {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+
+  cursor: pointer;
 }
 
 .links a {
