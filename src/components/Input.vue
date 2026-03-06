@@ -13,17 +13,21 @@
       :color="color"
       :base-color="required ? 'primary' : color"
       :disabled="disabled"
-      :type="type"
+      :type="actualType"
       hide-details="auto"
       :density="density"
       :required="required"
       :error-messages="errorMessages"
+      :append-inner-icon="isPassword ? (showPassword ? 'mdi-eye-off' : 'mdi-eye') : undefined"
+      @click:append-inner="togglePasswordVisibility"
       @update:model-value="updateModelValue"
     />
   </div>
 </template>
 
 <script lang="ts" setup>
+import { ref, computed } from 'vue';
+
 const props = withDefaults(defineProps<{
   color?: string,
   disabled?: boolean,
@@ -39,11 +43,28 @@ const props = withDefaults(defineProps<{
   type: 'textarea',
   density: 'default',
   required: false,
-})
+});
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void;
 }>();
+
+const showPassword = ref(false);
+
+const isPassword = computed(() => props.type === 'password');
+
+const actualType = computed(() => {
+  if (isPassword.value && showPassword.value) {
+    return 'text';
+  }
+  return props.type;
+});
+
+const togglePasswordVisibility = () => {
+  if (isPassword.value) {
+    showPassword.value = !showPassword.value;
+  }
+};
 
 const updateModelValue = (value: string) => {
   emit('update:modelValue', value);
