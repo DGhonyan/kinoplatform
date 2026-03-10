@@ -2,13 +2,14 @@
   <div class="login-page">
     <div class="header">
       <h1>Kinoplatform</h1>
+      <LanguageSelector />
     </div>
 
     <div class="form-wrapper">
       <div class="form">
         <div class="view-control">
-          <v-btn :class="['view-control-button', formView === 'login' && 'active']" variant="text" @click="formView = 'login'">Login</v-btn>
-          <v-btn :class="['view-control-button', formView === 'register' && 'active']" variant="text" @click="formView = 'register'">Register</v-btn>
+          <v-btn :class="['view-control-button', formView === 'login' && 'active']" variant="text" @click="formView = 'login'">{{ $t('common_login') }}</v-btn>
+          <v-btn :class="['view-control-button', formView === 'register' && 'active']" variant="text" @click="formView = 'register'">{{ $t('common_register') }}</v-btn>
         </div>
   
         <div class="input-container">
@@ -24,6 +25,7 @@
 import { ref } from 'vue'
 import Login from './Login.vue'
 import Register from './Register.vue'
+import LanguageSelector from '@/components/LanguageSelector.vue'
 
 const formView = ref('login')
 </script>
@@ -36,6 +38,13 @@ const formView = ref('login')
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: color(--v-theme-primary);
 }
 
 .form-wrapper {

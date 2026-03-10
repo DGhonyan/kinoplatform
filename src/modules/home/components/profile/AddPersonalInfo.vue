@@ -1,10 +1,10 @@
 <template>
   <div class="add-personal-info">
     <FileUpload
-      label="Profile Photo"
+      label="common_profile_photo"
       accept="image/*"
-      placeholder="Upload your photo"
-      helper-text="Upload a profile photo (JPG, PNG, WebP)"
+      placeholder="personal_info_upload_photo"
+      helper-text="personal_info_upload_photo_helper_text"
       v-model="avatarBlobName"
       @upload:error="handleUploadError"
     />
@@ -22,7 +22,7 @@
     </template>
     
     <Select
-      :label="'Professions'"
+      label="common_professions"
       v-model="currentProfessions"
       required
       :items="professions"
@@ -33,7 +33,7 @@
 
     <AddProject :projects="projects" @update:projects="updateProjects" />
 
-    <v-btn color="primary" @click="addPersonalInfo">Update Personal Info</v-btn>
+    <v-btn color="primary" @click="addPersonalInfo">{{ $t('personal_info_update_personal_info') }}</v-btn>
   </div>
 </template>
 
@@ -48,9 +48,10 @@ import type { PersonalInfoProject } from '@/types/user';
 import { validateFields } from '@/common/utils';
 import { useUserStore } from '@/stores/user';
 import { useRouteHelpers } from '@/composables/useRouteHelpers';
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 const { navigateTo } = useRouteHelpers();
-
 const userStore = useUserStore();
 
 const avatarBlobName = ref('');
@@ -75,27 +76,27 @@ const fields: Record<string, {
   }> = {
   firstName: {
     model: ref(''),
-    label: 'First Name',
+    label: 'common_first_name',
     required: true,
     component: Input,
     errorMessages: ref(''),
   },
   lastName: {
     model: ref(''),
-    label: 'Last Name',
+    label: 'common_last_name',
     required: true,
     component: Input,
     errorMessages: ref(''),
   },
   bio: {
     model: ref(''),
-    label: 'Bio',
+    label: 'common_bio',
     component: TextArea,
     required: false,
   },
   portfolio: {
     model: ref(undefined),
-    label: 'Portfolio link',
+    label: 'common_portfolio_link',
     component: Input,
     required: false,
   },
@@ -113,10 +114,10 @@ const addPersonalInfo = async () => {
   professionsErrorMessages.value = '';
 
   if (currentProfessions.value.length === 0) {
-    professionsErrorMessages.value = 'This field is required';
+    professionsErrorMessages.value = t('common_this_field_is_required');
   }
 
-  if (validateFields(fields) || professionsErrorMessages.value) return;
+  if (validateFields(fields, t) || professionsErrorMessages.value) return;
 
   try {
     await userStore.updateUser({

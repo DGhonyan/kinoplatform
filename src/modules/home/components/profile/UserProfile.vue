@@ -12,15 +12,15 @@
       </div>
       <div class="bio">
         <span class="bio-title">Biography</span>
-        <span class="bio-content">{{ user?.bio || 'No biography added' }}</span>
+        <span class="bio-content">{{ user?.bio || $t('profile_no_bio') }}</span>
       </div>
 
       <div v-if="user?.portfolio" class="portfolio">
-        <a :href="user?.portfolio" target="_blank">Portfolio Link</a>
+        <a :href="user?.portfolio" target="_blank">{{ $t('common_portfolio_link') }}</a>
       </div>
     </div>
     <div class="right">
-      <span class="projects-title">Projects</span>
+      <span class="projects-title">{{ $t('common_projects') }}</span>
       <div v-if="user?.projects && user?.projects.length > 0" class="projects">
   
         <div class="project-item" v-for="project in user?.projects" :key="project.name">
@@ -28,19 +28,19 @@
         </div>
       </div>
       <div v-else class="no-projects">
-        <span class="no-projects-title">This user didn't add any projects</span>
+        <span class="no-projects-title">{{ $t('profile_no_projects') }}</span>
       </div>
 
       <div class="availability-section">
         <div class="availability-header">
-          <span class="availability-title">Availability</span>
+          <span class="availability-title">{{ $t('profile_availability') }}</span>
           <v-btn 
             v-if="canEdit" 
             size="small" 
             color="primary"
             @click="openAvailabilityDialog"
           >
-            {{ hasAvailability ? 'Edit' : 'Add' }} Availability
+            {{ hasAvailability ? $t('profile_edit_availability') : $t('profile_add_availability') }}
           </v-btn>
         </div>
 
@@ -74,13 +74,13 @@
     <v-dialog v-model="showAvailabilityDialog" max-width="600px">
       <v-card>
         <v-card-title>
-          <span class="text-h5">Manage Availability</span>
+          <span class="text-h5">{{ $t('profile_manage_availability') }}</span>
         </v-card-title>
         <v-card-text>
           <v-form class="availability-form">
             <Input
               v-model="newAvailability.title"
-              label="Title"
+              label="common_title"
               required
               :error-messages="titleError"
               @update:model-value="titleError = ''"
@@ -89,7 +89,7 @@
               <v-col cols="6">
                 <Input
                   v-model="newAvailability.start_date"
-                  label="Start Date"
+                  label="common_start_date"
                   type="date"
                   required
                   :error-messages="startDateError"
@@ -99,7 +99,7 @@
               <v-col cols="6">
                 <Input
                   v-model="newAvailability.end_date"
-                  label="End Date"
+                  label="common_end_date"
                   type="date"
                   required
                   :error-messages="endDateError"
@@ -111,21 +111,21 @@
               <v-col cols="6">
                 <Input
                   v-model="newAvailability.start_time"
-                  label="Start Time"
+                  label="profile_start_time"
                   type="time"
                 />
               </v-col>
               <v-col cols="6">
                 <Input
                   v-model="newAvailability.end_time"
-                  label="End Time"
+                  label="profile_end_time"
                   type="time"
                 />
               </v-col>
             </v-row>
             <v-select
               v-model="newAvailability.color"
-              label="Color"
+              label="common_color"
               :items="colorOptions"
               variant="outlined"
               hide-details
@@ -133,7 +133,7 @@
           </v-form>
 
           <div v-if="userEvents.length > 0" class="existing-availability">
-            <h4>Current Availability</h4>
+            <h4>{{ $t('profile_current_availability') }}</h4>
             <div v-for="event in validUserEvents" :key="event._id" class="availability-item">
               <div class="availability-item-info">
                 <span class="availability-date">
@@ -175,6 +175,9 @@ import { onMounted, ref, computed, watch } from 'vue';
 import type { User, Event } from '@/types/user';
 import { useUserStore } from '@/stores/user';
 import Input from '@/components/Input.vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const props = defineProps<{
   userId: string | undefined;
@@ -229,11 +232,11 @@ const startDateError = ref('');
 const endDateError = ref('');
 
 const colorOptions = [
-  { title: 'Primary', value: 'primary' },
-  { title: 'Success', value: 'success' },
-  { title: 'Warning', value: 'warning' },
-  { title: 'Error', value: 'error' },
-  { title: 'Info', value: 'info' },
+  { title: t('common_primary'), value: 'primary' },
+  { title: t('common_success'), value: 'success' },
+  { title: t('common_warning'), value: 'warning' },
+  { title: t('common_error'), value: 'error' },
+  { title: t('common_info'), value: 'info' },
 ];
 
 const hasAvailability = computed(() => {
@@ -303,27 +306,27 @@ const validateForm = (): boolean => {
   let isValid = true;
   
   if (!newAvailability.value.title) {
-    titleError.value = 'Title is required';
+    titleError.value = t('common_this_field_is_required');
     isValid = false;
   }
   
   if (!newAvailability.value.start_date) {
-    startDateError.value = 'Start date is required';
+    startDateError.value = t('common_this_field_is_required');
     isValid = false;
   }
   
   if (!newAvailability.value.end_date) {
-    endDateError.value = 'End date is required';
+    endDateError.value = t('common_this_field_is_required');
     isValid = false;
   }
   
   if (newAvailability.value.start_date && newAvailability.value.end_date) {
     if (newAvailability.value.end_date < newAvailability.value.start_date) {
-      endDateError.value = 'End date must be after or equal to start date';
+      endDateError.value = t('common_end_date_must_be_after_or_equal_to_start_date');
       isValid = false;
     }
   }
-  
+
   return isValid;
 };
 

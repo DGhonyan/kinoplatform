@@ -1,12 +1,12 @@
 // Plugins
 import AutoImport from 'unplugin-auto-import/vite'
-import Components from 'unplugin-vue-components/vite'
 import Fonts from 'unplugin-fonts/vite'
 import Layouts from 'vite-plugin-vue-layouts-next'
 import Vue from '@vitejs/plugin-vue'
 import VueRouter from 'unplugin-vue-router/vite'
 import { VueRouterAutoImports } from 'unplugin-vue-router'
 import Vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
+import vueI18n from '@intlify/unplugin-vue-i18n/vite'
 
 // Utilities
 import { defineConfig } from 'vite'
@@ -18,6 +18,9 @@ export default defineConfig({
   plugins: [
     VueRouter({
       dts: 'src/typed-router.d.ts',
+    }),
+    vueI18n({
+      include: fileURLToPath(new URL("./src/translations/*.json", import.meta.url))
     }),
     Layouts(),
     AutoImport({

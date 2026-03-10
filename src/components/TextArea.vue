@@ -1,7 +1,7 @@
 <template>
   <div class="text-area-container">
     <label v-if="label" class="label" @click.stop>
-      {{ label }}
+      {{ $t(label) }}
   
       <span v-if="required" class="asterisk"> * </span>
     </label>

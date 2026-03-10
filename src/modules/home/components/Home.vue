@@ -1,7 +1,7 @@
 <template>
   <div class="home-container">
     <div class="home-left">
-      <span>This is a placeholder text for the home pagepagep agepa gepagepagepagepa gepagepagepa gepagepagepagepage</span>
+      <span class="home-description">{{ $t('home_description') }}</span>
       <v-icon class="home-arrow" icon="mdi-arrow-right" size="50" color="primary" @click="navigateTo('Crew')" />
     </div>
     <div class="home-right">
@@ -21,6 +21,7 @@ const { navigateTo } = useRouteHelpers()
   height: 100%;
   display: flex;
   align-items: center;
+  justify-content: space-around;
   gap: 20px;
 
   padding: 120px;
@@ -29,10 +30,11 @@ const { navigateTo } = useRouteHelpers()
 .home-left {
   max-width: 50%;
 
-  span {
+  .home-description {
     font-size: 24px;
     color: color(--v-theme-gray);
     padding-right: 20px;
+    white-space: pre-line;
   }
 
   .home-arrow {

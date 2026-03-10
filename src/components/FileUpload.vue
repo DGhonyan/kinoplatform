@@ -1,7 +1,7 @@
 <template>
   <div class="file-upload">
     <label v-if="label" class="label">
-      {{ label }}
+      {{ $t(label) }}
       <span v-if="required" class="asterisk"> * </span>
     </label>
 
@@ -11,7 +11,7 @@
           v-model="selectedFile"
           :accept="accept"
           variant="outlined"
-          :label="placeholder"
+          :label="$t(placeholder)"
           hide-details="auto"
           :error-messages="errorMessages"
           @update:model-value="handleFileSelect"
@@ -48,7 +48,7 @@
       </div>
     </div>
 
-    <span v-if="helperText" class="helper-text">{{ helperText }}</span>
+    <span v-if="helperText" class="helper-text">{{ $t(helperText) }}</span>
   </div>
 </template>
 

@@ -9,31 +9,32 @@
         :class="[link === route.name && 'active']"
         @click="navigateTo(link, { event: $event })"
         :key="link">
-        {{ link }}
+        {{ $t(`common_${link.toLowerCase()}`) }}
       </a>
     </div>
     
     <div class="actions">
       <a v-if="user" :class="['user-link', route.name === 'User' && 'active']" @click="navigateTo('User', { event: $event })">{{ user.first_name + ' ' + user.last_name }}</a>
-      <v-btn v-if="!user" variant="text" color="primary" @click="navigateTo('Login', { newTab: true })">Login</v-btn>
-      <v-btn v-else variant="text" color="gray" @click="showLogoutDialog = true">Logout</v-btn>
+      <v-btn v-if="!user" variant="text" color="primary" @click="navigateTo('Login', { newTab: true })">{{ $t('common_login') }}</v-btn>
+      <v-btn v-else variant="text" color="gray" @click="showLogoutDialog = true">{{ $t('common_logout') }}</v-btn>
+      <LanguageSelector />
     </div>
 
     <v-dialog v-model="showLogoutDialog" max-width="400px">
       <v-card>
         <v-card-title class="text-h5">
-          Confirm Logout
+          {{ $t('common_confirm_logout') }}
         </v-card-title>
         <v-card-text>
-          Are you sure you want to logout?
+          {{ $t('common_are_you_sure_you_want_to_logout') }}
         </v-card-text>
         <v-card-actions>
           <v-spacer />
           <v-btn color="grey" variant="text" @click="showLogoutDialog = false">
-            Cancel
+            {{ $t('common_cancel') }}
           </v-btn>
           <v-btn color="primary" variant="text" @click="confirmLogout">
-            Logout
+            {{ $t('common_logout') }}
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -48,6 +49,7 @@ const { navigateTo } = useRouteHelpers()
 import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
+import LanguageSelector from '@/components/LanguageSelector.vue'
 
 const authStore = useAuthStore();
 const { user } = storeToRefs(authStore);

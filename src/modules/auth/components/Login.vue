@@ -11,7 +11,7 @@
       />
     </template>
 
-    <v-btn color="primary" @click="handleLogin">Login</v-btn>
+    <v-btn color="primary" @click="handleLogin">{{ $t('common_login') }}</v-btn>
   </div>
 </template>
 
@@ -21,26 +21,28 @@ import Input from '@/components/Input.vue'
 import { validateFields } from '@/common/utils'
 import { useAuthStore } from '@/stores/auth'
 import { useRouteHelpers } from '@/composables/useRouteHelpers'
+import { useI18n } from 'vue-i18n';
 
 const { navigateTo } = useRouteHelpers();
+const { t } = useI18n();
 
 const fields = {
   email: {
     model: ref(''),
-    label: 'Email',
+    label: 'common_email',
     type: 'email',
     errorMessages: ref(''),
   },
   password: {
     model: ref(''),
-    label: 'Password',
+    label: 'common_password',
     type: 'password',
     errorMessages: ref(''),
   },
 };
 
 const handleLogin = async () => {
-  if (validateFields(fields)) return;
+  if (validateFields(fields, t)) return;
 
   const authStore = useAuthStore();
 

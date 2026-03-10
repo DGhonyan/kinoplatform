@@ -1,7 +1,7 @@
 <template>
   <div class="shared-input">
     <label v-if="label" class="label" @click.stop>
-      {{ label }}
+      {{ $t(label) }}
   
       <span v-if="required" class="asterisk"> * </span>
     </label>

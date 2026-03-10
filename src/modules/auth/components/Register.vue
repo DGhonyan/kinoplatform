@@ -13,7 +13,7 @@
       />
     </template>
 
-    <v-btn color="primary" @click="handleRegister">Register</v-btn>
+    <v-btn color="primary" @click="handleRegister">{{ $t('common_register') }}</v-btn>
   </div>
 </template>
 
@@ -23,33 +23,35 @@ import Input from '@/components/Input.vue';
 import { validateFields } from '@/common/utils';
 import { useRouteHelpers } from '@/composables/useRouteHelpers';
 import { useAuthStore } from '@/stores/auth';
+import { useI18n } from 'vue-i18n';
 
 const { navigateTo } = useRouteHelpers();
 const authStore = useAuthStore();
+const { t } = useI18n();
 
 const fields = {
   email: {
     model: ref(''),
-    label: 'Email',
+    label: 'common_email',
     type: 'email',
     errorMessages: ref(''),
   },
   password: {
     model: ref(''),
-    label: 'Password (min 8 characters)',
+    label: 'register_password_min_length',
     type: 'password',
     errorMessages: ref(''),
   },
   confirmPassword: {
     model: ref(''),
-    label: 'Confirm Password',
+    label: 'register_confirm_password',
     type: 'password',
     errorMessages: ref(''),
   },
 };
 
 const handleRegister = async () => {
-  if (validateFields(fields)) return;
+  if (validateFields(fields, t)) return;
 
   try {
     await authStore.register(fields.email.model.value, fields.password.model.value, fields.confirmPassword.model.value);

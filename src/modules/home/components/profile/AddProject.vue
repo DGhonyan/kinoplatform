@@ -1,9 +1,9 @@
 <template>
   <div class="add-project">
     <div class="add-project-header">
-      <div class="label">Projects (optional)</div>
+      <div class="label">{{ $t('personal_info_projects_optional') }}</div>
       <div class="error-message" v-if="error">
-        <span>{{ error }}</span>
+        <span>{{ $t(error) }}</span>
       </div>
     </div>
 
@@ -18,23 +18,23 @@
     <div class="project-items">
       <div class="inputs">
         <Input
-          :label="'Project Name'"
+          :label="'personal_info_project_name'"
           v-model="currentProject.name"
           required
         />
         <Input
-          :label="'Project Year'"
+          :label="'personal_info_project_year'"
           v-model="currentProject.year"
           required
           type="number"
         />
         <Input
-          :label="'Project Link'"
+          :label="'personal_info_project_link'"
           v-model="currentProject.link"
           required
         />
       </div>
-      <v-btn class="add-project-button" variant="outlined" color="primary" @click="addProject">Add Project</v-btn>
+      <v-btn class="add-project-button" variant="outlined" color="primary" @click="addProject">{{ $t('personal_info_add_project') }}</v-btn>
     </div>
   </div>
 </template>
@@ -60,7 +60,7 @@ const validateFields = (fields: PersonalInfoProject) => {
 
   for (const field in fields) {
     if (!fields[field as keyof PersonalInfoProject]) {
-      error.value = 'All fields are required';
+      error.value = 'common_all_fields_are_required';
       return true
     }
   }

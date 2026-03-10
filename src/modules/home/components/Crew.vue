@@ -3,7 +3,7 @@
     <div class="toolbar">
       <v-text-field
         v-model="search"
-        label="Search by name"
+        :label="t('crew_search_by_name')"
         prepend-inner-icon="mdi-magnify"
         variant="outlined"
         density="compact"
@@ -11,7 +11,7 @@
       />
       <v-select
         v-model="selectedProfessions"
-        label="Filter by profession"
+        :label="t('crew_filter_by_profession')"
         :items="professionOptions"
         variant="outlined"
         density="compact"
@@ -42,7 +42,7 @@
     </div>
 
     <div v-if="filteredUsers.length === 0" class="no-results">
-      <span>No crew members found</span>
+      <span>{{ $t('crew_no_crew_members_found') }}</span>
     </div>
   </div>
 </template>
@@ -53,10 +53,11 @@ import { useUserStore } from '@/stores/user'
 import { useFileStore } from '@/stores/file'
 import type { User } from '@/types/user'
 import { useRouteHelpers } from '@/composables/useRouteHelpers'
+import { useI18n } from 'vue-i18n';
 
 const { navigateTo } = useRouteHelpers();
 const fileStore = useFileStore();
-
+const { t } = useI18n();
 const getUserAvatar = (user: User) => {
   if (user.avatar) {
     return fileStore.composeFileUrl(user.avatar);
