@@ -11,7 +11,7 @@
         </div>
       </div>
       <div class="bio">
-        <span class="bio-title">Biography</span>
+        <span class="bio-title">{{ $t('common_bio') }}</span>
         <span class="bio-content">{{ user?.bio || $t('profile_no_bio') }}</span>
       </div>
 
@@ -55,7 +55,7 @@
               @click="goToToday"
               class="today-btn"
             >
-              Today
+              {{ $t('common_today') }}
             </v-btn>
           </div>
           <v-calendar
@@ -66,7 +66,7 @@
           />
         </div>
         <div v-else class="no-availability">
-          <span>{{ canEdit ? 'Add your availability to let others know when you\'re free' : 'No availability information added' }}</span>
+          <span>{{ canEdit ? $t('profile_availability_description') : $t('profile_no_availability_information_added') }}</span>
         </div>
       </div>
     </div>
@@ -125,7 +125,7 @@
             </v-row>
             <v-select
               v-model="newAvailability.color"
-              label="common_color"
+              :label="$t('common_color')"
               :items="colorOptions"
               variant="outlined"
               hide-details
@@ -231,13 +231,13 @@ const titleError = ref('');
 const startDateError = ref('');
 const endDateError = ref('');
 
-const colorOptions = [
+const colorOptions = computed(() => [
   { title: t('common_primary'), value: 'primary' },
   { title: t('common_success'), value: 'success' },
   { title: t('common_warning'), value: 'warning' },
   { title: t('common_error'), value: 'error' },
   { title: t('common_info'), value: 'info' },
-];
+]);
 
 const hasAvailability = computed(() => {
   return userEvents.value.length > 0;
