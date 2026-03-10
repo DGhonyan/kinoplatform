@@ -49,20 +49,13 @@ import { validateFields } from '@/common/utils';
 import { useUserStore } from '@/stores/user';
 import { useRouteHelpers } from '@/composables/useRouteHelpers';
 import { useI18n } from 'vue-i18n';
+import { professions } from '@/common/constants';
 
 const { t } = useI18n();
 const { navigateTo } = useRouteHelpers();
 const userStore = useUserStore();
 
 const avatarBlobName = ref('');
-
-const professions = ref([
-  'Camera Operator',
-  'Sound Operator',
-  'Lighting Operator',
-  'Other',
-]);
-
 const currentProfessions = ref<string[]>([]);
 const projects = ref<PersonalInfoProject[]>([]);
 const professionsErrorMessages = ref('');

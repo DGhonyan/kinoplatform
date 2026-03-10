@@ -6,7 +6,19 @@
           <img :src="getUserAvatar()" alt="User Avatar" class="user-avatar" />
         </div>
         <div class="personal-info">
-          <span class="name">{{ user?.first_name }} {{ user?.last_name }}</span>
+          <div class="name-section">
+            <span class="name">{{ user?.first_name }} {{ user?.last_name }}</span>
+            <v-btn 
+              v-if="canEdit"
+              size="small"
+              variant="outlined"
+              color="primary"
+              prepend-icon="mdi-pencil"
+              @click="openEditProfileDialog"
+            >
+              {{ $t('profile_edit_profile') }}
+            </v-btn>
+          </div>
           <span class="profession">{{ user?.profession.join(', ') }}</span>
         </div>
       </div>
@@ -164,6 +176,42 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <v-dialog v-model="showEditProfileDialog" max-width="800px">
+      <v-card>
+        <v-card-title>
+          <span class="text-h5">{{ $t('profile_edit_profile') }}</span>
+        </v-card-title>
+        <v-card-text>
+          <div class="edit-profile-form">
+            <v-textarea
+              v-model="editBioValue"
+              :label="$t('common_bio')"
+              variant="outlined"
+              rows="4"
+            />
+
+            <v-select
+              v-model="editProfessionsValue"
+              :label="$t('common_professions')"
+              :items="professionOptions"
+              variant="outlined"
+              multiple
+              chips
+              closable-chips
+              :error-messages="editProfessionsError"
+            />
+
+            <AddProject :projects="editProjectsValue" @update:projects="updateProjects" />
+          </div>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn color="grey" variant="text" @click="closeEditProfileDialog">{{ $t('common_cancel') }}</v-btn>
+          <v-btn color="primary" variant="text" @click="saveProfile">{{ $t('common_save') }}</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -172,10 +220,12 @@ import { useAuthStore } from '@/stores/auth';
 import { useEventStore } from '@/stores/event';
 import { useFileStore } from '@/stores/file';
 import { onMounted, ref, computed, watch } from 'vue';
-import type { User, Event } from '@/types/user';
+import type { User, Event, PersonalInfoProject } from '@/types/user';
 import { useUserStore } from '@/stores/user';
 import Input from '@/components/Input.vue';
+import AddProject from './AddProject.vue';
 import { useI18n } from 'vue-i18n';
+import { professions } from '@/common/constants';
 
 const { t } = useI18n();
 
@@ -231,6 +281,12 @@ const titleError = ref('');
 const startDateError = ref('');
 const endDateError = ref('');
 
+const showEditProfileDialog = ref(false);
+const editBioValue = ref('');
+const editProfessionsValue = ref<string[]>([]);
+const editProjectsValue = ref<PersonalInfoProject[]>([]);
+const editProfessionsError = ref('');
+
 const colorOptions = computed(() => [
   { title: t('common_primary'), value: 'primary' },
   { title: t('common_success'), value: 'success' },
@@ -248,6 +304,8 @@ const validUserEvents = computed(() => {
     event.start_date && event.end_date && event.title
   );
 });
+
+const professionOptions = computed(() => professions.value);
 
 const calendarEvents = computed(() => {
   return userEvents.value
@@ -376,6 +434,44 @@ const removeAvailability = async (eventId: string) => {
   }
 };
 
+const openEditProfileDialog = () => {
+  editBioValue.value = user.value?.bio || '';
+  editProfessionsValue.value = [...(user.value?.profession || [])];
+  editProjectsValue.value = user.value?.projects ? JSON.parse(JSON.stringify(user.value.projects)) : [];
+  showEditProfileDialog.value = true;
+};
+
+const closeEditProfileDialog = () => {
+  showEditProfileDialog.value = false;
+  editProfessionsError.value = '';
+};
+
+const updateProjects = (newProjects: PersonalInfoProject[]) => {
+  editProjectsValue.value = newProjects;
+};
+
+const saveProfile = async () => {
+  editProfessionsError.value = '';
+
+  if (editProfessionsValue.value.length === 0) {
+    editProfessionsError.value = t('common_this_field_is_required');
+    return;
+  }
+
+  try {
+    await userStore.updateUser({
+      bio: editBioValue.value,
+      profession: editProfessionsValue.value,
+      projects: editProjectsValue.value,
+    });
+
+    user.value = getUser();
+    closeEditProfileDialog();
+  } catch (error) {
+    console.error('Failed to update profile', error);
+  }
+};
+
 const onEventClick = (event: any) => {
   console.log('Event clicked:', event);
 };
@@ -481,6 +577,13 @@ watch(() => props.userId, () => {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  flex: 1;
+}
+
+.name-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 .name {
@@ -626,5 +729,11 @@ watch(() => props.userId, () => {
   font-size: 12px;
   color: color(--v-theme-gray);
   opacity: 0.7;
+}
+
+.edit-profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 </style>
