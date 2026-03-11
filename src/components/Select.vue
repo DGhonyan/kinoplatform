@@ -6,6 +6,7 @@
     </label>
 
     <v-autocomplete
+      autocomplete="suppress"
       class="select"
       v-bind="$attrs"
       variant="outlined"

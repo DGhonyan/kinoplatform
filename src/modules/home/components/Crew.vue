@@ -19,6 +19,7 @@
         clearable
         multiple
         chips
+        autocomplete="suppress"
       />
     </div>
 
