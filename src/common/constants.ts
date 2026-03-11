@@ -7,315 +7,100 @@ export const FILE_API_URL = 'https://kinoplatformazure.blob.core.windows.net/'
 
 // move this outta my sight please
 export const professions = ref([
-  // DIRECTING & CREATIVE LEADERSHIP
-  "Director",
-  
-  "Assistant Director (1st AD, 2nd AD, 3rd AD)",
-  
-  
-  "Script Supervisor",
-  
-  
-  "Creative Producer",
-  
-  
-  "Showrunner (series)",
-  
-  
-  // 📝 WRITING & DEVELOPMENT
-  "Screenwriter",
-  
-  
-  "Script Editor / Script Consultant",
-  
-  
-  "Dramaturg",
-  
-  
-  "Story Editor",
-  
-  
-  "Researcher",
-  
-  
-  // 💼 PRODUCTION & MANAGEMENT
-  "Producer",
-  
-  
-  "Executive Producer",
-  
-  
-  "Line Producer",
-  
-  
-  "Production Manager",
-  
-  
-  "Production Coordinator",
-  
-  
-  "Production Assistant (PA)",
-  
-  
-  "Unit Production Manager (UPM)",
-  
-  
-  "Casting Producer",
-  
-  
-  // 🎭 CASTING & TALENT
-  "Casting Director",
-  
-  
-  "Casting Assistant",
-  
-  
-  "Talent Coordinator",
-  // 📷 CAMERA DEPARTMENT
-  "Cinematographer",
-  
-  
-  "Camera Operator",
-  
-  
-  "1st Assistant Camera",
-  
-  
-  "2nd Assistant Camera ",
-  
-  
-  "Digital Imaging Technician (DIT)",
-  
-  
-  "Steadicam Operator",
-  
-  
-  "Drone Operator",
-  
-  // 💡 LIGHTING & ELECTRICAL
-  "Gaffer",
-  
-  
-  "Best Boy Electric",
-  
-  
-  "Lighting Technician / Electrician",
-  
-  
-  "Generator Operator",
-  
-  
-  // 🔊 SOUND
-  "Sound Designer",
-  
-  
-  "Production Sound Mixer",
-  
-  
-  "Boom Operator",
-  
-  
-  "Sound Assistant",
-  
-  
-  "Foley Artist",
-  
-  
-  "ADR Recordist",
-  
-  
-  // 🎨 ART DEPARTMENT & DESIGN
-  "Production Designer",
-  
-  
-  "Art Director",
-  
-  
-  "Set Designer",
-  
-  
-  "Set Decorator",
-  
-  
-  "Props Master",
-  
-  
-  "Props Assistant",
-  
-  
-  "Scenic Painter",
-  
-  
-  "Construction Manager",
-  
-  
-  // 👗 COSTUME & MAKEUP
-  "Costume Designer",
-  
-  
-  "Costume Supervisor",
-  
-  
-  "Wardrobe Assistant",
-  
-  
-  "Makeup Artist",
-  
-  
-  "Hair Stylist",
-  
-  
-  "SFX Makeup Artist",
-  
-  
-  
-  
-  // 🏗️ LOCATIONS
-  "Location Manager",
-  
-  
-  "Assistant Location Manager",
-  
-  
-  "Location Scout",
-  
-  
-  
-  // 🎞️ POST-PRODUCTION
-  "Editor",
-  
-  
-  "Assistant Editor",
-  
-  
-  "Colorist",
-  
-  
-  "Post-Production Supervisor",
-  
-  
-  "Online Editor",
-  
-  
-  "Mastering Technician",
-  
-  
-  // 🎧 SOUND POST-PRODUCTION
-  "Sound Editor",
-  
-  
-  "Dialogue Editor",
-  
-  
-  "Re-recording Mixer",
-  
-  
-  "Sound Effects Editor",
-  
-  
-  // 🖥️ VFX, ANIMATION & MOTION
-  "VFX Supervisor",
-  
-  
-  "VFX Artist",
-  
-  
-  "Compositor",
-  
-  
-  "2D Animator",
-  
-  
-  "3D Animator",
-  
-  
-  "Motion Designer",
-  
-  
-  "CG Artist",
-  
-  
-  "Technical Director (TD)",
-  
-  
-  
-  // 📸 PHOTOGRAPHY & BACKSTAGE
-  "BTS Photographer",
-  
-  
-  "BTS Videographer",
-  
-  
-  
-  // 📢 MARKETING & DISTRIBUTION
-  "Marketing Producer",
-  
-  
-  "Publicist",
-  
-  
-  "Film Sales Agent",
-  
-  
-  "Distributor",
-  
-  
-  "Festival Coordinator",
-  
-  
-  "Press Kit Designer",
-  
-  
-  "Trailer Editor",
-  
-  
-  
-  // 🧾 LEGAL, FINANCE & SUPPORT
-  "Film Accountant",
-  
-  
-  "Legal Advisor",
-  
-  
-  "Rights & Clearance Manager",
-  
-  
-  "Insurance Coordinator",
-  
-  
-  
-  // 🚚 ON-SET SUPPORT
-  "Unit Driver",
-  
-  
-  "Caterer / Craft Services",
-  
-  
-  "Set Medic",
-  
-  
-  "Security",
-  
-  
-  
-  // 🧪 DOCUMENTARY 
-  "Documentary Director",
-  
-  
-  "Field Producer",
-  
-  
-  "Fixer",
-  
-  
-  "Archival Researcher",
-  
-  
-  "Interview Producer",
-  
-  
-  
-  
-  ]);
-  
-  
+  "profession_director",
+  "profession_assistant_director",
+  "profession_script_supervisor",
+  "profession_creative_producer",
+  "profession_showrunner",
+  "profession_screenwriter",
+  "profession_script_editor",
+  "profession_dramaturg",
+  "profession_story_editor",
+  "profession_researcher",
+  "profession_producer",
+  "profession_executive_producer",
+  "profession_line_producer",
+  "profession_production_manager",
+  "profession_production_coordinator",
+  "profession_production_assistant",
+  "profession_unit_production_manager",
+  "profession_casting_producer",
+  "profession_casting_director",
+  "profession_casting_assistant",
+  "profession_talent_coordinator",
+  "profession_cinematographer",
+  "profession_camera_operator",
+  "profession_1st_assistant_camera",
+  "profession_2nd_assistant_camera",
+  "profession_digital_imaging_technician",
+  "profession_steadicam_operator",
+  "profession_drone_operator",
+  "profession_gaffer",
+  "profession_best_boy_electric",
+  "profession_lighting_technician",
+  "profession_generator_operator",
+  "profession_sound_designer",
+  "profession_production_sound_mixer",
+  "profession_boom_operator",
+  "profession_sound_assistant",
+  "profession_foley_artist",
+  "profession_adr_recordist",
+  "profession_production_designer",
+  "profession_art_director",
+  "profession_set_designer",
+  "profession_set_decorator",
+  "profession_props_master",
+  "profession_props_assistant",
+  "profession_scenic_painter",
+  "profession_construction_manager",
+  "profession_costume_designer",
+  "profession_costume_supervisor",
+  "profession_wardrobe_assistant",
+  "profession_makeup_artist",
+  "profession_hair_stylist",
+  "profession_sfx_makeup_artist",
+  "profession_location_manager",
+  "profession_assistant_location_manager",
+  "profession_location_scout",
+  "profession_editor",
+  "profession_assistant_editor",
+  "profession_colorist",
+  "profession_post_production_supervisor",
+  "profession_online_editor",
+  "profession_mastering_technician",
+  "profession_sound_editor",
+  "profession_dialogue_editor",
+  "profession_re_recording_mixer",
+  "profession_sound_effects_editor",
+  "profession_vfx_supervisor",
+  "profession_vfx_artist",
+  "profession_compositor",
+  "profession_2d_animator",
+  "profession_3d_animator",
+  "profession_motion_designer",
+  "profession_cg_artist",
+  "profession_technical_director",
+  "profession_bts_photographer",
+  "profession_bts_videographer",
+  "profession_marketing_producer",
+  "profession_publicist",
+  "profession_film_sales_agent",
+  "profession_distributor",
+  "profession_festival_coordinator",
+  "profession_press_kit_designer",
+  "profession_trailer_editor",
+  "profession_film_accountant",
+  "profession_legal_advisor",
+  "profession_rights_and_clearance_manager",
+  "profession_insurance_coordinator",
+  "profession_unit_driver",
+  "profession_caterer_craft_services",
+  "profession_set_medic",
+  "profession_security",
+  "profession_documentary_director",
+  "profession_field_producer",
+  "profession_fixer",
+  "profession_archival_researcher",
+  "profession_interview_producer",
+]);
+

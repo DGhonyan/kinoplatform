@@ -4,7 +4,8 @@
       {{ $t(label) }}
       <span v-if="required" class="asterisk"> * </span>
     </label>
-    <v-select
+
+    <v-autocomplete
       class="select"
       v-bind="$attrs"
       variant="outlined"
@@ -18,13 +19,13 @@
       :density="density"
       :required="required"
       :error-messages="errorMessages"
-      />
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
 withDefaults(defineProps<{
-  items: string[],
+  items: { title: string, value: string }[] | string[],
   multiple?: boolean,
   color?: string,
   disabled?: boolean,

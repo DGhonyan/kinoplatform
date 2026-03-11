@@ -25,7 +25,7 @@
       label="common_professions"
       v-model="currentProfessions"
       required
-      :items="professions"
+      :items="professions.map(profession => ({ title: $t(profession), value: profession }))"
       multiple
       :error-messages="professionsErrorMessages"
       @update:model-value="professionsErrorMessages = ''"

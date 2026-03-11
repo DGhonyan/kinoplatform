@@ -9,10 +9,10 @@
         density="compact"
         hide-details
       />
-      <v-select
+      <v-autocomplete
         v-model="selectedProfessions"
         :label="t('crew_filter_by_profession')"
-        :items="professionOptions"
+        :items="professionOptions.map(profession => ({ title: $t(profession), value: profession }))"
         variant="outlined"
         density="compact"
         hide-details
@@ -35,7 +35,7 @@
           </div>
           <div class="user-info">
             <h3 class="user-name">{{ user.first_name }} {{ user.last_name }}</h3>
-            <p class="user-profession">{{ user.profession.join(', ') }}</p>
+            <p class="user-profession">{{ user.profession.map(profession => $t(profession)).join(', ') }}</p>
           </div>
         </div>
       </v-card>

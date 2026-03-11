@@ -19,7 +19,7 @@
               {{ $t('profile_edit_profile') }}
             </v-btn>
           </div>
-          <span class="profession">{{ user?.profession.join(', ') }}</span>
+          <span class="profession">{{ user?.profession.map(profession => $t(profession)).join(', ') }}</span>
         </div>
       </div>
       <div class="bio">
@@ -618,6 +618,10 @@ watch(() => props.userId, () => {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.no-projects-title {
+  color: color(--v-theme-gray);
 }
 
 .project-item {
