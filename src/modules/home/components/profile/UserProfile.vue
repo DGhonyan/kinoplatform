@@ -184,6 +184,14 @@
         </v-card-title>
         <v-card-text>
           <div class="edit-profile-form">
+            <FileUpload
+              label="common_profile_photo"
+              accept="image/*"
+              placeholder="personal_info_upload_photo"
+              helper-text="personal_info_upload_photo_helper_text"
+              v-model="editAvatarBlobName"
+            />
+
             <v-textarea
               v-model="editBioValue"
               :label="$t('common_bio')"
@@ -223,6 +231,7 @@ import { onMounted, ref, computed, watch } from 'vue';
 import type { User, Event, PersonalInfoProject } from '@/types/user';
 import { useUserStore } from '@/stores/user';
 import Input from '@/components/Input.vue';
+import FileUpload from '@/components/FileUpload.vue';
 import AddProject from './AddProject.vue';
 import { useI18n } from 'vue-i18n';
 import { professions } from '@/common/constants';
@@ -286,6 +295,7 @@ const editBioValue = ref('');
 const editProfessionsValue = ref<string[]>([]);
 const editProjectsValue = ref<PersonalInfoProject[]>([]);
 const editProfessionsError = ref('');
+const editAvatarBlobName = ref('');
 
 const colorOptions = computed(() => [
   { title: t('common_primary'), value: 'primary' },
@@ -438,12 +448,14 @@ const openEditProfileDialog = () => {
   editBioValue.value = user.value?.bio || '';
   editProfessionsValue.value = [...(user.value?.profession || [])];
   editProjectsValue.value = user.value?.projects ? JSON.parse(JSON.stringify(user.value.projects)) : [];
+  editAvatarBlobName.value = '';
   showEditProfileDialog.value = true;
 };
 
 const closeEditProfileDialog = () => {
   showEditProfileDialog.value = false;
   editProfessionsError.value = '';
+  editAvatarBlobName.value = '';
 };
 
 const updateProjects = (newProjects: PersonalInfoProject[]) => {
@@ -463,6 +475,7 @@ const saveProfile = async () => {
       bio: editBioValue.value,
       profession: editProfessionsValue.value,
       projects: editProjectsValue.value,
+      avatar: editAvatarBlobName.value || undefined,
     });
 
     user.value = getUser();
