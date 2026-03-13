@@ -305,7 +305,7 @@ const validUserEvents = computed(() => {
   );
 });
 
-const professionOptions = computed(() => professions.value);
+const professionOptions = computed(() => professions.value.map(profession => ({ title: t(profession), value: profession })));
 
 const calendarEvents = computed(() => {
   return userEvents.value
