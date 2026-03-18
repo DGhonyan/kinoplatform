@@ -527,11 +527,17 @@ const loadUserData = async () => {
   try {
     if (props.userId && props.userId !== currentUser?._id) {
       const userData = await getUserById(props.userId);
-      user.value = userData as User;
+      user.value = userData;
       await fetchUserEvents(props.userId);
     }
     else {
-      user.value = currentUser as User;
+      user.value = await getUserById(currentUser!._id);
+
+      if (!user.value) {
+        throw new Error('User not found');
+      }
+
+      authStore.setUser(user.value);
       await fetchUserEvents(currentUser!._id);
     }
   } catch (error) {

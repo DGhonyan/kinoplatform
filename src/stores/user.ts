@@ -55,7 +55,7 @@ export const useUserStore = defineStore('user', {
       });
     },
 
-    async getUserById(userId: string) {
+    async getUserById(userId: string): Promise<User | null> {
       const appStore = useAppStore();
       
       return withLoader(async () => {
