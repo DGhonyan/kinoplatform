@@ -199,7 +199,7 @@
               rows="4"
             />
 
-            <v-select
+            <v-autocomplete
               v-model="editProfessionsValue"
               :label="$t('common_professions')"
               :items="professionOptions"

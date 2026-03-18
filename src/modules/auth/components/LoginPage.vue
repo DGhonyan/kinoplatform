@@ -1,9 +1,6 @@
 <template>
   <div class="login-page">
-    <div class="header">
-      <h1>Kinoplatform</h1>
-      <LanguageSelector />
-    </div>
+    <Header />
 
     <div class="form-wrapper">
       <div class="form">
@@ -25,7 +22,7 @@
 import { ref } from 'vue'
 import Login from './Login.vue'
 import Register from './Register.vue'
-import LanguageSelector from '@/components/LanguageSelector.vue'
+import Header from '@/components/Header.vue'
 
 const formView = ref('login')
 </script>

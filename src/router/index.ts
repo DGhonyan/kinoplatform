@@ -74,14 +74,9 @@ router.beforeEach(async (to, from, next) => {
     next();
     return;
   }
-  
+
   if ((user && !user.active) && to.name !== 'User') {
     next({ name: 'User' });
-    return;
-  }
-
-  if (!user) {
-    next({ name: 'Login' });
     return;
   }
 

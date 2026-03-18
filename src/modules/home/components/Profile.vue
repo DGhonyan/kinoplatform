@@ -20,7 +20,7 @@ const authStore = useAuthStore();
 const { user } = storeToRefs(authStore);
 
 const showAddPersonalInfo = computed(() => {
-  return !user.value?.active;
+  return user.value && !user.value?.active;
 });
 </script>
 
