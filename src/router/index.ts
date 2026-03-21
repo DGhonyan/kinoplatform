@@ -80,6 +80,11 @@ router.beforeEach(async (to, from, next) => {
     return;
   }
 
+  if (!user) {
+    next({ name: 'Login' });
+    return;
+  }
+
   next();
 });
 
