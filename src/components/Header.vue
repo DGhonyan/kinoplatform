@@ -4,7 +4,7 @@
       <h1>Kinoplatform</h1>
     </div>
 
-    <div class="links">
+    <div v-if="user" class="links">
       <a v-for="link in headerLinks"
         :class="[link === route.name && 'active']"
         @click="navigateTo(link, { event: $event })"
