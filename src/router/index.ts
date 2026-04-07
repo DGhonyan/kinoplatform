@@ -8,6 +8,8 @@
 import { useAuthStore } from '@/stores/auth'
 import { createRouter, createWebHistory } from 'vue-router'
 
+const publicRoutes = ['Login', 'VerifyEmail', 'ForgotPassword', 'ResetPassword'];
+
 export const routes = [
   {
     name: 'Home',
@@ -25,9 +27,24 @@ export const routes = [
     component: () => import('@/modules/auth/views/AuthView.vue'),
   },
   {
+    name: 'VerifyEmail',
+    path: '/verify-email',
+    component: () => import('@/modules/auth/views/VerifyEmailView.vue'),
+  },
+  {
+    name: 'ForgotPassword',
+    path: '/forgot-password',
+    component: () => import('@/modules/auth/views/ForgotPasswordView.vue'),
+  },
+  {
+    name: 'ResetPassword',
+    path: '/reset-password',
+    component: () => import('@/modules/auth/views/ResetPasswordView.vue'),
+  },
+  {
     name: 'User',
     path: '/user',
-    component: () => import('@/modules/home/views/ProfileView.vue'),  
+    component: () => import('@/modules/home/views/ProfileView.vue'),
   },
   {
     name: 'Users',
@@ -62,18 +79,25 @@ router.isReady().then(() => {
 
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
-  const user = await authStore.getUser();
 
-  // Allow access to login page without authentication
-  if (to.name === 'Login') {
-    if (user) {
-      next({ name: 'Home' });
-      return;
+  // Public routes don't need auth
+  if (publicRoutes.includes(to.name as string)) {
+    // If already logged in, redirect away from login
+    if (to.name === 'Login') {
+      await authStore.initAuth();
+      if (authStore.getUser()) {
+        next({ name: 'Home' });
+        return;
+      }
     }
-
     next();
     return;
   }
+
+  // Initialize auth state (validates token against server on first call)
+  await authStore.initAuth();
+
+  const user = authStore.getUser();
 
   if ((user && !user.active) && to.name !== 'User') {
     next({ name: 'User' });

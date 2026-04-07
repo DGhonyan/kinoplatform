@@ -11,6 +11,18 @@
       />
     </template>
 
+    <div class="login-options">
+      <v-checkbox
+        v-model="rememberMe"
+        :label="$t('common_remember_me')"
+        density="compact"
+        hide-details
+      />
+      <router-link to="/forgot-password" class="forgot-password-link">
+        {{ $t('auth_forgot_password') }}
+      </router-link>
+    </div>
+
     <v-btn color="primary" @click="handleLogin">{{ $t('common_login') }}</v-btn>
   </div>
 </template>
@@ -25,6 +37,8 @@ import { useI18n } from 'vue-i18n';
 
 const { navigateTo } = useRouteHelpers();
 const { t } = useI18n();
+
+const rememberMe = ref(false);
 
 const fields = {
   email: {
@@ -47,7 +61,7 @@ const handleLogin = async () => {
   const authStore = useAuthStore();
 
   try {
-    await authStore.login(fields.email.model.value, fields.password.model.value);
+    await authStore.login(fields.email.model.value, fields.password.model.value, rememberMe.value);
     navigateTo('Home');
   } catch (error) {
     console.error('Failed to login');
@@ -61,5 +75,21 @@ const handleLogin = async () => {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.login-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.forgot-password-link {
+  font-size: 14px;
+  color: color(--v-theme-primary);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 </style>

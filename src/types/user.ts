@@ -16,23 +16,22 @@ export type PersonalInfoProject = {
 
 export type Event = {
   _id?: string;
-  user_id: string;
-  start_date: string;
-  end_date: string;
+  userId: string;
+  startDate: string;
+  endDate: string;
   title: string;
   color?: string;
-  start_time?: string;
-  end_time?: string;
+  startTime?: string;
+  endTime?: string;
 }
 
 export type User = {
   _id: string;
-  password: string;
   email: string;
   type: UserType;
   active: boolean;
-  first_name: string;
-  last_name: string;
+  firstName: string;
+  lastName: string;
   bio: string;
   portfolio: string;
   projects: PersonalInfoProject[];

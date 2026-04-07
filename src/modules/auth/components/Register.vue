@@ -21,13 +21,17 @@
 import { ref } from 'vue';
 import Input from '@/components/Input.vue';
 import { validateFields } from '@/common/utils';
-import { useRouteHelpers } from '@/composables/useRouteHelpers';
 import { useAuthStore } from '@/stores/auth';
+import { useAppStore } from '@/stores/app';
 import { useI18n } from 'vue-i18n';
 
-const { navigateTo } = useRouteHelpers();
 const authStore = useAuthStore();
+const appStore = useAppStore();
 const { t } = useI18n();
+
+const emit = defineEmits<{
+  registered: [email: string];
+}>();
 
 const fields = {
   email: {
@@ -55,7 +59,8 @@ const handleRegister = async () => {
 
   try {
     await authStore.register(fields.email.model.value, fields.password.model.value, fields.confirmPassword.model.value);
-    navigateTo('Home');
+    appStore.showMessage('auth_registration_success', 'success');
+    emit('registered', fields.email.model.value);
   } catch (error) {
     console.error('Failed to register user', error);
   }
