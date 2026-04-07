@@ -1,15 +1,19 @@
-import type { User } from '@/types/user'
+import type { User, Event } from '@/types/user'
 import { defineStore } from 'pinia'
 import { useApi, withLoader } from '@/common/api';
 import { useAuthStore } from '@/stores/auth';
 import { useAppStore } from '@/stores/app';
+
+export type UserProfile = User & {
+  events: Event[];
+};
 
 export const useUserStore = defineStore('user', {
   actions: {
     async updateUser(user: Partial<User>) {
       const authStore = useAuthStore();
       const appStore = useAppStore();
-      let authUser = authStore.getUser();
+      const authUser = authStore.getUser();
 
       if (!authUser) {
         throw new Error('Unauthorized');
@@ -17,17 +21,13 @@ export const useUserStore = defineStore('user', {
 
       await withLoader(async () => {
         try {
-          const { data, error } = await useApi('/users/update').patch({
-            ...user,
-            email: authUser?.email,
-          }).json();
+          const { data, error } = await useApi('/users/update').patch(user);
 
-          if (!data.value || error.value) {
-            // appStore.showMessage(error.message);
+          if (!data || error) {
             throw new Error('Failed to update user');
           }
 
-          authStore.setUser(data.value as User);
+          authStore.setUser(data as User);
         } catch (error) {
           appStore.showMessage('Failed to update profile', 'error');
           throw error;
@@ -37,17 +37,17 @@ export const useUserStore = defineStore('user', {
 
     async getAllUsers() {
       const appStore = useAppStore();
-      
+
       return withLoader(async () => {
         try {
-          const { data, error } = await useApi('/users/all').get().json();
+          const { data, error } = await useApi('/users/all').get();
 
-          if (!data.value || error.value) {
+          if (!data || error) {
             appStore.showMessage('Failed to load users', 'error');
             throw new Error('Failed to get all users');
           }
 
-          return data.value as User[];
+          return data as User[];
         } catch (error) {
           appStore.showMessage('Failed to load users', 'error');
           throw error;
@@ -55,19 +55,19 @@ export const useUserStore = defineStore('user', {
       });
     },
 
-    async getUserById(userId: string): Promise<User | null> {
+    async getUserProfile(userId: string): Promise<UserProfile> {
       const appStore = useAppStore();
-      
+
       return withLoader(async () => {
         try {
-          const { data, error } = await useApi(`/users/user/${userId}`).get().json();
+          const { data, error } = await useApi(`/users/profile/${userId}`).get();
 
-          if (!data.value || error.value) {
+          if (!data || error) {
             appStore.showMessage('Failed to load user profile', 'error');
-            throw new Error('Failed to get user by id');
+            throw new Error('Failed to get user profile');
           }
 
-          return data.value as User;
+          return data as UserProfile;
         } catch (error) {
           appStore.showMessage('Failed to load user profile', 'error');
           throw error;

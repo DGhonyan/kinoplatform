@@ -14,7 +14,7 @@
     </div>
     
     <div class="actions">
-      <a v-if="user" :class="['user-link', route.name === 'User' && 'active']" @click="navigateTo('User', { event: $event })">{{ user.first_name + ' ' + user.last_name }}</a>
+      <a v-if="user" :class="['user-link', route.name === 'User' && 'active']" @click="navigateTo('User', { event: $event })">{{ userFullName }}</a>
       <v-btn v-if="!user" variant="text" color="primary" @click="navigateTo('Login', { newTab: true })">{{ $t('common_login') }}</v-btn>
       <v-btn v-else variant="text" color="gray" @click="showLogoutDialog = true">{{ $t('common_logout') }}</v-btn>
       <LanguageSelector />
@@ -54,6 +54,17 @@ import LanguageSelector from '@/components/LanguageSelector.vue'
 const authStore = useAuthStore();
 const { user } = storeToRefs(authStore);
 
+const userFullName = computed(() => {
+  const firstName = user.value?.firstName;
+  const lastName = user.value?.lastName;
+
+  if (!firstName || !lastName) {
+    return '';
+  }
+
+  return firstName + ' ' + lastName;
+});
+
 const headerLinks = ["Home", "Crew",];
 
 const route = useRoute();
@@ -62,6 +73,7 @@ const showLogoutDialog = ref(false);
 const confirmLogout = async () => {
   showLogoutDialog.value = false;
   await authStore.logout();
+  authStore.resetInitState();
   navigateTo('Login');
 };
 </script>

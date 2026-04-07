@@ -114,8 +114,8 @@ const addPersonalInfo = async () => {
 
   try {
     await userStore.updateUser({
-      first_name: fields.firstName?.model.value,
-      last_name: fields.lastName?.model.value,
+      firstName: fields.firstName?.model.value,
+      lastName: fields.lastName?.model.value,
       bio: fields.bio?.model.value,
       portfolio: fields.portfolio?.model.value,
       projects: projects.value,

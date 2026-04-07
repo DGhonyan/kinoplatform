@@ -7,7 +7,7 @@
         </div>
         <div class="personal-info">
           <div class="name-section">
-            <span class="name">{{ user?.first_name }} {{ user?.last_name }}</span>
+            <span class="name">{{ user?.firstName }} {{ user?.lastName }}</span>
             <v-btn 
               v-if="canEdit"
               size="small"
@@ -100,7 +100,7 @@
             <v-row>
               <v-col cols="6">
                 <Input
-                  v-model="newAvailability.start_date"
+                  v-model="newAvailability.startDate"
                   label="common_start_date"
                   type="date"
                   required
@@ -110,7 +110,7 @@
               </v-col>
               <v-col cols="6">
                 <Input
-                  v-model="newAvailability.end_date"
+                  v-model="newAvailability.endDate"
                   label="common_end_date"
                   type="date"
                   required
@@ -122,14 +122,14 @@
             <v-row>
               <v-col cols="6">
                 <Input
-                  v-model="newAvailability.start_time"
+                  v-model="newAvailability.startTime"
                   label="profile_start_time"
                   type="time"
                 />
               </v-col>
               <v-col cols="6">
                 <Input
-                  v-model="newAvailability.end_time"
+                  v-model="newAvailability.endTime"
                   label="profile_end_time"
                   type="time"
                 />
@@ -149,14 +149,14 @@
             <div v-for="event in validUserEvents" :key="event._id" class="availability-item">
               <div class="availability-item-info">
                 <span class="availability-date">
-                  {{ formatDate(event.start_date) }}
-                  <template v-if="event.start_date !== event.end_date">
-                    - {{ formatDate(event.end_date) }}
+                  {{ formatDate(event.startDate) }}
+                  <template v-if="event.startDate !== event.endDate">
+                    - {{ formatDate(event.endDate) }}
                   </template>
                 </span>
                 <span class="availability-title">{{ event.title }}</span>
-                <span v-if="event.start_time && event.end_time" class="availability-time">
-                  {{ event.start_time }} - {{ event.end_time }}
+                <span v-if="event.startTime && event.endTime" class="availability-time">
+                  {{ event.startTime }} - {{ event.endTime }}
                 </span>
               </div>
               <v-btn
@@ -246,10 +246,10 @@ const authStore = useAuthStore();
 const { getUser } = authStore;
 
 const userStore = useUserStore();
-const { getUserById } = userStore;
+const { getUserProfile } = userStore;
 
 const eventStore = useEventStore();
-const { createEvent, getEventsByUserId, deleteEvent } = eventStore;
+const { createEvent, deleteEvent } = eventStore;
 
 const fileStore = useFileStore();
 
@@ -277,13 +277,13 @@ const calendarDate = computed({
   set: (value) => { focusedDate.value = value; },
 });
 
-const newAvailability = ref<Omit<Event, '_id' | 'user_id'>>({
-  start_date: '',
-  end_date: '',
+const newAvailability = ref<Omit<Event, '_id' | 'userId'>>({
+  startDate: '',
+  endDate: '',
   title: '',
   color: 'primary',
-  start_time: '',
-  end_time: '',
+  startTime: '',
+  endTime: '',
 });
 
 const titleError = ref('');
@@ -311,7 +311,7 @@ const hasAvailability = computed(() => {
 
 const validUserEvents = computed(() => {
   return userEvents.value.filter(event => 
-    event.start_date && event.end_date && event.title
+    event.startDate && event.endDate && event.title
   );
 });
 
@@ -319,14 +319,14 @@ const professionOptions = computed(() => professions.value.map(profession => ({ 
 
 const calendarEvents = computed(() => {
   return userEvents.value
-    .filter(event => event.start_date && event.end_date)
+    .filter(event => event.startDate && event.endDate)
     .map(event => {
-      const startDateTime = event.start_time 
-        ? `${event.start_date}T${event.start_time}` 
-        : event.start_date;
-      const endDateTime = event.end_time 
-        ? `${event.end_date}T${event.end_time}` 
-        : event.end_date;
+      const startDateTime = event.startTime 
+        ? `${event.startDate}T${event.startTime}` 
+        : event.startDate;
+      const endDateTime = event.endTime 
+        ? `${event.endDate}T${event.endTime}` 
+        : event.endDate;
       
       return {
         title: event.title,
@@ -344,26 +344,16 @@ const getUserAvatar = () => {
   return new URL(`@/assets/default.jpg`, import.meta.url).href;
 };
 
-const fetchUserEvents = async (userId: string) => {
-  try {
-    const events = await getEventsByUserId(userId);
-    userEvents.value = events;
-  } catch (error) {
-    console.error('Failed to fetch user events', error);
-    userEvents.value = [];
-  }
-};
-
 const onStartDateChange = (value: string) => {
   startDateError.value = '';
   
-  // Auto-set end_date to start_date if empty
-  if (!newAvailability.value.end_date) {
-    newAvailability.value.end_date = value;
+  // Auto-set endDate to startDate if empty
+  if (!newAvailability.value.endDate) {
+    newAvailability.value.endDate = value;
   }
   
   // Validate date range
-  if (newAvailability.value.end_date && newAvailability.value.end_date < value) {
+  if (newAvailability.value.endDate && newAvailability.value.endDate < value) {
     endDateError.value = 'End date must be after or equal to start date';
   } else {
     endDateError.value = '';
@@ -378,18 +368,18 @@ const validateForm = (): boolean => {
     isValid = false;
   }
   
-  if (!newAvailability.value.start_date) {
+  if (!newAvailability.value.startDate) {
     startDateError.value = t('common_this_field_is_required');
     isValid = false;
   }
   
-  if (!newAvailability.value.end_date) {
+  if (!newAvailability.value.endDate) {
     endDateError.value = t('common_this_field_is_required');
     isValid = false;
   }
   
-  if (newAvailability.value.start_date && newAvailability.value.end_date) {
-    if (newAvailability.value.end_date < newAvailability.value.start_date) {
+  if (newAvailability.value.startDate && newAvailability.value.endDate) {
+    if (newAvailability.value.endDate < newAvailability.value.startDate) {
       endDateError.value = t('common_end_date_must_be_after_or_equal_to_start_date');
       isValid = false;
     }
@@ -409,12 +399,12 @@ const closeAvailabilityDialog = () => {
 
 const resetNewAvailability = () => {
   newAvailability.value = {
-    start_date: '',
-    end_date: '',
+    startDate: '',
+    endDate: '',
     title: '',
     color: 'primary',
-    start_time: '',
-    end_time: '',
+    startTime: '',
+    endTime: '',
   };
   titleError.value = '';
   startDateError.value = '';
@@ -428,7 +418,7 @@ const addAvailability = async () => {
 
   try {
     await createEvent(newAvailability.value);
-    await fetchUserEvents(user.value!._id);
+    await loadUserData();
     closeAvailabilityDialog();
   } catch (error) {
     console.error('Failed to add availability', error);
@@ -438,7 +428,7 @@ const addAvailability = async () => {
 const removeAvailability = async (eventId: string) => {
   try {
     await deleteEvent(eventId);
-    await fetchUserEvents(user.value!._id);
+    await loadUserData();
   } catch (error) {
     console.error('Failed to remove availability', error);
   }
@@ -523,25 +513,20 @@ const goToToday = () => {
 
 const loadUserData = async () => {
   const currentUser = getUser();
+  const targetId = props.userId || currentUser?._id;
+
+  if (!targetId) return;
 
   try {
-    if (props.userId && props.userId !== currentUser?._id) {
-      const userData = await getUserById(props.userId);
-      user.value = userData;
-      await fetchUserEvents(props.userId);
-    }
-    else {
-      user.value = await getUserById(currentUser!._id);
+    const { events, ...userData } = await getUserProfile(targetId);
+    user.value = userData;
+    userEvents.value = events;
 
-      if (!user.value) {
-        throw new Error('User not found');
-      }
-
-      authStore.setUser(user.value);
-      await fetchUserEvents(currentUser!._id);
+    if (targetId === currentUser?._id) {
+      authStore.setUser(userData);
     }
   } catch (error) {
-    console.error('Failed to get user by id', error);
+    console.error('Failed to load user profile', error);
   }
 };
 

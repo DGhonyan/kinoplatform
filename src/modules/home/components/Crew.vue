@@ -35,7 +35,7 @@
             <img :src="getUserAvatar(user)" alt="User Avatar" class="avatar" />
           </div>
           <div class="user-info">
-            <h3 class="user-name">{{ user.first_name }} {{ user.last_name }}</h3>
+            <h3 class="user-name">{{ user.firstName }} {{ user.lastName }}</h3>
             <p class="user-profession">{{ user.profession.map(profession => $t(profession)).join(', ') }}</p>
           </div>
         </div>
@@ -81,8 +81,8 @@ const professionOptions = computed(() => {
 const filteredUsers = computed(() => {
   return users.value.filter((user) => {
     const matchesSearch = 
-      user.first_name.toLowerCase().includes(search.value.toLowerCase()) ||
-      user.last_name.toLowerCase().includes(search.value.toLowerCase());
+      user.firstName.toLowerCase().includes(search.value.toLowerCase()) ||
+      user.lastName.toLowerCase().includes(search.value.toLowerCase());
     
     const matchesProfession = 
       selectedProfessions.value.length === 0 || 
