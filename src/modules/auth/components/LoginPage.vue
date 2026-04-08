@@ -10,8 +10,8 @@
         </div>
 
         <div class="input-container">
-          <!-- Post-registration verification banner -->
-          <div v-if="registeredEmail" class="verification-banner">
+          <!-- Email verification banner (after register or unverified login) -->
+          <div v-if="unverifiedEmail" class="verification-banner">
             <v-icon color="info" class="mr-2">mdi-email-check-outline</v-icon>
             <div class="verification-text">
               <span>{{ $t('auth_check_email_verification') }}</span>
@@ -27,7 +27,7 @@
             </div>
           </div>
 
-          <Login :class="['form-view', formView === 'login' && 'active']"/>
+          <Login :class="['form-view', formView === 'login' && 'active']" @unverified="onUnverified" />
           <Register :class="['form-view', formView === 'register' && 'active']" @registered="onRegistered" />
         </div>
       </div>
@@ -47,20 +47,24 @@ const authStore = useAuthStore();
 const appStore = useAppStore();
 
 const formView = ref('login')
-const registeredEmail = ref('');
+const unverifiedEmail = ref('');
 const resending = ref(false);
 
 const onRegistered = (email: string) => {
-  registeredEmail.value = email;
+  unverifiedEmail.value = email;
   formView.value = 'login';
 };
 
+const onUnverified = (email: string) => {
+  unverifiedEmail.value = email;
+};
+
 const handleResendVerification = async () => {
-  if (!registeredEmail.value) return;
+  if (!unverifiedEmail.value) return;
 
   resending.value = true;
   try {
-    await authStore.resendVerification(registeredEmail.value);
+    await authStore.resendVerification(unverifiedEmail.value);
     appStore.showMessage('auth_verification_resent', 'success');
   } catch {
     appStore.showMessage('auth_verification_resend_failed', 'error');
