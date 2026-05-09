@@ -38,6 +38,14 @@ export default defineNuxtConfig({
 
   compatibilityDate: '2025-01-01',
 
+  nitro: {
+    prerender: {
+      crawlLinks: true,
+      routes: ['/', '/login', '/forgot-password', '/reset-password', '/verify-email', '/user', '/crew'],
+      failOnError: false,
+    },
+  },
+
   vite: {
     css: {
       preprocessorOptions: {
