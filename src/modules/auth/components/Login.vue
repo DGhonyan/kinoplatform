@@ -38,6 +38,10 @@ import { useI18n } from 'vue-i18n';
 const { navigateTo } = useRouteHelpers();
 const { t } = useI18n();
 
+const emit = defineEmits<{
+  unverified: [email: string];
+}>();
+
 const rememberMe = ref(false);
 
 const fields = {
@@ -64,7 +68,9 @@ const handleLogin = async () => {
     await authStore.login(fields.email.model.value, fields.password.model.value, rememberMe.value);
     navigateTo('Home');
   } catch (error) {
-    console.error('Failed to login');
+    if (error instanceof Error && error.message.includes('verify your email')) {
+      emit('unverified', fields.email.model.value);
+    }
     return;
   }
 }
