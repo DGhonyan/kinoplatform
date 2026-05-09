@@ -3,20 +3,6 @@ import type { NitroFetchOptions } from 'nitropack';
 
 type ApiOptions = NitroFetchOptions<string>;
 
-const ACCESS_TOKEN_KEY = 'accessToken';
-
-export function getAccessToken(): string | null {
-  return localStorage.getItem(ACCESS_TOKEN_KEY);
-}
-
-export function setAccessToken(token: string): void {
-  localStorage.setItem(ACCESS_TOKEN_KEY, token);
-}
-
-export function clearAccessToken(): void {
-  localStorage.removeItem(ACCESS_TOKEN_KEY);
-}
-
 let isRefreshing = false;
 let refreshPromise: Promise<boolean> | null = null;
 
@@ -30,12 +16,11 @@ async function tryRefreshToken(): Promise<boolean> {
   isRefreshing = true;
   refreshPromise = (async () => {
     try {
-      const data = await $fetch<{ accessToken: string }>('/auth/refresh', {
+      await $fetch('/auth/refresh', {
         baseURL: config.public.apiUrl,
         method: 'POST',
         credentials: 'include',
       });
-      setAccessToken(data.accessToken);
       return true;
     }
     catch {
@@ -57,32 +42,27 @@ async function apiFetch<T>(
   options: ApiOptions = {},
 ): Promise<ApiResult<T>> {
   const config = useRuntimeConfig();
-  const token = getAccessToken();
 
-  const buildOptions = (authToken: string | null): ApiOptions => ({
+  const requestOptions: ApiOptions = {
     baseURL: config.public.apiUrl,
     credentials: 'include',
     ...options,
-    headers: {
-      ...(options.headers as Record<string, string> | undefined),
-      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
-    },
-  });
+  };
 
   try {
-    const data = await $fetch<T>(path, buildOptions(token));
+    const data = await $fetch<T>(path, requestOptions);
     return { data, error: null, status: 200 };
   }
   catch (err) {
     const fetchErr = err as FetchError;
     const status = fetchErr.response?.status ?? 500;
 
-    if (status === 401 && token) {
+    if (status === 401) {
       const refreshed = await tryRefreshToken();
 
       if (refreshed) {
         try {
-          const data = await $fetch<T>(path, buildOptions(getAccessToken()));
+          const data = await $fetch<T>(path, requestOptions);
           return { data, error: null, status: 200 };
         }
         catch (retryErr) {
@@ -95,8 +75,8 @@ async function apiFetch<T>(
         }
       }
 
-      clearAccessToken();
-      localStorage.removeItem('user');
+      const authStore = useAuthStore();
+      authStore.clearAuth();
       navigateTo('/login');
       return { data: null, error: { message: 'Session expired' }, status: 401 };
     }

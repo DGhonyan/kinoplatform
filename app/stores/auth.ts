@@ -3,7 +3,6 @@ import type { User } from '~~/shared/types/user';
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null);
-  const accessToken = ref<string | null>(null);
 
   let authInitialized = false;
   let initPromise: Promise<void> | null = null;
@@ -13,15 +12,8 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.setItem('user', JSON.stringify(newUser));
   }
 
-  function setToken(token: string) {
-    accessToken.value = token;
-    setAccessToken(token);
-  }
-
   function clearAuth() {
     user.value = null;
-    accessToken.value = null;
-    clearAccessToken();
     localStorage.removeItem('user');
   }
 
@@ -41,7 +33,6 @@ export const useAuthStore = defineStore('auth', () => {
       }
 
       setUser(data.user as User);
-      setToken(data.accessToken);
 
       return data;
     }
@@ -124,45 +115,21 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function _doInitAuth(): Promise<void> {
     try {
-      const token = getAccessToken();
+      // Optimistic UX: hydrate from cached profile while we revalidate.
       const savedUser = localStorage.getItem('user');
-
-      if (!token || !savedUser) {
-        clearAuth();
-        authInitialized = true;
-        return;
+      if (savedUser) {
+        user.value = JSON.parse(savedUser);
       }
 
-      accessToken.value = token;
-      user.value = JSON.parse(savedUser);
-
+      // Cookie rides along automatically. apiFetch handles refresh-on-401.
       const { data, error } = await useApi('/users/me').get();
 
       if (error) {
-        const refreshResult = await useApi('/auth/refresh').post<{ accessToken: string }>();
-
-        if (refreshResult.error) {
-          clearAuth();
-          authInitialized = true;
-          return;
-        }
-
-        setAccessToken(refreshResult.data!.accessToken);
-        accessToken.value = refreshResult.data!.accessToken;
-
-        const retryResult = await useApi('/users/me').get();
-
-        if (retryResult.error) {
-          clearAuth();
-          authInitialized = true;
-          return;
-        }
-
-        setUser(retryResult.data as User);
+        clearAuth();
+        return;
       }
-      else {
-        setUser(data as User);
-      }
+
+      setUser(data as User);
     }
     catch {
       clearAuth();
@@ -198,7 +165,6 @@ export const useAuthStore = defineStore('auth', () => {
 
   return {
     user,
-    accessToken,
     login,
     register,
     verifyEmail,
@@ -207,7 +173,6 @@ export const useAuthStore = defineStore('auth', () => {
     resetPassword,
     initAuth,
     setUser,
-    setToken,
     clearAuth,
     logout,
     resetInitState,
