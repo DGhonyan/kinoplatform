@@ -3,44 +3,42 @@
   "private": true,
   "type": "module",
   "version": "0.0.0",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "scripts": {
-    "dev": "vite",
-    "build": "run-p type-check \"build-only {@}\" --",
-    "preview": "vite preview",
-    "build-only": "vite build",
-    "type-check": "vue-tsc --build --force",
-    "lint": "eslint . --fix"
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "nuxi typecheck"
   },
   "dependencies": {
     "@azure/storage-blob": "^12.31.0",
     "@fontsource/roboto": "5.2.7",
-    "@intlify/unplugin-vue-i18n": "^11.0.7",
     "@mdi/font": "7.4.47",
+    "@nuxtjs/i18n": "^10.3.0",
+    "@pinia/nuxt": "^0.11.3",
     "@vueuse/core": "^14.2.1",
     "mime": "^4.1.0",
+    "nuxt": "4.4.2",
     "pinia": "^3.0.3",
     "vue": "^3.5.21",
     "vue-i18n": "^11.3.0",
     "vue-router": "^4.5.1",
-    "vuetify": "^3.10.1"
+    "vuetify": "^3.10.1",
+    "vuetify-nuxt-module": "^0.19.5"
   },
   "devDependencies": {
-    "@tsconfig/node22": "^22.0.0",
+    "@nuxt/eslint": "^1.15.2",
     "@types/node": "^22.9.0",
-    "@vitejs/plugin-vue": "^6.0.1",
-    "@vue/tsconfig": "^0.8.1",
-    "eslint": "^9.35.0",
-    "eslint-config-vuetify": "^4.2.0",
-    "npm-run-all2": "^8.0.4",
+    "eslint": "^9.39.4",
     "sass-embedded": "^1.92.1",
     "typescript": "~5.9.2",
-    "unplugin-auto-import": "^20.1.0",
-    "unplugin-fonts": "^1.4.0",
-    "unplugin-vue-components": "^29.0.0",
-    "unplugin-vue-router": "^0.15.0",
-    "vite": "^7.1.5",
-    "vite-plugin-vue-layouts-next": "^1.0.0",
-    "vite-plugin-vuetify": "^2.1.2",
-    "vue-tsc": "^3.2.0"
+    "typescript-eslint": "^8.59.2",
+    "vue-tsc": "^3.2.8"
   }
 }
