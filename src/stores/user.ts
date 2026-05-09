@@ -40,7 +40,7 @@ export const useUserStore = defineStore('user', {
 
       return withLoader(async () => {
         try {
-          const { data, error } = await useApi('/users/all').get();
+          const { data, error } = await useApi('/users/search').get();
 
           if (!data || error) {
             appStore.showMessage('Failed to load users', 'error');
