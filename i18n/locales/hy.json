@@ -174,9 +174,9 @@
     "auth_resend_verification": "Կրկին ուղարկել հաստատման նամակը",
     "auth_verification_resent": "Հաստատման նամակը կրկին ուղարկվել է։",
     "auth_verification_resend_failed": "Հաստատման նամակի կրկին ուղարկումը ձախողվեց։",
-    "auth_verifying_email": "Ել. հասցեի հաստատում...",
-    "auth_email_verified": "Ել. հասցեը հաստատվեց",
-    "auth_email_verified_description": "Ձեր էլ. հասցեը հաջողությամբ հաստատվեց։ Կարող եք մուտք գործել։",
+    "auth_verifying_email": "Էլ. հասցեի հաստատում...",
+    "auth_email_verified": "Էլ. հասցեն հաստատվեց",
+    "auth_email_verified_description": "Ձեր էլ. հասցեն հաջողությամբ հաստատվեց։ Կարող եք մուտք գործել։",
     "auth_verification_failed": "Հաստատումը ձախողվեց",
     "auth_back_to_login": "Վերադառնալ մուտքի էջ"
 }
