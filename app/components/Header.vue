@@ -108,15 +108,24 @@ const confirmLogout = async () => {
 </script>
 
 <style scoped lang="scss">
+/*
+ * Skin tokens — override on an ancestor to recolor this header per-page.
+ *   --header-fg     body text, link rest state
+ *   --header-accent title, hover/active link state
+ */
 .header-content {
+  --header-fg: #{color(--v-theme-on-surface)};
+  --header-accent: #{color(--v-theme-primary)};
+
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: $base-padding;
+  color: var(--header-fg);
 }
 
 .title {
-  color: color(--v-theme-primary);
+  color: var(--header-accent);
 }
 
 .links {
@@ -143,7 +152,7 @@ const confirmLogout = async () => {
 
   &:hover,
   &.active {
-    color: color(--v-theme-primary);
+    color: var(--header-accent);
   }
 }
 

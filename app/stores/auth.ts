@@ -21,18 +21,18 @@ export const useAuthStore = defineStore('auth', () => {
     const appStore = useAppStore();
 
     try {
-      const { data, error } = await useApi('/auth/login').post({
+      const { data, error } = await useApi('/auth/login').post<{ user: User }>({
         email,
         password,
         rememberMe,
       });
 
-      if (error) {
-        appStore.showMessage(error.message || 'Login failed', 'error');
-        throw new Error(error.message);
+      if (error || !data) {
+        appStore.showMessage(error?.message || 'Login failed', 'error');
+        throw new Error(error?.message || 'Login failed');
       }
 
-      setUser(data.user as User);
+      setUser(data.user);
 
       return data;
     }

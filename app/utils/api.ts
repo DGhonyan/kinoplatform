@@ -35,7 +35,20 @@ async function tryRefreshToken(): Promise<boolean> {
   return refreshPromise;
 }
 
-type ApiResult<T> = { data: T | null; error: any; status: number };
+export interface ApiError {
+  message: string;
+  [key: string]: unknown;
+}
+
+export type ApiResult<T> = { data: T | null; error: ApiError | null; status: number };
+
+function toApiError(fetchErr: FetchError): ApiError {
+  const data = fetchErr.data as Record<string, unknown> | undefined;
+  if (data && typeof data.message === 'string') {
+    return data as ApiError;
+  }
+  return { message: fetchErr.message };
+}
 
 async function apiFetch<T>(
   path: string,
@@ -69,7 +82,7 @@ async function apiFetch<T>(
           const retryFetchErr = retryErr as FetchError;
           return {
             data: null,
-            error: retryFetchErr.data ?? { message: retryFetchErr.message },
+            error: toApiError(retryFetchErr),
             status: retryFetchErr.response?.status ?? 500,
           };
         }
@@ -83,7 +96,7 @@ async function apiFetch<T>(
 
     return {
       data: null,
-      error: fetchErr.data ?? { message: fetchErr.message },
+      error: toApiError(fetchErr),
       status,
     };
   }
@@ -91,16 +104,16 @@ async function apiFetch<T>(
 
 export function useApi(path: string) {
   return {
-    get<T = any>() {
+    get<T = unknown>() {
       return apiFetch<T>(path, { method: 'GET' });
     },
-    post<T = any>(body?: any) {
+    post<T = unknown>(body?: Record<string, unknown>) {
       return apiFetch<T>(path, { method: 'POST', body });
     },
-    patch<T = any>(body?: any) {
+    patch<T = unknown>(body?: Record<string, unknown>) {
       return apiFetch<T>(path, { method: 'PATCH', body });
     },
-    delete<T = any>(body?: any) {
+    delete<T = unknown>(body?: Record<string, unknown>) {
       return apiFetch<T>(path, { method: 'DELETE', body });
     },
   };

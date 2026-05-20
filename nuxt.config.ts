@@ -13,7 +13,7 @@ export default defineNuxtConfig({
   ],
   ssr: false,
   app: {
-    baseURL: '/kinoplatform/',
+    baseURL: '/',
   },
 
   css: [
@@ -28,12 +28,12 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      apiUrl: 'https://kinoplatform-backend-536061277482.europe-west1.run.app',
+      apiUrl: 'https://api.kinoplatform.com',
     },
   },
 
   devServer: {
-    port: 3000,
+    port: 5173,
   },
 
   compatibilityDate: '2025-01-01',
