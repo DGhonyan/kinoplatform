@@ -19,13 +19,11 @@
     <v-text-field
       class="input"
       v-bind="$attrs"
-      variant="outlined"
       :color="resolvedColor"
       :base-color="resolvedBaseColor"
       :bg-color="resolvedBgColor"
       :disabled="disabled"
       :type="actualType"
-      hide-details="auto"
       :density="density"
       :required="required"
       :error-messages="errorMessages"
@@ -92,9 +90,6 @@ const resolvedColor = computed(() => resolveThemeColor(props.color));
 const resolvedBaseColor = computed(() => resolveThemeColor(props.baseColor));
 const resolvedBgColor = computed(() => resolveThemeColor(props.bgColor));
 const resolvedTextColor = computed(() => themeColorToCss(props.textColor) ?? '');
-// Label color follows the field's `color`, resolved to a real CSS color
-// (resolveThemeColor leaves bare tokens like 'primary' as-is, which isn't valid CSS).
-const labelColor = computed(() => themeColorToCss(props.color) ?? '');
 
 const showPassword = ref(false);
 const textPosition = computed(() => props.textPosition);
@@ -153,7 +148,6 @@ const updateModelValue = (value: string) => {
 .label {
   font-size: 14px;
   font-weight: 500;
-  color: v-bind(labelColor);
 }
 
 .asterisk {

@@ -104,6 +104,15 @@ export default defineNuxtConfig({
           },
         },
       },
+      // Shared field config so the wrapper components (Input/Select/TextArea)
+      // don't each repeat variant / hide-details. Per-instance props (and
+      // anything passed at a call site) still override these.
+      defaults: {
+        VTextField: { variant: 'outlined', hideDetails: 'auto' },
+        VTextarea: { variant: 'outlined', hideDetails: 'auto' },
+        VAutocomplete: { variant: 'outlined', hideDetails: 'auto' },
+        VSelect: { variant: 'outlined', hideDetails: 'auto' },
+      },
     },
     moduleOptions: {
       styles: {

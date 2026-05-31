@@ -15,12 +15,10 @@
     <v-textarea
       class="text-area"
       v-bind="$attrs"
-      variant="outlined"
       :color="color"
       :base-color="color"
       :disabled="disabled"
       :type="type"
-      hide-details="auto"
       :required="required"
       :error-messages="errorMessages"
     />
@@ -28,6 +26,8 @@
 </template>
 
 <script lang="ts" setup>
+import { computed } from 'vue';
+
 const props = withDefaults(defineProps<{
   color?: string;
   disabled?: boolean;
@@ -44,7 +44,9 @@ const props = withDefaults(defineProps<{
   errorMessages: '',
 });
 
-const labelColor = computed(() => themeColorToCss(props.color) ?? '');
+// Let callers pass theme tokens (incl. `on-*`) by name; resolveThemeColor turns
+// the ones Vuetify can't (the `on-*` ones) into the working variable form.
+const resolvedColor = computed(() => resolveThemeColor(props.color));
 </script>
 
 <style scoped lang="scss">
@@ -61,7 +63,6 @@ const labelColor = computed(() => themeColorToCss(props.color) ?? '');
 .label {
   font-size: 14px;
   font-weight: 500;
-  color: v-bind(labelColor);
 }
 
 .asterisk {

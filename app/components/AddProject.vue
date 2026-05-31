@@ -115,7 +115,6 @@ const removeProject = (index: number) => {
     .label {
       font-size: 16px;
       font-weight: 500;
-      color: color(--v-theme-gray);
     }
 
     .error-message {

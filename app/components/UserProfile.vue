@@ -260,17 +260,17 @@
               helper-text="personal_info_upload_photo_helper_text"
             />
 
-            <Textarea
+            <TextArea
               v-model="editBioValue"
+              color="on-surface"
               :label="$t('common_bio')"
               rows="4"
             />
 
-            <v-autocomplete
+            <Select
               v-model="editProfessionsValue"
               :label="$t('common_professions')"
               :items="professionOptions"
-              variant="outlined"
               multiple
               chips
               closable-chips

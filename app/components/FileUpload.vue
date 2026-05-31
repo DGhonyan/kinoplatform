@@ -33,7 +33,7 @@
       >
         <v-progress-linear
           :model-value="uploadProgress"
-          color="primary"
+          :color="resolvedColor"
           height="25"
         >
           <template #default>
@@ -88,6 +88,7 @@ const props = withDefaults(defineProps<{
   errorMessages?: string | string[];
   modelValue?: string;
   autoUpload?: boolean;
+  color?: string;
 }>(), {
   label: '',
   required: false,
@@ -95,7 +96,12 @@ const props = withDefaults(defineProps<{
   placeholder: 'Choose file',
   helperText: '',
   autoUpload: true,
+  color: 'primary',
 });
+
+// Let callers pass theme tokens (incl. `on-*`) by name; resolveThemeColor turns
+// the ones Vuetify can't (the `on-*` ones) into the working variable form.
+const resolvedColor = computed(() => resolveThemeColor(props.color));
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void;
@@ -205,7 +211,6 @@ defineExpose({
 .label {
   font-size: 14px;
   font-weight: 500;
-  color: color(--v-theme-gray);
 }
 
 .asterisk {
@@ -259,14 +264,12 @@ defineExpose({
 
   span {
     font-size: 14px;
-    color: color(--v-theme-gray);
     word-break: break-all;
   }
 }
 
 .helper-text {
   font-size: 12px;
-  color: color(--v-theme-gray);
   opacity: 0.7;
 }
 </style>

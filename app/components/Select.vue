@@ -17,12 +17,10 @@
       autocomplete="suppress"
       class="select"
       v-bind="$attrs"
-      variant="outlined"
       :color="resolvedColor"
       base-color="grey"
       :disabled="disabled"
       :type="type"
-      hide-details="auto"
       :menu-props="{ contentClass: 'select-menu-content', width: menuWidth }"
       :multiple="multiple"
       :items="items"
@@ -61,7 +59,6 @@ const props = withDefaults(defineProps<{
 // Let callers pass theme tokens (incl. `on-*`) by name; resolveThemeColor turns
 // the ones Vuetify can't (the `on-*` ones) into the working variable form.
 const resolvedColor = computed(() => resolveThemeColor(props.color));
-const labelColor = computed(() => themeColorToCss(props.color) ?? '');
 
 // Pin the dropdown to the field's width so its size doesn't track the option
 // text (the menu is shrink-to-fit, so wrapping alone won't stop it growing).
@@ -97,7 +94,6 @@ onBeforeUnmount(() => observer?.disconnect());
 .label {
   font-size: 14px;
   font-weight: 500;
-  color: v-bind(labelColor);
 }
 
 .asterisk {
