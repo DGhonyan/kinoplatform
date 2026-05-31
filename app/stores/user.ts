@@ -5,73 +5,43 @@ export type UserProfile = User & {
   events: Event[];
 };
 
-export const useUserStore = defineStore('user', () => {
-  async function updateUser(payload: Partial<User>) {
-    const authStore = useAuthStore();
-    const appStore = useAppStore();
+export const useUserStore = defineStore('user', {
+  state: () => ({
+    users: [] as User[],
+  }),
 
-    if (!authStore.user) {
-      throw new Error('Unauthorized');
-    }
+  actions: {
+    async updateUser(payload: Partial<User> & { completeStep?: string }) {
+      const authStore = useAuthStore();
 
-    await withLoader(async () => {
-      try {
-        const { data, error } = await useApi('/users/update').patch(payload);
-
-        if (!data || error) {
-          throw new Error('Failed to update user');
-        }
-
-        authStore.setUser(data as User);
+      if (!authStore.user) {
+        throw new Error('Unauthorized');
       }
-      catch (err) {
-        appStore.showMessage('Failed to update profile', 'error');
-        throw err;
+
+      const data = await apiRequest('/users/update', {
+        loader: true,
+        errorMessage: 'error_update_profile_failed',
+      }).patch<User>(payload);
+
+      if (data) {
+        authStore.setUser(data);
       }
-    });
-  }
 
-  async function getAllUsers() {
-    const appStore = useAppStore();
+      return data;
+    },
 
-    return withLoader(async () => {
-      try {
-        const { data, error } = await useApi('/users/search').get();
+    async getAllUsers() {
+      return apiRequest('/users/search', {
+        loader: true,
+        errorMessage: 'error_load_users_failed',
+      }).get<User[]>();
+    },
 
-        if (!data || error) {
-          appStore.showMessage('Failed to load users', 'error');
-          throw new Error('Failed to get all users');
-        }
-
-        return data as User[];
-      }
-      catch (err) {
-        appStore.showMessage('Failed to load users', 'error');
-        throw err;
-      }
-    });
-  }
-
-  async function getUserProfile(userId: string): Promise<UserProfile> {
-    const appStore = useAppStore();
-
-    return withLoader(async () => {
-      try {
-        const { data, error } = await useApi(`/users/profile/${userId}`).get();
-
-        if (!data || error) {
-          appStore.showMessage('Failed to load user profile', 'error');
-          throw new Error('Failed to get user profile');
-        }
-
-        return data as UserProfile;
-      }
-      catch (err) {
-        appStore.showMessage('Failed to load user profile', 'error');
-        throw err;
-      }
-    });
-  }
-
-  return { updateUser, getAllUsers, getUserProfile };
+    async getUserProfile(userId: string) {
+      return apiRequest(`/users/profile/${userId}`, {
+        loader: true,
+        errorMessage: 'error_load_user_profile_failed',
+      }).get<UserProfile>();
+    },
+  },
 });

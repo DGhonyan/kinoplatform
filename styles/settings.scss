@@ -8,4 +8,8 @@
 @use '_utils';
 @use 'vuetify/settings' with (
   $color-pack: false,
+  // App-wide field radius. Vuetify applies this to the outlined variant's
+  // notched-outline segments natively, so wrapper components (Input, Select,
+  // TextArea) no longer need :deep(.v-field) / .v-field__outline overrides.
+  $field-border-radius: 16px,
 );

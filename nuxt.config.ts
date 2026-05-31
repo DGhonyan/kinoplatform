@@ -1,5 +1,5 @@
 import { fileURLToPath } from 'node:url';
-import { lightColors } from './design-system/colors';
+import { lightColors, darkColors } from './design-system/colors';
 
 const rootDir = fileURLToPath(new URL('.', import.meta.url));
 
@@ -41,7 +41,7 @@ export default defineNuxtConfig({
   nitro: {
     prerender: {
       crawlLinks: true,
-      routes: ['/', '/login', '/forgot-password', '/reset-password', '/verify-email', '/user', '/crew'],
+      routes: ['/', '/login', '/register', '/forgot-password', '/reset-password', '/user', '/crew'],
       failOnError: false,
     },
   },
@@ -86,9 +86,13 @@ export default defineNuxtConfig({
   },
 
   vuetify: {
+    // Note: the custom SVG icon set ('custom:*') is registered at runtime by
+    // app/plugins/vuetify-icons.client.ts, not here — `import.meta.glob` only
+    // works in Vite-processed code, not in the config file (which is loaded
+    // by jiti at build time).
     vuetifyOptions: {
       theme: {
-        defaultTheme: 'light',
+        defaultTheme: 'dark',
         themes: {
           light: {
             dark: false,
@@ -96,6 +100,7 @@ export default defineNuxtConfig({
           },
           dark: {
             dark: true,
+            colors: darkColors,
           },
         },
       },

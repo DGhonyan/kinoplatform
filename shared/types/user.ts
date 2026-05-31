@@ -34,7 +34,14 @@ export type User = {
   lastName: string;
   bio: string;
   portfolio: string;
+  portfolioFile?: string;
   projects: PersonalInfoProject[];
+  fields: string[];
   profession: string[];
   avatar?: string;
+  birthDate?: string;
+  location?: string;
+  education?: string;
+  languages?: string[];
+  completedSteps: string[];
 };

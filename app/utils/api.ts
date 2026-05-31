@@ -37,6 +37,11 @@ async function tryRefreshToken(): Promise<boolean> {
 
 export interface ApiError {
   message: string;
+  /** Machine-readable discriminator from the backend (e.g. 'EMAIL_NOT_VERIFIED').
+   *  Prefer branching on this over the human-readable `message`. */
+  code?: string;
+  /** Per-field validation messages, present when code === 'VALIDATION_ERROR'. */
+  errors?: Record<string, string[]>;
   [key: string]: unknown;
 }
 
@@ -46,6 +51,11 @@ function toApiError(fetchErr: FetchError): ApiError {
   const data = fetchErr.data as Record<string, unknown> | undefined;
   if (data && typeof data.message === 'string') {
     return data as ApiError;
+  }
+  // Defensive: a raw class-validator response (message: string[]) that didn't go
+  // through the backend's normalizing filter. Collapse to a single string.
+  if (data && Array.isArray(data.message)) {
+    return { ...data, message: String(data.message[0] ?? 'Request failed') } as ApiError;
   }
   return { message: fetchErr.message };
 }
@@ -91,7 +101,7 @@ async function apiFetch<T>(
       const authStore = useAuthStore();
       authStore.clearAuth();
       navigateTo('/login');
-      return { data: null, error: { message: 'Session expired' }, status: 401 };
+      return { data: null, error: { message: 'common_session_expired', code: ERROR_CODE.SESSION_EXPIRED }, status: 401 };
     }
 
     return {
@@ -102,21 +112,58 @@ async function apiFetch<T>(
   }
 }
 
-export function useApi(path: string) {
+export type ApiRequestOptions = {
+  errorMessage?: string;
+  showError?: boolean;
+  successMessage?: string;
+  loader?: boolean;
+};
+
+type ApiMode = 'raw' | 'data';
+type Outcome<M extends ApiMode, T> = M extends 'raw' ? ApiResult<T> : T | null;
+
+function createApiMethods<M extends ApiMode>(
+  run: <T>(options: ApiOptions) => Promise<Outcome<M, T>>,
+) {
   return {
-    get<T = unknown>() {
-      return apiFetch<T>(path, { method: 'GET' });
-    },
-    post<T = unknown>(body?: Record<string, unknown>) {
-      return apiFetch<T>(path, { method: 'POST', body });
-    },
-    patch<T = unknown>(body?: Record<string, unknown>) {
-      return apiFetch<T>(path, { method: 'PATCH', body });
-    },
-    delete<T = unknown>(body?: Record<string, unknown>) {
-      return apiFetch<T>(path, { method: 'DELETE', body });
-    },
+    get: <T = unknown>() => run<T>({ method: 'GET' }),
+    post: <T = unknown>(body?: Record<string, unknown>) => run<T>({ method: 'POST', body }),
+    patch: <T = unknown>(body?: Record<string, unknown>) => run<T>({ method: 'PATCH', body }),
+    delete: <T = unknown>(body?: Record<string, unknown>) => run<T>({ method: 'DELETE', body }),
   };
+}
+
+async function handleRequest<T>(
+  fetcher: () => Promise<ApiResult<T>>,
+  opts: ApiRequestOptions,
+): Promise<T | null> {
+  const exec = async (): Promise<T | null> => {
+    const { data, error } = await fetcher();
+
+    if (error) {
+      if (opts.showError !== false) {
+        useAppStore().showMessage(opts.errorMessage ?? apiErrorMessageKey(error), 'error');
+      }
+      return null;
+    }
+
+    if (opts.successMessage) {
+      useAppStore().showMessage(opts.successMessage, 'success');
+    }
+
+    return data;
+  };
+
+  return opts.loader ? withLoader(exec) : exec();
+}
+
+export function useApi(path: string) {
+  return createApiMethods<'raw'>(<T>(options: ApiOptions) => apiFetch<T>(path, options));
+}
+
+export function apiRequest(path: string, opts: ApiRequestOptions = {}) {
+  return createApiMethods<'data'>(<T>(options: ApiOptions) =>
+    handleRequest<T>(() => apiFetch<T>(path, options), opts));
 }
 
 export const withLoader = async <T>(fn: () => Promise<T>): Promise<T> => {

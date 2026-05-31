@@ -1,180 +1,113 @@
 import { defineStore } from 'pinia';
 import type { User } from '~~/shared/types/user';
 
-export const useAuthStore = defineStore('auth', () => {
-  const user = ref<User | null>(null);
+let authInitialized = false;
+let initPromise: Promise<void> | null = null;
 
-  let authInitialized = false;
-  let initPromise: Promise<void> | null = null;
+export const useAuthStore = defineStore('auth', {
+  state: () => ({
+    user: null as User | null,
+  }),
 
-  function setUser(newUser: User) {
-    user.value = newUser;
-    localStorage.setItem('user', JSON.stringify(newUser));
-  }
+  actions: {
+    setUser(newUser: User) {
+      this.user = newUser;
+      localStorage.setItem('user', JSON.stringify(newUser));
+    },
 
-  function clearAuth() {
-    user.value = null;
-    localStorage.removeItem('user');
-  }
+    clearAuth() {
+      this.user = null;
+      localStorage.removeItem('user');
+    },
 
-  async function login(email: string, password: string, rememberMe: boolean = false) {
-    const appStore = useAppStore();
-
-    try {
-      const { data, error } = await useApi('/auth/login').post<{ user: User }>({
+    async login(email: string, password: string, rememberMe: boolean = false) {
+      const res = await useApi('/auth/login').post<{ user: User }>({
         email,
         password,
         rememberMe,
       });
 
-      if (error || !data) {
-        appStore.showMessage(error?.message || 'Login failed', 'error');
-        throw new Error(error?.message || 'Login failed');
+      if (res.data) {
+        this.setUser(res.data.user);
       }
 
-      setUser(data.user);
+      return res;
+    },
 
-      return data;
-    }
-    catch (err) {
-      if (err instanceof Error && !err.message.includes('Login failed')) {
-        appStore.showMessage('Login failed. Please try again.', 'error');
-      }
-      throw err;
-    }
-  }
-
-  async function register(email: string, password: string, confirmPassword: string) {
-    const appStore = useAppStore();
-
-    try {
-      const { data, error } = await useApi('/auth/register').post({
+    async register(email: string, password: string) {
+      return apiRequest('/auth/register').post<{ user: User; message: string }>({
         email,
         password,
-        confirmPassword,
       });
+    },
 
-      if (error) {
-        appStore.showMessage(error.message || 'Registration failed', 'error');
-        throw new Error(error.message);
+    async verifyEmail(email: string, code: string) {
+      return useApi('/auth/verify-email').post<{ message: string }>({ email, code });
+    },
+
+    async resendVerification(email: string) {
+      return apiRequest('/auth/resend-verification', { showError: false }).post<{ message: string }>({ email });
+    },
+
+    async requestPasswordReset(email: string) {
+      return apiRequest('/auth/request-password-reset', { showError: false }).post<{ message: string }>({ email });
+    },
+
+    async resetPassword(email: string, code: string, password: string) {
+      return apiRequest('/auth/reset-password').post<{ message: string }>({
+        email,
+        code,
+        password,
+      });
+    },
+
+    async _doInitAuth(): Promise<void> {
+      try {
+        // Optimistic UX: hydrate from cached profile while we revalidate.
+        const savedUser = localStorage.getItem('user');
+        if (savedUser) {
+          this.user = JSON.parse(savedUser);
+        }
+
+        // Cookie rides along automatically. apiFetch handles refresh-on-401.
+        // showError: false — a logged-out cold start gets a quiet null, not a
+        // "Session expired" snackbar on every load.
+        const data = await apiRequest('/users/me', { showError: false }).get<User>();
+
+        if (!data) {
+          this.clearAuth();
+          return;
+        }
+
+        this.setUser(data);
       }
-
-      return data as { user: User; message: string };
-    }
-    catch (err) {
-      if (err instanceof Error && !err.message.includes('Registration failed')) {
-        appStore.showMessage('Registration failed. Please try again.', 'error');
+      catch {
+        this.clearAuth();
       }
-      throw err;
-    }
-  }
-
-  async function verifyEmail(token: string) {
-    const { data, error } = await useApi('/auth/verify-email').post({ token });
-
-    if (error) {
-      throw new Error(error.message || 'Verification failed');
-    }
-
-    return data as { message: string };
-  }
-
-  async function resendVerification(email: string) {
-    const { data, error } = await useApi('/auth/resend-verification').post({ email });
-
-    if (error) {
-      throw new Error(error.message || 'Failed to resend verification');
-    }
-
-    return data as { message: string };
-  }
-
-  async function requestPasswordReset(email: string) {
-    const { data, error } = await useApi('/auth/request-password-reset').post({ email });
-
-    if (error) {
-      throw new Error(error.message || 'Failed to request password reset');
-    }
-
-    return data as { message: string };
-  }
-
-  async function resetPassword(token: string, password: string, confirmPassword: string) {
-    const { data, error } = await useApi('/auth/reset-password').post({
-      token,
-      password,
-      confirmPassword,
-    });
-
-    if (error) {
-      throw new Error(error.message || 'Password reset failed');
-    }
-
-    return data as { message: string };
-  }
-
-  async function _doInitAuth(): Promise<void> {
-    try {
-      // Optimistic UX: hydrate from cached profile while we revalidate.
-      const savedUser = localStorage.getItem('user');
-      if (savedUser) {
-        user.value = JSON.parse(savedUser);
+      finally {
+        authInitialized = true;
+        initPromise = null;
       }
+    },
 
-      // Cookie rides along automatically. apiFetch handles refresh-on-401.
-      const { data, error } = await useApi('/users/me').get();
+    async initAuth(): Promise<void> {
+      if (authInitialized) return;
+      if (initPromise) return initPromise;
 
-      if (error) {
-        clearAuth();
-        return;
-      }
+      initPromise = this._doInitAuth();
+      return initPromise;
+    },
 
-      setUser(data as User);
-    }
-    catch {
-      clearAuth();
-    }
-    finally {
-      authInitialized = true;
+    async logout() {
+      // showError: false — logging out shouldn't nag if the server call fails;
+      // we clear local auth regardless.
+      await apiRequest('/auth/logout', { showError: false }).post();
+      this.clearAuth();
+    },
+
+    resetInitState() {
+      authInitialized = false;
       initPromise = null;
-    }
-  }
-
-  async function initAuth(): Promise<void> {
-    if (authInitialized) return;
-    if (initPromise) return initPromise;
-
-    initPromise = _doInitAuth();
-    return initPromise;
-  }
-
-  async function logout() {
-    try {
-      await useApi('/auth/logout').post();
-    }
-    catch {
-      // even if the API call fails, clear local state
-    }
-    clearAuth();
-  }
-
-  function resetInitState() {
-    authInitialized = false;
-    initPromise = null;
-  }
-
-  return {
-    user,
-    login,
-    register,
-    verifyEmail,
-    resendVerification,
-    requestPasswordReset,
-    resetPassword,
-    initAuth,
-    setUser,
-    clearAuth,
-    logout,
-    resetInitState,
-  };
+    },
+  },
 });

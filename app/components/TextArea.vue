@@ -28,7 +28,7 @@
 </template>
 
 <script lang="ts" setup>
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<{
   color?: string;
   disabled?: boolean;
   label?: string;
@@ -43,6 +43,8 @@ withDefaults(defineProps<{
   required: false,
   errorMessages: '',
 });
+
+const labelColor = computed(() => themeColorToCss(props.color) ?? '');
 </script>
 
 <style scoped lang="scss">
@@ -59,7 +61,7 @@ withDefaults(defineProps<{
 .label {
   font-size: 14px;
   font-weight: 500;
-  color: color(--v-theme-gray);
+  color: v-bind(labelColor);
 }
 
 .asterisk {

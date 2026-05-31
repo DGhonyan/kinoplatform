@@ -1,152 +1,176 @@
 <template>
-  <div class="reset-password">
-    <div class="content">
-      <div class="form-card">
-        <template v-if="success">
-          <v-icon
-            color="success"
-            size="48"
-          >
-            mdi-check-circle-outline
-          </v-icon>
-          <h2>{{ $t('auth_password_reset_success') }}</h2>
-          <p>{{ $t('auth_password_reset_success_description') }}</p>
-          <v-btn
-            color="primary"
-            @click="navigateTo('/login')"
-          >
-            {{ $t('common_login') }}
-          </v-btn>
-        </template>
+  <div class="reset-password-page">
+    <Card :gap="16">
+      <h2 class="title">
+        {{ $t('auth_reset_password') }}
+      </h2>
 
-        <template v-else>
-          <h2>{{ $t('auth_reset_password') }}</h2>
+      <p class="description">
+        {{ $t('auth_reset_password_description') }}
+      </p>
+      <p class="description small">
+        {{ $t('register_password_requirements') }}
+      </p>
 
-          <Input
-            v-model="password"
-            type="password"
-            label="auth_new_password"
-            required
-            :error-messages="passwordError"
-            hide-details="auto"
-          />
+      <Input
+        v-model="email"
+        type="email"
+        :placeholder="$t('common_email')"
+        required
+        :error-messages="emailError"
+        hide-details="auto"
+        @update:model-value="emailError = ''"
+      />
+      <Input
+        v-model="code"
+        type="text"
+        :placeholder="$t('register_code_placeholder')"
+        required
+        maxlength="6"
+        inputmode="numeric"
+        :error-messages="codeError"
+        hide-details="auto"
+        @update:model-value="codeError = ''"
+      />
+      <Input
+        v-model="password"
+        type="password"
+        :placeholder="$t('auth_new_password')"
+        required
+        :error-messages="passwordError"
+        hide-details="auto"
+        @update:model-value="passwordError = ''"
+      />
 
-          <Input
-            v-model="confirmPassword"
-            type="password"
-            label="common_confirm_password"
-            required
-            :error-messages="confirmPasswordError"
-            hide-details="auto"
-          />
+      <v-btn
+        color="primary"
+        rounded="pill"
+        size="large"
+        block
+        :loading="loading"
+        @click="handleReset"
+      >
+        {{ $t('auth_reset_password') }}
+      </v-btn>
 
-          <v-btn
-            color="primary"
-            :loading="loading"
-            @click="handleReset"
-          >
-            {{ $t('auth_reset_password') }}
-          </v-btn>
-        </template>
-
+      <div class="footer">
         <NuxtLink
           to="/login"
-          class="back-link"
-        >{{ $t('auth_back_to_login') }}</NuxtLink>
+          class="link"
+        >
+          {{ $t('auth_back_to_login') }}
+        </NuxtLink>
       </div>
-    </div>
+    </Card>
   </div>
 </template>
 
 <script lang="ts" setup>
-definePageMeta({ layout: 'auth' });
+definePageMeta({ layout: 'hero' });
 
 const route = useRoute();
 const authStore = useAuthStore();
 const appStore = useAppStore();
 const { t } = useI18n();
 
+const email = ref((route.query.email as string | undefined) ?? '');
+const code = ref('');
 const password = ref('');
-const confirmPassword = ref('');
-const passwordError = ref('');
-const confirmPasswordError = ref('');
-const loading = ref(false);
-const success = ref(false);
 
-const handleReset = async () => {
+const emailError = ref('');
+const codeError = ref('');
+const passwordError = ref('');
+const loading = ref(false);
+
+// Mirrors the backend's PASSWORD_REGEX in auth.dto.ts.
+const PASSWORD_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,32}$/;
+
+const validate = (): boolean => {
+  emailError.value = '';
+  codeError.value = '';
   passwordError.value = '';
-  confirmPasswordError.value = '';
+  let ok = true;
+
+  const emailValue = email.value.trim();
+  if (!emailValue) {
+    emailError.value = t('common_this_field_is_required');
+    ok = false;
+  }
+  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
+    emailError.value = t('auth_invalid_email');
+    ok = false;
+  }
+
+  const codeValue = code.value.trim();
+  if (!codeValue) {
+    codeError.value = t('common_this_field_is_required');
+    ok = false;
+  }
+  else if (!/^\d{6}$/.test(codeValue)) {
+    codeError.value = t('register_invalid_code');
+    ok = false;
+  }
 
   if (!password.value) {
     passwordError.value = t('common_this_field_is_required');
-    return;
+    ok = false;
+  }
+  else if (!PASSWORD_RE.test(password.value)) {
+    passwordError.value = t('register_password_requirements');
+    ok = false;
   }
 
-  if (!confirmPassword.value) {
-    confirmPasswordError.value = t('common_this_field_is_required');
-    return;
-  }
+  return ok;
+};
 
-  if (password.value !== confirmPassword.value) {
-    confirmPasswordError.value = t('auth_passwords_do_not_match');
-    return;
-  }
-
-  const token = route.query.token as string;
-
-  if (!token) {
-    appStore.showMessage('auth_invalid_reset_link', 'error');
-    return;
-  }
+const handleReset = async () => {
+  if (!validate()) return;
 
   loading.value = true;
+  const ok = await authStore.resetPassword(email.value.trim(), code.value.trim(), password.value);
+  loading.value = false;
 
-  try {
-    await authStore.resetPassword(token, password.value, confirmPassword.value);
-    success.value = true;
-  }
-  catch (error) {
-    appStore.showMessage(
-      error instanceof Error ? error.message : 'auth_password_reset_failed',
-      'error',
-    );
-  }
-  finally {
-    loading.value = false;
-  }
+  if (!ok) return;
+
+  appStore.showMessage('auth_password_reset_success', 'success');
+  navigateTo('/login');
 };
 </script>
 
 <style scoped lang="scss">
-.reset-password {
+.reset-password-page {
   width: 100%;
   height: 100%;
   display: flex;
-  flex-direction: column;
-}
-
-.content {
-  flex: 1;
-  display: flex;
   align-items: center;
   justify-content: center;
+  padding: $base-padding;
 }
 
-.form-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  max-width: 400px;
-  width: 100%;
-  padding: 32px;
-  border: 1px solid color(--v-theme-primary);
+.title {
   text-align: center;
 }
 
-.back-link {
+.description {
+  text-align: center;
   font-size: 14px;
+}
+
+.description.small {
+  font-size: 12px;
+  color: color(--v-theme-gray);
+}
+
+.footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px;
+}
+
+.link {
   color: color(--v-theme-primary);
+  font-weight: 600;
   text-decoration: none;
 
   &:hover {

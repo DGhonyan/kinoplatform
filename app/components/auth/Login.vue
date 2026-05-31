@@ -1,24 +1,30 @@
 <template>
   <div class="login-form">
-    <template
-      v-for="field in Object.values(fields)"
-      :key="field.label"
-    >
-      <Input
-        v-model="field.model.value"
-        :type="field.type"
-        :label="field.label"
-        required
-        :error-messages="field.errorMessages.value"
-        hide-details="auto"
-      />
-    </template>
+    <Input
+      v-model="email"
+      type="email"
+      :placeholder="$t('common_email')"
+      required
+      :error-messages="emailError"
+      hide-details="auto"
+      @update:model-value="emailError = ''"
+    />
+    <Input
+      v-model="password"
+      type="password"
+      :placeholder="$t('common_password')"
+      required
+      :error-messages="passwordError"
+      hide-details="auto"
+      @update:model-value="passwordError = ''"
+    />
 
     <div class="login-options">
       <v-checkbox
         v-model="rememberMe"
         :label="$t('common_remember_me')"
         density="compact"
+        color="primary"
         hide-details
       />
       <NuxtLink
@@ -31,6 +37,9 @@
 
     <v-btn
       color="primary"
+      rounded="pill"
+      size="large"
+      block
       @click="handleLogin"
     >
       {{ $t('common_login') }}
@@ -45,38 +54,47 @@ const emit = defineEmits<{
   unverified: [email: string];
 }>();
 
+const email = ref('');
+const password = ref('');
 const rememberMe = ref(false);
+const emailError = ref('');
+const passwordError = ref('');
 
-const fields = {
-  email: {
-    model: ref(''),
-    label: 'common_email',
-    type: 'email',
-    errorMessages: ref(''),
-  },
-  password: {
-    model: ref(''),
-    label: 'common_password',
-    type: 'password',
-    errorMessages: ref(''),
-  },
+const validate = (): boolean => {
+  emailError.value = '';
+  passwordError.value = '';
+  let ok = true;
+
+  if (!email.value.trim()) {
+    emailError.value = t('common_this_field_is_required');
+    ok = false;
+  }
+  if (!password.value) {
+    passwordError.value = t('common_this_field_is_required');
+    ok = false;
+  }
+  return ok;
 };
 
 const handleLogin = async () => {
-  if (validateFields(fields, t)) return;
+  if (!validate()) return;
 
   const authStore = useAuthStore();
+  const appStore = useAppStore();
 
-  try {
-    await authStore.login(fields.email.model.value, fields.password.model.value, rememberMe.value);
+  const res = await authStore.login(email.value, password.value, rememberMe.value);
+
+  if (res.data) {
     navigateTo('/');
-  }
-  catch (error) {
-    if (error instanceof Error && error.message.includes('verify your email')) {
-      emit('unverified', fields.email.model.value);
-    }
     return;
   }
+
+  if (res.error?.code === ERROR_CODE.EMAIL_NOT_VERIFIED) {
+    emit('unverified', email.value);
+    return;
+  }
+
+  appStore.showMessage(res.error ? apiErrorMessageKey(res.error) : GENERIC_ERROR_KEY, 'error');
 };
 </script>
 

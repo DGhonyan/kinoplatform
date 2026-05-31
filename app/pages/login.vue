@@ -1,96 +1,123 @@
 <template>
   <div class="login-page">
-    <div class="form-wrapper">
-      <div class="form">
-        <div class="view-control">
-          <v-btn
-            :class="['view-control-button', formView === 'login' && 'active']"
-            variant="text"
-            @click="formView = 'login'"
+    <Card>
+      <h2 class="title">
+        {{ $t('common_login') }}
+      </h2>
+
+      <div
+        v-if="unverifiedEmail"
+        class="verification-banner"
+      >
+        <div class="verification-header">
+          <v-icon
+            color="info"
+            class="mr-2"
           >
-            {{ $t('common_login') }}
-          </v-btn>
-          <v-btn
-            :class="['view-control-button', formView === 'register' && 'active']"
-            variant="text"
-            @click="formView = 'register'"
-          >
-            {{ $t('common_register') }}
-          </v-btn>
+            mdi-email-check-outline
+          </v-icon>
+          <span>{{ $t('auth_check_email_verification') }}</span>
         </div>
 
-        <div class="input-container">
-          <div
-            v-if="unverifiedEmail"
-            class="verification-banner"
-          >
-            <v-icon
-              color="info"
-              class="mr-2"
-            >
-              mdi-email-check-outline
-            </v-icon>
-            <div class="verification-text">
-              <span>{{ $t('auth_check_email_verification') }}</span>
-              <v-btn
-                variant="text"
-                color="primary"
-                size="small"
-                :loading="resending"
-                @click="handleResendVerification"
-              >
-                {{ $t('auth_resend_verification') }}
-              </v-btn>
-            </div>
-          </div>
+        <Input
+          v-model="code"
+          type="text"
+          :placeholder="$t('register_code_placeholder')"
+          required
+          maxlength="6"
+          inputmode="numeric"
+          :error-messages="codeError"
+          hide-details="auto"
+          @update:model-value="codeError = ''"
+        />
 
-          <AuthLogin
-            :class="['form-view', formView === 'login' && 'active']"
-            @unverified="onUnverified"
-          />
-          <AuthRegister
-            :class="['form-view', formView === 'register' && 'active']"
-            @registered="onRegistered"
-          />
+        <div class="verification-actions">
+          <v-btn
+            variant="text"
+            color="primary"
+            size="small"
+            :loading="resending"
+            @click="handleResendVerification"
+          >
+            {{ $t('auth_resend_verification') }}
+          </v-btn>
+          <v-btn
+            color="primary"
+            rounded="pill"
+            :loading="verifying"
+            @click="handleVerify"
+          >
+            {{ $t('common_next') }}
+          </v-btn>
         </div>
       </div>
-    </div>
+
+      <AuthLogin @unverified="onUnverified" />
+
+      <div class="footer">
+        <span>{{ $t('login_dont_have_account') }}</span>
+        <NuxtLink
+          to="/register"
+          class="link"
+        >
+          {{ $t('common_register') }}
+        </NuxtLink>
+      </div>
+    </Card>
   </div>
 </template>
 
 <script lang="ts" setup>
-definePageMeta({ layout: 'auth' });
+definePageMeta({ layout: 'hero' });
 
+const { t } = useI18n();
 const authStore = useAuthStore();
 const appStore = useAppStore();
 
-const formView = ref('login');
 const unverifiedEmail = ref('');
+const code = ref('');
+const codeError = ref('');
 const resending = ref(false);
-
-const onRegistered = (email: string) => {
-  unverifiedEmail.value = email;
-  formView.value = 'login';
-};
+const verifying = ref(false);
 
 const onUnverified = (email: string) => {
   unverifiedEmail.value = email;
+  code.value = '';
+  codeError.value = '';
 };
 
 const handleResendVerification = async () => {
   if (!unverifiedEmail.value) return;
 
   resending.value = true;
-  try {
-    await authStore.resendVerification(unverifiedEmail.value);
-    appStore.showMessage('auth_verification_resent', 'success');
+  const ok = await authStore.resendVerification(unverifiedEmail.value);
+  resending.value = false;
+  appStore.showMessage(
+    ok ? 'auth_verification_resent' : 'auth_verification_resend_failed',
+    ok ? 'success' : 'error',
+  );
+};
+
+const handleVerify = async () => {
+  codeError.value = '';
+
+  if (!/^\d{6}$/.test(code.value.trim())) {
+    codeError.value = t('register_invalid_code');
+    return;
   }
-  catch {
-    appStore.showMessage('auth_verification_resend_failed', 'error');
+
+  verifying.value = true;
+  const res = await authStore.verifyEmail(unverifiedEmail.value, code.value.trim());
+  verifying.value = false;
+
+  if (res.error) {
+    codeError.value = t(apiErrorMessageKey(res.error));
+    return;
   }
-  finally {
-    resending.value = false;
-  }
+
+  unverifiedEmail.value = '';
+  code.value = '';
+  appStore.showMessage('auth_email_verified', 'success');
 };
 </script>
 
@@ -98,96 +125,54 @@ const handleResendVerification = async () => {
 .login-page {
   width: 100%;
   height: 100%;
-
   display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.form-wrapper {
-  width: 100%;
-  height: 100%;
-
-  display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
+  padding: $base-padding;
 }
 
-.form {
-  border: 1px solid color(--v-theme-primary);
-
-  display: flex;
-  flex-direction: column;
+.title {
+  text-align: center;
 }
 
-.input-container {
-  width: 100%;
-  min-width: 400px;
-  max-width: 600px;
-
-  padding: 32px;
-
-  align-self: center;
-  justify-self: center;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.view-control {
-  width: 100%;
-
-  display: flex;
-  justify-content: center;
-
-  border-bottom: 1px solid color(--v-theme-primary);
-}
-
-.view-control-button {
-  width: 50%;
-
-  padding: 24px;
-  border-radius: 0;
-
+.footer {
   display: flex;
   justify-content: center;
   align-items: center;
-
-  transition: all 0.3s ease;
+  gap: 4px;
+  font-size: 14px;
 }
 
-.view-control-button.active {
-  color: color(--v-theme-white);
-  background-color: color(--v-theme-primary);
-}
+.link {
+  color: color(--v-theme-primary);
+  font-weight: 600;
+  text-decoration: none;
 
-.form-view.active {
-  height: fit-content;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.form-view {
-  display: none;
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 .verification-banner {
   display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 12px 16px;
-  margin-bottom: 16px;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
   background-color: rgba(var(--v-theme-info), 0.08);
   border: 1px solid rgba(var(--v-theme-info), 0.3);
   border-radius: 8px;
+  font-size: 14px;
 }
 
-.verification-text {
+.verification-header {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 14px;
+  align-items: center;
+}
+
+.verification-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
 }
 </style>

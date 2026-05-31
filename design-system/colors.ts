@@ -132,6 +132,17 @@ export const lightColors: Record<string, string> = {
   dolphin950: '#131316',
 };
 
+export const darkColors: Record<string, string> = {
+  ...lightColors,
+  'background': '#161515',
+  // Lifted a few % above the background so cards, dialogs, and menus read as
+  // elevated instead of blending into the page (Vuetify paints v-card / v-menu
+  // / v-dialog surfaces with this token).
+  'surface': '#262222',
+  'on-background': '#FFF1DD',
+  'on-surface': '#FFF1DD',
+};
+
 export const iconAliases: Record<string, string> = {
   clear: 'close',
   prev: 'chevron_left',

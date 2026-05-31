@@ -5,7 +5,7 @@
     </div>
 
     <div
-      v-if="user"
+      v-if="user?.active"
       class="links"
     >
       <NuxtLink
@@ -20,22 +20,16 @@
     </div>
 
     <div class="actions">
-      <NuxtLink
-        v-if="user"
-        to="/user"
-        class="user-link"
-        :class="{ active: route.path === '/user' }"
-      >
-        {{ userFullName }}
-      </NuxtLink>
-      <v-btn
+      <Button
         v-if="!user"
-        variant="text"
-        color="primary"
-        @click="navigateTo('/login')"
+        variant="primary"
+        color="white"
+        text-color="primary"
+        rounded="pill"
+        @click="navigateTo(isOnLogin ? '/register' : '/login')"
       >
-        {{ $t('common_login') }}
-      </v-btn>
+        {{ $t(isOnLogin ? 'common_register' : 'common_login') }}
+      </Button>
       <v-btn
         v-else
         variant="text"
@@ -81,15 +75,10 @@
 </template>
 
 <script lang="ts" setup>
+import Button from './Button.vue';
+
 const authStore = useAuthStore();
 const { user } = storeToRefs(authStore);
-
-const userFullName = computed(() => {
-  const firstName = user.value?.firstName;
-  const lastName = user.value?.lastName;
-  if (!firstName || !lastName) return '';
-  return firstName + ' ' + lastName;
-});
 
 const headerLinks = [
   { path: '/', label: 'common_home' },
@@ -98,6 +87,8 @@ const headerLinks = [
 
 const route = useRoute();
 const showLogoutDialog = ref(false);
+
+const isOnLogin = computed(() => route.path.replace(/\/+$/, '') === '/login');
 
 const confirmLogout = async () => {
   showLogoutDialog.value = false;

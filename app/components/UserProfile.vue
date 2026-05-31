@@ -260,10 +260,9 @@
               helper-text="personal_info_upload_photo_helper_text"
             />
 
-            <v-textarea
+            <Textarea
               v-model="editBioValue"
               :label="$t('common_bio')"
-              variant="outlined"
               rows="4"
             />
 
@@ -488,24 +487,18 @@ const addAvailability = async () => {
     return;
   }
 
-  try {
-    await createEvent(newAvailability.value);
-    await loadUserData();
-    closeAvailabilityDialog();
-  }
-  catch (error) {
-    console.error('Failed to add availability', error);
-  }
+  const event = await createEvent(newAvailability.value);
+  if (!event) return;
+
+  await loadUserData();
+  closeAvailabilityDialog();
 };
 
 const removeAvailability = async (eventId: string) => {
-  try {
-    await deleteEvent(eventId);
-    await loadUserData();
-  }
-  catch (error) {
-    console.error('Failed to remove availability', error);
-  }
+  const ok = await deleteEvent(eventId);
+  if (!ok) return;
+
+  await loadUserData();
 };
 
 const openEditProfileDialog = () => {
@@ -534,20 +527,17 @@ const saveProfile = async () => {
     return;
   }
 
-  try {
-    await userStore.updateUser({
-      bio: editBioValue.value,
-      profession: editProfessionsValue.value,
-      projects: editProjectsValue.value,
-      avatar: editAvatarBlobName.value || undefined,
-    });
+  const data = await userStore.updateUser({
+    bio: editBioValue.value,
+    profession: editProfessionsValue.value,
+    projects: editProjectsValue.value,
+    avatar: editAvatarBlobName.value || undefined,
+  });
 
-    user.value = authStore.user;
-    closeEditProfileDialog();
-  }
-  catch (error) {
-    console.error('Failed to update profile', error);
-  }
+  if (!data) return;
+
+  user.value = authStore.user;
+  closeEditProfileDialog();
 };
 
 const formatDate = (date?: string) => {
@@ -588,17 +578,15 @@ const loadUserData = async () => {
 
   if (!targetId) return;
 
-  try {
-    const { events, ...userData } = await getUserProfile(targetId);
-    user.value = userData;
-    userEvents.value = events;
+  const profile = await getUserProfile(targetId);
+  if (!profile) return;
 
-    if (targetId === currentUser?._id) {
-      authStore.setUser(userData);
-    }
-  }
-  catch (error) {
-    console.error('Failed to load user profile', error);
+  const { events, ...userData } = profile;
+  user.value = userData;
+  userEvents.value = events;
+
+  if (targetId === currentUser?._id) {
+    authStore.setUser(userData);
   }
 };
 
@@ -665,7 +653,6 @@ watch(() => props.userId, () => {
 .name {
   font-size: 32px;
   font-weight: 500;
-  color: color(--v-theme-gray);
 }
 
 .profession {
@@ -682,22 +669,16 @@ watch(() => props.userId, () => {
 .bio-title, .projects-title, .availability-title {
   font-size: 24px;
   font-weight: 500;
-  color: color(--v-theme-gray);
 }
 
 .bio-content {
   font-size: 14px;
-  color: color(--v-theme-gray);
 }
 
 .projects {
   display: flex;
   flex-direction: column;
   gap: 16px;
-}
-
-.no-projects-title {
-  color: color(--v-theme-gray);
 }
 
 .project-item {
@@ -743,7 +724,6 @@ watch(() => props.userId, () => {
 .calendar-month-display {
   font-size: 18px;
   font-weight: 500;
-  color: color(--v-theme-gray);
   min-width: 180px;
   text-align: center;
 }
@@ -755,7 +735,6 @@ watch(() => props.userId, () => {
 .no-availability {
   padding: 24px;
   text-align: center;
-  color: color(--v-theme-gray);
   font-size: 14px;
   border: 1px dashed rgba(var(--v-theme-primary), 0.3);
   border-radius: 8px;
@@ -776,7 +755,6 @@ watch(() => props.userId, () => {
   h4 {
     font-size: 16px;
     font-weight: 500;
-    color: color(--v-theme-gray);
   }
 }
 
@@ -802,12 +780,10 @@ watch(() => props.userId, () => {
 
 .availability-title {
   font-size: 14px;
-  color: color(--v-theme-gray);
 }
 
 .availability-time {
   font-size: 12px;
-  color: color(--v-theme-gray);
   opacity: 0.7;
 }
 

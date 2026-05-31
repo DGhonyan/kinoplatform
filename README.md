@@ -1,3 +1,91 @@
+# Kinoplatform — Frontend
+
+Nuxt 4 SPA (`ssr: false`) on Vuetify + Pinia, talking to the NestJS
+`kinoplatform-backend`. Vuetify scaffolding docs are further down; this section
+covers the conventions specific to this app. For the agent-facing summary, see
+[`CLAUDE.md`](./CLAUDE.md).
+
+## Talking to the API
+
+All HTTP goes through two helpers in [`app/utils/api.ts`](./app/utils/api.ts).
+Both expose `.get<T>()`, `.post<T>(body)`, `.patch<T>(body)`, `.delete<T>(body)`,
+send the auth cookie automatically, transparently retry once on a 401 (token
+refresh), and **never throw**.
+
+| Helper | Returns | When |
+| --- | --- | --- |
+| **`apiRequest(path, opts?)`** | `T \| null` (`null` on error) | The default. Shows an error snackbar on failure; callers never `try/catch`. |
+| **`useApi(path)`** | `ApiResult<T> = { data, error, status }` | Escape hatch — only when the caller needs the raw `error` for control flow or inline display. |
+
+`apiRequest` options: `{ errorMessage?, showError? = true, successMessage?, loader? = false }`.
+`loader: true` shows the global spinner; `errorMessage`/`successMessage` are
+**i18n keys**.
+
+Calls live in **Pinia store actions** (options-style: `defineStore('x', { state, actions })`),
+which own the request and return the result:
+
+```ts
+// app/stores/user.ts
+async getAllUsers() {
+  return apiRequest('/users/search', {
+    loader: true,
+    errorMessage: 'error_load_users_failed',
+  }).get<User[]>();
+}
+```
+
+```ts
+// component
+const users = (await userStore.getAllUsers()) ?? [];
+```
+
+Only `auth.login` and `auth.verifyEmail` use the raw `useApi` — the first
+branches on `error.code`, the second renders the error inline — because a
+snackbar alone can't express those.
+
+## Error handling & localization
+
+The backend returns a single envelope for every failure:
+
+```json
+{ "statusCode": 403, "code": "EMAIL_NOT_VERIFIED", "message": "…", "errors": { } }
+```
+
+`code` is the stable contract; `message` is an English developer string and is
+**not** shown as the source of truth. The flow:
+
+1. `apiFetch` surfaces the envelope as `ApiError` (`{ message, code?, errors? }`).
+2. [`app/utils/apiErrors.ts`](./app/utils/apiErrors.ts) maps each `code` → an
+   i18n key via `ERROR_MESSAGE_KEYS`; `apiErrorMessageKey(error)` resolves it
+   (mapped key → raw `message` fallback during migration → `common_unexpected_error`,
+   with a dev-only warning for unmapped codes).
+3. `apiRequest` runs failures through that resolver and calls
+   `appStore.showMessage(key, 'error')`.
+4. [`Message.vue`](./app/components/Message.vue) and `Input` error slots
+   translate keys with `t()`, so the user sees localized text.
+
+`appStore.showMessage(key, type, { variables? })` always takes an **i18n key**
+(a non-key string passes through `t()` unchanged). Never pass English literals.
+
+## Adding a new endpoint (end to end)
+
+**Backend** (`kinoplatform-backend`): add the DTO + controller route + service
+method, and throw `HttpException`s with explicit `{ code, message }`. See that
+repo's README → *Error Handling*.
+
+**Frontend:**
+
+1. Add a store action calling `apiRequest('/path', opts).<method><T>(body)`
+   (`<T>` from `~~/shared/types`); mutate state if needed, then `return` the result.
+2. For each new backend `code`, add `CODE → 'i18n_key'` to `ERROR_MESSAGE_KEYS`
+   in `app/utils/apiErrors.ts`.
+3. Add every new key (errors, success, override copy) to **both**
+   `i18n/locales/en.json` and `hy.json` — keep them at parity.
+4. Call the action from the component; check the return (`if (!data) return;`).
+   Use `useApi` only if you must branch on `error.code` or show the error inline.
+
+---
+
 # Vuetify (Default)
 
 This is the official scaffolding tool for Vuetify, designed to give you a head start in building your new Vuetify application. It sets up a base template with all the necessary configurations and standard directory structure, enabling you to begin development without the hassle of setting up the project from scratch.

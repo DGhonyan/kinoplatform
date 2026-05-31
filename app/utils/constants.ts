@@ -1,6 +1,26 @@
 export const SAS_TOKEN = 'sv=2024-11-04&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2027-03-13T16:42:34Z&st=2026-03-13T08:27:34Z&spr=https,http&sig=tRISEP2WpisSM4hupBB5muMriWoS7CkWV7YfRtn61H0%3D';
 export const FILE_API_URL = 'https://kinoplatformazure.blob.core.windows.net/';
 
+export const FIELD_IDS = [
+  'field_directing_creative_leadership',
+  'field_writing_development',
+  'field_production_management',
+  'field_casting_talent',
+  'field_lighting_electrical',
+  'field_sound',
+  'field_art_department_design',
+  'field_costume_makeup',
+  'field_locations',
+  'field_post_production',
+  'field_sound_post_production',
+  'field_vfx_animation_motion',
+  'field_photography_backstage',
+  'field_marketing_distribution',
+  'field_legal_finance_support',
+  'field_on_set_support',
+  'field_documentary',
+] as const;
+
 export const professions = [
   'profession_director',
   'profession_assistant_director',

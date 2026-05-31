@@ -9,37 +9,39 @@ export type AppMessage = {
   variables?: Record<string, string | number>;
 };
 
-export const useAppStore = defineStore('app', () => {
-  const loading = ref(false);
-  const message = ref<AppMessage | null>(null);
+export const useAppStore = defineStore('app', {
+  state: () => ({
+    loading: false,
+    message: null as AppMessage | null,
+  }),
 
-  function showLoader() {
-    loading.value = true;
-  }
-
-  function hideLoader() {
-    loading.value = false;
-  }
-
-  function showMessage(
-    text: string,
-    type: MessageType = 'info',
-    options?: {
-      duration?: number;
-      variables?: Record<string, string | number>;
+  actions: {
+    showLoader() {
+      this.loading = true;
     },
-  ) {
-    message.value = {
-      text,
-      type,
-      duration: options?.duration ?? 5000,
-      variables: options?.variables,
-    };
-  }
 
-  function hideMessage() {
-    message.value = null;
-  }
+    hideLoader() {
+      this.loading = false;
+    },
 
-  return { loading, message, showLoader, hideLoader, showMessage, hideMessage };
+    showMessage(
+      text: string,
+      type: MessageType = 'info',
+      options?: {
+        duration?: number;
+        variables?: Record<string, string | number>;
+      },
+    ) {
+      this.message = {
+        text,
+        type,
+        duration: options?.duration ?? 5000,
+        variables: options?.variables,
+      };
+    },
+
+    hideMessage() {
+      this.message = null;
+    },
+  },
 });

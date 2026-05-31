@@ -13,6 +13,7 @@
 </template>
 
 <script lang="ts" setup>
+const { t, te } = useI18n();
 const appStore = useAppStore();
 const { message } = storeToRefs(appStore);
 const { hideMessage } = appStore;
@@ -22,7 +23,9 @@ const timeoutId = ref<number | null>(null);
 const formattedMessage = computed(() => {
   if (!message.value) return '';
 
-  let text = message.value.text;
+  // `text` is usually an i18n key (callers pass keys); translate it. Backend
+  // messages that aren't keys fall through unchanged via the te() guard.
+  let text = te(message.value.text) ? t(message.value.text) : message.value.text;
 
   // Replace variables in format {variableName}
   if (message.value.variables) {

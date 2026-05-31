@@ -173,7 +173,7 @@ const uploadFile = async (file: File) => {
   }
   catch (error) {
     console.error('Upload failed:', error);
-    appStore.showMessage('File upload failed. Please try again.', 'error');
+    appStore.showMessage('error_file_upload_failed', 'error');
     emit('upload:error', error as Error);
   }
   finally {
