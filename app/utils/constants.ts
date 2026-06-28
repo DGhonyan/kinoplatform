@@ -1,5 +1,4 @@
-export const SAS_TOKEN = 'sv=2024-11-04&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2027-03-13T16:42:34Z&st=2026-03-13T08:27:34Z&spr=https,http&sig=tRISEP2WpisSM4hupBB5muMriWoS7CkWV7YfRtn61H0%3D';
-export const FILE_API_URL = 'https://kinoplatformazure.blob.core.windows.net/';
+import type { ChipGroup } from '~/utils/gear';
 
 export const FIELD_IDS = [
   'field_directing_creative_leadership',
@@ -117,4 +116,226 @@ export const professions = [
   'profession_fixer',
   'profession_archival_researcher',
   'profession_interview_producer',
+] as const;
+
+/**
+ * The same profession ids as `professions`, grouped by department for the
+ * ChipPicker. This is purely a frontend presentation concern — the backend
+ * still stores a flat `string[]` of profession ids. Category labels are the
+ * `field_*` i18n keys (plus `field_camera`, added for the camera department).
+ */
+export const PROFESSION_GROUPS: ChipGroup[] = [
+  {
+    label: 'field_directing_creative_leadership',
+    items: [
+      'profession_director',
+      'profession_assistant_director',
+      'profession_script_supervisor',
+      'profession_creative_producer',
+      'profession_showrunner',
+    ],
+  },
+  {
+    label: 'field_writing_development',
+    items: [
+      'profession_screenwriter',
+      'profession_script_editor',
+      'profession_dramaturg',
+      'profession_story_editor',
+      'profession_researcher',
+    ],
+  },
+  {
+    label: 'field_production_management',
+    items: [
+      'profession_producer',
+      'profession_executive_producer',
+      'profession_line_producer',
+      'profession_production_manager',
+      'profession_production_coordinator',
+      'profession_production_assistant',
+      'profession_unit_production_manager',
+    ],
+  },
+  {
+    label: 'field_casting_talent',
+    items: [
+      'profession_casting_producer',
+      'profession_casting_director',
+      'profession_casting_assistant',
+      'profession_talent_coordinator',
+    ],
+  },
+  {
+    label: 'field_camera',
+    items: [
+      'profession_cinematographer',
+      'profession_camera_operator',
+      'profession_1st_assistant_camera',
+      'profession_2nd_assistant_camera',
+      'profession_digital_imaging_technician',
+      'profession_steadicam_operator',
+      'profession_drone_operator',
+    ],
+  },
+  {
+    label: 'field_lighting_electrical',
+    items: [
+      'profession_gaffer',
+      'profession_best_boy_electric',
+      'profession_lighting_technician',
+      'profession_generator_operator',
+    ],
+  },
+  {
+    label: 'field_sound',
+    items: [
+      'profession_sound_designer',
+      'profession_production_sound_mixer',
+      'profession_boom_operator',
+      'profession_sound_assistant',
+      'profession_foley_artist',
+      'profession_adr_recordist',
+    ],
+  },
+  {
+    label: 'field_art_department_design',
+    items: [
+      'profession_production_designer',
+      'profession_art_director',
+      'profession_set_designer',
+      'profession_set_decorator',
+      'profession_props_master',
+      'profession_props_assistant',
+      'profession_scenic_painter',
+      'profession_construction_manager',
+    ],
+  },
+  {
+    label: 'field_costume_makeup',
+    items: [
+      'profession_costume_designer',
+      'profession_costume_supervisor',
+      'profession_wardrobe_assistant',
+      'profession_makeup_artist',
+      'profession_hair_stylist',
+      'profession_sfx_makeup_artist',
+    ],
+  },
+  {
+    label: 'field_locations',
+    items: [
+      'profession_location_manager',
+      'profession_assistant_location_manager',
+      'profession_location_scout',
+    ],
+  },
+  {
+    label: 'field_post_production',
+    items: [
+      'profession_editor',
+      'profession_assistant_editor',
+      'profession_colorist',
+      'profession_post_production_supervisor',
+      'profession_online_editor',
+      'profession_mastering_technician',
+    ],
+  },
+  {
+    label: 'field_sound_post_production',
+    items: [
+      'profession_sound_editor',
+      'profession_dialogue_editor',
+      'profession_re_recording_mixer',
+      'profession_sound_effects_editor',
+    ],
+  },
+  {
+    label: 'field_vfx_animation_motion',
+    items: [
+      'profession_vfx_supervisor',
+      'profession_vfx_artist',
+      'profession_compositor',
+      'profession_2d_animator',
+      'profession_3d_animator',
+      'profession_motion_designer',
+      'profession_cg_artist',
+      'profession_technical_director',
+    ],
+  },
+  {
+    label: 'field_photography_backstage',
+    items: ['profession_bts_photographer', 'profession_bts_videographer'],
+  },
+  {
+    label: 'field_marketing_distribution',
+    items: [
+      'profession_marketing_producer',
+      'profession_publicist',
+      'profession_film_sales_agent',
+      'profession_distributor',
+      'profession_festival_coordinator',
+      'profession_press_kit_designer',
+      'profession_trailer_editor',
+    ],
+  },
+  {
+    label: 'field_legal_finance_support',
+    items: [
+      'profession_film_accountant',
+      'profession_legal_advisor',
+      'profession_rights_and_clearance_manager',
+      'profession_insurance_coordinator',
+    ],
+  },
+  {
+    label: 'field_on_set_support',
+    items: [
+      'profession_unit_driver',
+      'profession_caterer_craft_services',
+      'profession_set_medic',
+      'profession_security',
+    ],
+  },
+  {
+    label: 'field_documentary',
+    items: [
+      'profession_documentary_director',
+      'profession_field_producer',
+      'profession_fixer',
+      'profession_archival_researcher',
+      'profession_interview_producer',
+    ],
+  },
+];
+
+// Stored as the short enum value (matches User['gender']); display name comes
+// from the i18n key `gender_<value>` (e.g. 'male' → t('gender_male')).
+export const GENDERS = ['male', 'female', 'other'] as const;
+
+// Each id is both the stored value and its i18n key.
+export const EXPERIENCE_LEVELS = [
+  'experience_student',
+  'experience_beginner',
+  'experience_junior',
+  'experience_experienced',
+  'experience_professional',
+] as const;
+
+export const EMPLOYMENT_TYPES = [
+  'employment_full_time',
+  'employment_part_time',
+  'employment_freelance',
+  'employment_contract',
+  'employment_internship',
+] as const;
+
+export const PRODUCTION_TYPES = [
+  'production_short_film',
+  'production_feature_film',
+  'production_series',
+  'production_commercial',
+  'production_music_video',
+  'production_documentary',
+  'production_other',
 ] as const;

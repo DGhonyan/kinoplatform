@@ -24,6 +24,7 @@ export default defineNuxtConfig({
     '@fontsource/roboto/latin-500.css',
     '@fontsource/roboto/latin-700.css',
     '@fontsource/roboto/latin-900.css',
+    '@fontsource/bebas-neue/latin-400.css',
   ],
 
   runtimeConfig: {

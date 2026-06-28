@@ -26,18 +26,12 @@ const languages: { title: string; value: AppLocale }[] = [
   { title: 'Հայերեն', value: 'hy' },
 ];
 
+// Saved locale is restored at app boot by plugins/restore-locale.client.ts, so
+// `locale.value` is already correct when this mounts — we just persist changes.
 const changeLanguage = (newLocale: AppLocale) => {
   locale.value = newLocale;
   localStorage.setItem('locale', newLocale);
 };
-
-onMounted(() => {
-  const savedLocale = localStorage.getItem('locale') as AppLocale | null;
-  if (savedLocale === 'en' || savedLocale === 'hy') {
-    locale.value = savedLocale;
-    currentLocale.value = savedLocale;
-  }
-});
 </script>
 
 <style scoped lang="scss">

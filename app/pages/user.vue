@@ -1,102 +1,127 @@
 <template>
   <div class="profile">
-    <template v-if="showOnboarding">
+    <div
+      v-if="phase === 'wizard'"
+      class="onboarding"
+    >
       <Card>
         <AuthRegisterWizard
-          :steps="remainingSteps"
+          :steps="wizardStepList"
           :title="$t('onboarding_complete_profile')"
           :initial-form-data="initialFormData"
-          :progress-total="totalOnboardingSteps"
+          :initial-index="firstIncompleteIndex"
+          :progress-total="progressTotal"
           :progress-offset="progressOffset"
-          @completed="onCompleted"
+          @completed="onWizardCompleted"
         />
       </Card>
+    </div>
+
+    <template v-else>
+      <UserProfile :user-id="undefined" />
+      <EssentialsPopup
+        v-if="essentialsOpen"
+        v-model="essentialsOpen"
+        @completed="onEssentialsCompleted"
+      />
     </template>
-    <UserProfile
-      v-else
-      :user-id="undefined"
-    />
   </div>
 </template>
 
 <script lang="ts" setup>
 import {
   STEP_IDS,
+  WIZARD_STEP_IDS,
   useRegisterSteps,
   type RegisterFormData,
   type RegisterStep,
 } from '~/components/auth/registerSteps';
+import EssentialsPopup from '~/components/profile/popups/EssentialsPopup.vue';
 
 const authStore = useAuthStore();
-const appStore = useAppStore();
 const { user } = storeToRefs(authStore);
 
-// Post-verification onboarding steps shown on /user. Add new step ids here as
-// the flow grows; the wizard renders only those not yet in user.completedSteps.
+// The wizard on /user resumes the post-auth required steps. Credentials + Code
+// are always done by the time the user is logged in, so we only offer the three
+// profile steps; the required "essentials" popup (photo/bio/languages) takes
+// over afterwards.
 const stepConfigs = useRegisterSteps();
-const allSteps: RegisterStep[] = [
+const wizardStepList: RegisterStep[] = [
   stepConfigs[STEP_IDS.NAME],
-  stepConfigs[STEP_IDS.BACKGROUND],
-  stepConfigs[STEP_IDS.EXPERTISE],
-  stepConfigs[STEP_IDS.PORTFOLIO],
-  stepConfigs[STEP_IDS.AVATAR],
-  stepConfigs[STEP_IDS.BIO],
+  stepConfigs[STEP_IDS.LOCATION],
+  stepConfigs[STEP_IDS.PROFESSION],
 ];
 
-// Snapshot at mount — do NOT make this reactive. `user.completedSteps` grows
-// every time a wizard step finishes, and a reactive `remainingSteps` would
-// shrink under the wizard's feet between steps. `currentIndex += 1` would
-// then land on the wrong step (e.g. portfolio skip would jump to bio,
-// skipping avatar). Snapshot once; the wizard remounts on full page reload
-// if the user comes back later.
+// Keep ALL three reversible steps in the array (don't filter completed ones out)
+// and just start on the first incomplete one — so a resuming user can still go
+// Back to revise an already-completed step (each is an idempotent PATCH).
+// Snapshot at mount — completedSteps grows as steps finish, but the array stays
+// fixed so currentIndex never misaligns.
 const completedAtMount = new Set(user.value?.completedSteps ?? []);
-const remainingSteps: RegisterStep[] = allSteps.filter(s => !completedAtMount.has(s.id));
-
-// Progress is shown against the FULL onboarding flow (credentials + code +
-// the 6 post-auth steps = 8), not just this page's slice. The user mentally
-// went through one wizard — "step 6 of 8" is more honest than "step 4 of 6".
-const totalOnboardingSteps = Object.keys(STEP_IDS).length;
-const progressOffset = totalOnboardingSteps - remainingSteps.length;
-
-const showOnboarding = computed(() =>
-  Boolean(user.value && !user.value.active && remainingSteps.length > 0),
+const firstIncompleteIndex = Math.max(
+  0,
+  wizardStepList.findIndex(s => !completedAtMount.has(s.id)),
 );
 
-watch(showOnboarding, (newVal) => {
-  if (newVal) {
-    setPageLayout('hero');
+// Progress reflects the whole 5-step wizard (credentials + code + these three),
+// so a resuming user sees "step 4 of 5", not "step 1 of 3". credentials + code
+// are always done here, so the offset is constant.
+const progressTotal = WIZARD_STEP_IDS.length;
+const progressOffset = WIZARD_STEP_IDS.length - wizardStepList.length;
+
+// Wizard phase if any of the three steps is still incomplete.
+const allWizardStepsDone = wizardStepList.every(s => completedAtMount.has(s.id));
+const phase = ref<'wizard' | 'profile'>(allWizardStepsDone ? 'profile' : 'wizard');
+const essentialsOpen = ref(false);
+
+const essentialsDone = () => (user.value?.completedSteps ?? []).includes(STEP_IDS.ESSENTIALS);
+
+const maybeOpenEssentials = () => {
+  if (phase.value === 'profile' && !essentialsDone()) {
+    essentialsOpen.value = true;
   }
-  else {
-    setPageLayout('default');
-  }
-}, { immediate: true });
+};
 
 const initialFormData = computed<Partial<RegisterFormData>>(() => ({
   email: user.value?.email ?? '',
   name: user.value?.firstName ?? '',
   surname: user.value?.lastName ?? '',
-  birthDate: user.value?.birthDate ?? '',
+  gender: user.value?.gender ?? null,
   location: user.value?.location ?? '',
-  education: user.value?.education ?? '',
-  languages: user.value?.languages ?? [],
-  fields: user.value?.fields ?? [],
+  birthDate: user.value?.birthDate ?? '',
   profession: user.value?.profession ?? [],
-  portfolio: user.value?.portfolio ?? '',
-  portfolioFile: user.value?.portfolioFile ?? '',
-  avatar: user.value?.avatar ?? '',
-  bio: user.value?.bio ?? '',
 }));
 
-const onCompleted = (_data: RegisterFormData) => {
-  appStore.showMessage('auth_registration_success', 'success');
-  navigateTo('/');
+const onWizardCompleted = () => {
+  phase.value = 'profile';
+  nextTick(maybeOpenEssentials);
 };
+
+const onEssentialsCompleted = () => {
+  essentialsOpen.value = false;
+};
+
+// Onboarding wants the hero look (cover image + white card) while the wizard
+// runs; the regular profile uses the default layout.
+watch(phase, (p) => {
+  setPageLayout(p === 'wizard' ? 'hero' : 'default');
+}, { immediate: true });
+
+onMounted(maybeOpenEssentials);
 </script>
 
 <style scoped lang="scss">
 .profile {
   display: flex;
   flex-direction: column;
+  height: 100%;
   gap: 16px;
+}
+
+.onboarding {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
 }
 </style>

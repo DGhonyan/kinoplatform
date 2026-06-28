@@ -1,6 +1,6 @@
 <template>
   <div class="register-page">
-    <Card>
+    <Card :max-width="640">
       <AuthRegisterWizard
         :steps="steps"
         :title="$t('common_registration')"
@@ -23,6 +23,7 @@
 <script lang="ts" setup>
 import {
   STEP_IDS,
+  isOnboardingComplete,
   useRegisterSteps,
   type RegisterFormData,
   type RegisterStep,
@@ -34,10 +35,10 @@ const authStore = useAuthStore();
 const appStore = useAppStore();
 
 // If the user is already signed in we shouldn't start them at step 1 of registration.
-// Active users go home; partially-onboarded users go to /user, where the wizard
-// resumes with the remaining steps.
+// Fully-onboarded users go home; partially-onboarded users go to /user, where the
+// wizard / essentials popup resumes.
 if (import.meta.client && authStore.user) {
-  navigateTo(authStore.user.active ? '/' : '/user');
+  navigateTo(isOnboardingComplete(authStore.user) ? '/' : '/user');
 }
 
 const stepConfigs = useRegisterSteps();
@@ -45,19 +46,16 @@ const steps: RegisterStep[] = [
   stepConfigs[STEP_IDS.CREDENTIALS],
   stepConfigs[STEP_IDS.CODE],
   stepConfigs[STEP_IDS.NAME],
-  stepConfigs[STEP_IDS.BACKGROUND],
-  stepConfigs[STEP_IDS.EXPERTISE],
-  stepConfigs[STEP_IDS.PORTFOLIO],
-  stepConfigs[STEP_IDS.AVATAR],
-  stepConfigs[STEP_IDS.BIO],
+  stepConfigs[STEP_IDS.LOCATION],
+  stepConfigs[STEP_IDS.PROFESSION],
 ];
 
-// By the time the wizard emits `completed`, the user has been auto-logged-in
-// in the Code step and their profile updated (with active: true server-side)
-// in the Name step.
+// The wizard only covers the required pre-profile steps. The user still has the
+// required "essentials" popup (photo/bio/languages) to fill before onboarding
+// is complete, so send them to /user where that popup takes over.
 const onCompleted = (_data: RegisterFormData) => {
   appStore.showMessage('auth_registration_success', 'success');
-  navigateTo('/');
+  navigateTo('/user');
 };
 </script>
 

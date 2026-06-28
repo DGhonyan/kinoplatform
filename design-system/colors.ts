@@ -10,11 +10,13 @@ export const lightColors: Record<string, string> = {
   primary300: '#A8D2E8',
   primary400: '#7EBADC',
   primary500: '#60A0D1',
-  primary: '#9e2c24',
+  primary: '#810100',
   primary700: '#4275B3',
   primary800: '#3B5F92',
   primary900: '#335075',
   primary950: '#233248',
+
+  accent: '#FFF9F0',
 
   // Secondary
   secondary25: '#FAFAFF',
@@ -139,8 +141,8 @@ export const darkColors: Record<string, string> = {
   // elevated instead of blending into the page (Vuetify paints v-card / v-menu
   // / v-dialog surfaces with this token).
   'surface': '#262222',
-  'on-background': '#FFF1DD',
-  'on-surface': '#FFF1DD',
+  'on-background': '#FFF9F0',
+  'on-surface': '#FFF9F0',
 };
 
 export const iconAliases: Record<string, string> = {

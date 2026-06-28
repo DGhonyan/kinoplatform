@@ -15,8 +15,8 @@
     <v-textarea
       class="text-area"
       v-bind="$attrs"
-      :color="color"
-      :base-color="color"
+      :color="resolvedColor"
+      :base-color="resolvedColor"
       :disabled="disabled"
       :type="type"
       :required="required"

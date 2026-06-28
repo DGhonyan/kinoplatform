@@ -78,27 +78,11 @@
         v-if="filteredUsers.length > 0"
         class="crew-grid"
       >
-        <button
+        <UserCard
           v-for="user in filteredUsers"
           :key="user._id"
-          type="button"
-          class="user-card"
-          @click="navigateTo(`/users/${user._id}`)"
-        >
-          <img
-            :src="getUserAvatar(user)"
-            :alt="`${user.firstName} ${user.lastName}`"
-            class="avatar"
-          >
-          <div class="user-info">
-            <h3 class="user-name">
-              {{ user.firstName }} {{ user.lastName }}
-            </h3>
-            <p class="user-profession">
-              {{ user.profession.map(p => $t(p)).join(', ') }}
-            </p>
-          </div>
-        </button>
+          :user="user"
+        />
       </div>
 
       <div
@@ -120,8 +104,11 @@ import {
 } from '~/utils/languages';
 import Select from '~/components/Select.vue';
 
+definePageMeta({
+  header: { cover: true, slogan: 'crew_page_slogan', coverNav: false },
+});
+
 const { t, locale } = useI18n();
-const fileStore = useFileStore();
 const userStore = useUserStore();
 
 const users = ref<User[]>([]);
@@ -135,11 +122,6 @@ const selectedProfessions = ref<string[]>([]);
 const selectedLocations = ref<string[]>([]);
 const selectedLanguages = ref<string[]>([]);
 const hasPortfolioOnly = ref(false);
-
-const getUserAvatar = (user: User) => {
-  if (user.avatar) return fileStore.composeFileUrl(user.avatar);
-  return new URL('@/assets/default.jpg', import.meta.url).href;
-};
 
 // Items for the drawer multi-selects.
 const professionItems = computed(() =>
@@ -289,68 +271,12 @@ onMounted(async () => {
 }
 
 .crew-grid {
-  display: grid;
-  // Auto-fill so the grid responsively reflows from 6 cols on a wide desktop
-  // down to 1 col on phones, without media queries.
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  // Fixed-width cards (see UserCard) packed with even 16px gutters — the old
+  // auto-fill 1fr grid stretched the cells wider than the cards, so the visible
+  // gaps were larger than the gap value and uneven row-to-row.
+  display: flex;
+  flex-wrap: wrap;
   gap: 16px;
-}
-
-.user-card {
-  width: 200px;
-  height: 290px;
-
-  max-width: 200px;
-  max-height: 290px;
-
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 12px;
-  background: rgba(var(--v-theme-on-surface), 0.04);
-  border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
-  border-radius: 16px;
-  cursor: pointer;
-  text-align: left;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-    border-color: rgba(var(--v-theme-primary), 0.3);
-  }
-}
-
-.avatar {
-  width: 100%;
-  aspect-ratio: 1;
-  object-fit: cover;
-  border-radius: 12px;
-}
-
-.user-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.user-name {
-  font-size: 15px;
-  font-weight: 600;
-  margin: 0;
-  color: rgba(var(--v-theme-on-surface), 0.87);
-}
-
-.user-profession {
-  font-size: 13px;
-  color: rgb(var(--v-theme-primary));
-  margin: 0;
-  // Cap at two lines so cards stay uniform height regardless of role count.
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
 }
 
 .no-results {

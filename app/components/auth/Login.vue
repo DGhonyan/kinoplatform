@@ -8,6 +8,7 @@
       :error-messages="emailError"
       hide-details="auto"
       @update:model-value="emailError = ''"
+      bg-color="accent"
     />
     <Input
       v-model="password"
@@ -17,6 +18,7 @@
       :error-messages="passwordError"
       hide-details="auto"
       @update:model-value="passwordError = ''"
+      bg-color="accent"
     />
 
     <div class="login-options">

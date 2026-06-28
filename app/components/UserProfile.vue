@@ -1,795 +1,798 @@
 <template>
   <div class="user-profile">
-    <div class="left">
-      <div class="profile-header">
+    <ProfileCompletionBanner
+      v-if="showBanner"
+      :remaining="remainingOptional"
+      @open="openCompletionFlow"
+      @dismiss="dismissBanner"
+    />
+
+    <!-- ───────────── 1. Personal info ───────────── -->
+    <section class="container">
+      <div class="personal-top">
+        <div class="identity">
+          <div class="name-row">
+            <h1 class="name">{{ user?.firstName }} {{ user?.lastName }}</h1>
+            <v-btn
+              v-if="canEdit"
+              icon="mdi-pencil"
+              variant="text"
+              size="small"
+              :aria-label="$t('profile_edit_personal_info')"
+              @click="showEditInfo = true"
+            />
+          </div>
+          <span
+            v-if="professionsText"
+            class="professions"
+          >{{ professionsText }}</span>
+          <span
+            v-if="user?.experienceLevel"
+            class="experience-level"
+          >{{ $t(user.experienceLevel) }}</span>
+        </div>
+
         <div
           v-if="user?.avatar"
-          class="avatar-section"
+          class="avatar"
         >
           <img
             :src="getUserAvatar()"
-            alt="User Avatar"
-            class="user-avatar"
+            alt=""
           >
         </div>
-        <div class="personal-info">
-          <div class="name-section">
-            <span class="name">{{ user?.firstName }} {{ user?.lastName }}</span>
-            <v-btn
-              v-if="canEdit"
-              size="small"
-              variant="outlined"
-              color="primary"
-              prepend-icon="mdi-pencil"
-              @click="openEditProfileDialog"
-            >
-              {{ $t('profile_edit_profile') }}
-            </v-btn>
-          </div>
-          <span class="profession">{{ user?.profession.map(profession => $t(profession)).join(', ') }}</span>
-        </div>
       </div>
-      <div class="bio">
-        <span class="bio-title">{{ $t('common_bio') }}</span>
-        <span class="bio-content">{{ user?.bio || $t('profile_no_bio') }}</span>
+
+      <p
+        v-if="user?.bio"
+        class="bio"
+      >
+        {{ user.bio }}
+      </p>
+
+      <div class="meta">
+        <div
+          v-if="user?.location"
+          class="meta-line"
+        >
+          <v-icon size="18">
+            custom:map-pin
+          </v-icon>
+          <span>{{ user.location }}</span>
+        </div>
+        <div
+          v-if="user?.education"
+          class="meta-line"
+        >
+          <v-icon size="18">
+            custom:graduation-cap
+          </v-icon>
+          <span>{{ user.education }}</span>
+        </div>
+        <a
+          v-if="user?.portfolio"
+          class="meta-line portfolio"
+          :href="user.portfolio"
+          target="_blank"
+        >
+          <v-icon size="18">mdi-link-variant</v-icon>
+          <span>{{ $t('common_portfolio_link') }}</span>
+        </a>
       </div>
 
       <div
-        v-if="user?.portfolio"
-        class="portfolio"
+        v-if="hasLanguages"
+        class="chip-group"
       >
-        <a
-          :href="user?.portfolio"
-          target="_blank"
-        >{{ $t('common_portfolio_link') }}</a>
+        <span class="chip-label">{{ $t('common_languages') }}</span>
+        <div class="chips">
+          <v-chip
+            v-for="code in user?.languages"
+            :key="code"
+            size="small"
+            color="accent"
+          >
+            {{ languageName(code) }}
+          </v-chip>
+        </div>
       </div>
-    </div>
-    <div class="right">
-      <span class="projects-title">{{ $t('common_projects') }}</span>
+
       <div
-        v-if="user?.projects && user?.projects.length > 0"
+        v-if="hasTools || hasEquipment"
+        class="chip-group"
+      >
+        <div class="chip-label-row">
+          <span class="chip-label">{{ $t('gear_title') }}</span>
+          <v-btn
+            v-if="canEdit"
+            icon="mdi-pencil"
+            variant="text"
+            size="x-small"
+            :aria-label="$t('common_edit')"
+            @click="openGear"
+          />
+        </div>
+        <div class="chips">
+          <v-chip
+            v-for="item in [...(user?.tools ?? []), ...(user?.equipment ?? [])]"
+            :key="item"
+            size="small"
+            color="accent"
+          >
+            {{ item }}
+          </v-chip>
+        </div>
+      </div>
+
+      <div
+        v-if="enabledPracticalities.length"
+        class="chip-group"
+      >
+        <div class="chip-label-row">
+          <span class="chip-label">{{ $t('gear_practicalities_label') }}</span>
+          <v-btn
+            v-if="canEdit"
+            icon="mdi-pencil"
+            variant="text"
+            size="x-small"
+            :aria-label="$t('common_edit')"
+            @click="openGear"
+          />
+        </div>
+        <div class="chips">
+          <v-chip
+            v-for="key in enabledPracticalities"
+            :key="key"
+            size="small"
+            color="accent"
+          >
+            {{ $t(`practicality_${key}`) }}
+          </v-chip>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────── 2. Projects ───────────── -->
+    <section
+      v-if="hasProjects || canEdit"
+      class="container"
+    >
+      <div class="section-head">
+        <h2 class="section-title">
+          {{ $t('common_projects') }}
+        </h2>
+        <div
+          v-if="canEdit"
+          class="section-actions"
+        >
+          <v-btn
+            variant="text"
+            size="small"
+            prepend-icon="mdi-plus"
+            color="accent"
+            @click="openProjects('add')"
+          >
+            {{ $t('common_add') }}
+          </v-btn>
+          <v-btn
+            v-if="hasProjects"
+            variant="text"
+            size="small"
+            prepend-icon="mdi-pencil"
+            color="accent"
+            @click="openProjects('list')"
+          >
+            {{ $t('common_edit') }}
+          </v-btn>
+        </div>
+      </div>
+
+      <p
+        v-if="!hasProjects"
+        class="empty-state"
+      >
+        {{ $t('profile_no_projects_yet') }}
+      </p>
+
+      <div
+        v-else
         class="projects"
       >
         <div
-          v-for="project in user?.projects"
-          :key="project.name"
+          v-for="(p, i) in visibleProjects"
+          :key="i"
           class="project-item"
         >
-          <a
-            :href="project.link"
-            target="_blank"
-          >{{ project.name }} - {{ project.year }}</a>
+          <component
+            :is="p.link ? 'a' : 'div'"
+            :href="p.link || undefined"
+            :target="p.link ? '_blank' : undefined"
+            class="project-name"
+          >
+            {{ p.name }}
+          </component>
+          <span class="project-meta">{{ projectLine(p) }}</span>
+          <p
+            v-if="p.description"
+            class="project-desc"
+          >
+            {{ p.description }}
+          </p>
         </div>
       </div>
-      <div
-        v-else
-        class="no-projects"
+
+      <Button
+        v-if="(user?.projects?.length ?? 0) > PROJECTS_PREVIEW"
+        variant="text"
+        color="accent"
+        @click="projectsExpanded = !projectsExpanded"
       >
-        <span class="no-projects-title">{{ $t('profile_no_projects') }}</span>
-      </div>
+        {{ projectsExpanded ? $t('profile_show_less') : $t('profile_show_all', { count: user?.projects?.length }) }}
+      </Button>
+    </section>
 
-      <div class="availability-section">
-        <div class="availability-header">
-          <span class="availability-title">{{ $t('profile_availability') }}</span>
+    <!-- ───────────── 3. Experience ───────────── -->
+    <section
+      v-if="hasExperience || canEdit"
+      class="container"
+    >
+      <div class="section-head">
+        <h2 class="section-title">
+          {{ $t('profile_experience') }}
+        </h2>
+        <div
+          v-if="canEdit"
+          class="section-actions"
+        >
           <v-btn
-            v-if="canEdit"
+            variant="text"
             size="small"
-            color="primary"
-            @click="openAvailabilityDialog"
+            prepend-icon="mdi-plus"
+            color="accent"
+            @click="openExperience('add')"
           >
-            {{ hasAvailability ? $t('profile_edit_availability') : $t('profile_add_availability') }}
+            {{ $t('common_add') }}
           </v-btn>
-        </div>
-
-        <div
-          v-if="hasAvailability"
-          class="calendar-wrapper"
-        >
-          <div class="calendar-controls">
-            <v-btn
-              icon="mdi-chevron-left"
-              size="small"
-              variant="text"
-              @click="previousMonth"
-            />
-            <span class="calendar-month-display">{{ formatMonthYear(focusedDate) }}</span>
-            <v-btn
-              icon="mdi-chevron-right"
-              size="small"
-              variant="text"
-              @click="nextMonth"
-            />
-            <v-btn
-              size="small"
-              variant="text"
-              class="today-btn"
-              @click="goToToday"
-            >
-              {{ $t('common_today') }}
-            </v-btn>
-          </div>
-          <v-calendar
-            v-model="calendarDate"
-            :events="calendarEvents"
-            :view-mode="calendarView"
-          />
-        </div>
-        <div
-          v-else
-          class="no-availability"
-        >
-          <span>{{ canEdit ? $t('profile_availability_description') : $t('profile_no_availability_information_added') }}</span>
+          <v-btn
+            v-if="hasExperience"
+            variant="text"
+            size="small"
+            prepend-icon="mdi-pencil"
+            color="accent"
+            @click="openExperience('list')"
+          >
+            {{ $t('common_edit') }}
+          </v-btn>
         </div>
       </div>
-    </div>
 
-    <v-dialog
-      v-model="showAvailabilityDialog"
-      max-width="600px"
-    >
-      <v-card>
-        <v-card-title>
-          <span class="text-h5">{{ $t('profile_manage_availability') }}</span>
-        </v-card-title>
-        <v-card-text>
-          <v-form class="availability-form">
-            <Input
-              v-model="newAvailability.title"
-              label="common_title"
-              required
-              :error-messages="titleError"
-              @update:model-value="titleError = ''"
-            />
-            <v-row>
-              <v-col cols="6">
-                <Input
-                  v-model="newAvailability.startDate"
-                  label="common_start_date"
-                  type="date"
-                  required
-                  :error-messages="startDateError"
-                  @update:model-value="onStartDateChange"
-                />
-              </v-col>
-              <v-col cols="6">
-                <Input
-                  v-model="newAvailability.endDate"
-                  label="common_end_date"
-                  type="date"
-                  required
-                  :error-messages="endDateError"
-                  @update:model-value="endDateError = ''"
-                />
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col cols="6">
-                <Input
-                  v-model="newAvailability.startTime"
-                  label="profile_start_time"
-                  type="time"
-                />
-              </v-col>
-              <v-col cols="6">
-                <Input
-                  v-model="newAvailability.endTime"
-                  label="profile_end_time"
-                  type="time"
-                />
-              </v-col>
-            </v-row>
-            <v-select
-              v-model="newAvailability.color"
-              :label="$t('common_color')"
-              :items="colorOptions"
-              variant="outlined"
-              hide-details
-            />
-          </v-form>
+      <p
+        v-if="!hasExperience"
+        class="empty-state"
+      >
+        {{ $t('profile_no_experience_yet') }}
+      </p>
 
-          <div
-            v-if="userEvents.length > 0"
-            class="existing-availability"
-          >
-            <h4>{{ $t('profile_current_availability') }}</h4>
-            <div
-              v-for="event in validUserEvents"
-              :key="event._id"
-              class="availability-item"
+      <ol
+        v-else
+        class="timeline"
+      >
+        <li
+          v-for="(e, i) in user?.experience"
+          :key="i"
+          class="timeline-item"
+        >
+          <span class="timeline-marker" />
+          <div class="timeline-body">
+            <span class="exp-title">{{ e.position }} · {{ e.company }}</span>
+            <span class="exp-date">{{ experienceLine(e) }}</span>
+            <p
+              v-if="e.description"
+              class="exp-desc"
             >
-              <div class="availability-item-info">
-                <span class="availability-date">
-                  {{ formatDate(event.startDate) }}
-                  <template v-if="event.startDate !== event.endDate">
-                    - {{ formatDate(event.endDate) }}
-                  </template>
-                </span>
-                <span class="availability-title">{{ event.title }}</span>
-                <span
-                  v-if="event.startTime && event.endTime"
-                  class="availability-time"
-                >
-                  {{ event.startTime }} - {{ event.endTime }}
-                </span>
-              </div>
-              <v-btn
-                size="small"
-                color="error"
-                variant="text"
-                icon="mdi-delete"
-                @click="removeAvailability(event._id!)"
-              />
-            </div>
+              {{ e.description }}
+            </p>
           </div>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn
-            color="grey"
-            variant="text"
-            @click="closeAvailabilityDialog"
-          >
-            Cancel
-          </v-btn>
-          <v-btn
-            color="primary"
-            variant="text"
-            @click="addAvailability"
-          >
-            Add
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+        </li>
+      </ol>
+    </section>
 
-    <v-dialog
-      v-model="showEditProfileDialog"
-      max-width="800px"
+    <!-- ───────────── Recommendations ───────────── -->
+    <section
+      v-if="showRecommendations"
+      class="container"
     >
-      <v-card>
-        <v-card-title>
-          <span class="text-h5">{{ $t('profile_edit_profile') }}</span>
-        </v-card-title>
-        <v-card-text>
-          <div class="edit-profile-form">
-            <FileUpload
-              v-model="editAvatarBlobName"
-              label="common_profile_photo"
-              accept="image/*"
-              placeholder="personal_info_upload_photo"
-              helper-text="personal_info_upload_photo_helper_text"
-            />
+      <h2 class="section-title">
+        {{ $t('recommendation_title') }}
+      </h2>
+      <ProfileRecommendations
+        :target-id="user?._id ?? ''"
+        :recommendations="user?.recommendations ?? []"
+        :is-owner="canEdit"
+        @changed="loadUserData"
+      />
+    </section>
 
-            <TextArea
-              v-model="editBioValue"
-              color="on-surface"
-              :label="$t('common_bio')"
-              rows="4"
-            />
+    <!-- Availability — hidden for now; flip showAvailability to bring it back. -->
+    <ProfileAvailability
+      v-if="showAvailability"
+      :user-id="userId"
+      :can-edit="canEdit"
+    />
 
-            <Select
-              v-model="editProfessionsValue"
-              :label="$t('common_professions')"
-              :items="professionOptions"
-              multiple
-              chips
-              closable-chips
-              :error-messages="editProfessionsError"
-            />
-
-            <AddProject
-              :projects="editProjectsValue"
-              @update:projects="updateProjects"
-            />
-          </div>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn
-            color="grey"
-            variant="text"
-            @click="closeEditProfileDialog"
-          >
-            {{ $t('common_cancel') }}
-          </v-btn>
-          <v-btn
-            color="primary"
-            variant="text"
-            @click="saveProfile"
-          >
-            {{ $t('common_save') }}
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <!-- ───────────── Edit popups ───────────── -->
+    <EditPersonalInfoPopup
+      v-if="canEdit && showEditInfo"
+      v-model="showEditInfo"
+      @saved="onSaved"
+    />
+    <ProjectsManagerPopup
+      v-if="canEdit && showProjectsManager"
+      v-model="showProjectsManager"
+      :mode="projectsMode"
+      @saved="onSaved"
+    />
+    <ExperienceManagerPopup
+      v-if="canEdit && showExperienceManager"
+      v-model="showExperienceManager"
+      :mode="experienceMode"
+      @saved="onSaved"
+    />
+    <ProjectsExperiencePopup
+      v-if="canEdit && showDetailsPopup"
+      v-model="showDetailsPopup"
+      @completed="onPopupCompleted"
+    />
+    <GearAndTravelPopup
+      v-if="canEdit && showGearPopup"
+      v-model="showGearPopup"
+      @completed="onPopupCompleted"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
-import type { User, Event, PersonalInfoProject } from '~~/shared/types/user';
+import type { Project, Experience, Practicalities } from '~~/shared/types/user';
+import type { UserProfile } from '~/stores/user';
+import { getLanguageDisplayName } from '~/utils/languages';
+import { isOnboardingComplete } from '~/utils/onboarding';
+import Button from '~/components/Button.vue';
+import ProfileCompletionBanner from '~/components/profile/ProfileCompletionBanner.vue';
+import ProfileRecommendations from '~/components/profile/ProfileRecommendations.vue';
+import ProfileAvailability from '~/components/profile/ProfileAvailability.vue';
+import ProjectsExperiencePopup from '~/components/profile/popups/ProjectsExperiencePopup.vue';
+import GearAndTravelPopup from '~/components/profile/popups/GearAndTravelPopup.vue';
+import EditPersonalInfoPopup from '~/components/profile/popups/EditPersonalInfoPopup.vue';
+import ProjectsManagerPopup from '~/components/profile/popups/ProjectsManagerPopup.vue';
+import ExperienceManagerPopup from '~/components/profile/popups/ExperienceManagerPopup.vue';
 
-const { t } = useI18n();
+const PROJECTS_PREVIEW = 3;
+// Availability is hidden for now (kept as a component) — flip to show it again.
+const showAvailability = false;
+
+const { t, locale } = useI18n();
 
 const props = defineProps<{
   userId: string | undefined;
 }>();
 
 const authStore = useAuthStore();
-
 const userStore = useUserStore();
-const { getUserProfile } = userStore;
 
-const eventStore = useEventStore();
-const { createEvent, deleteEvent } = eventStore;
+const user = ref<UserProfile | null>(null);
 
-const fileStore = useFileStore();
+const canEdit = computed(() => user.value?._id === authStore.user?._id);
 
-const user = ref<User | null>(null);
-const userEvents = ref<Event[]>([]);
+const hasRecommendations = computed(() => (user.value?.recommendations?.length ?? 0) > 0);
+const canLeaveRecommendation = computed(() =>
+  !!user.value && !canEdit.value && isOnboardingComplete(authStore.user),
+);
+const showRecommendations = computed(() => hasRecommendations.value || canLeaveRecommendation.value);
 
-const canEdit = computed(() => {
-  return user.value?._id === authStore.user?._id;
-});
+// ── Display helpers ──
+const professionsText = computed(() =>
+  (user.value?.profession ?? []).map(p => t(p)).join(', '),
+);
+const languageName = (code: string) => getLanguageDisplayName(code, locale.value) ?? code;
+const monthName = (m: number) =>
+  new Date(2000, Math.max(0, m - 1), 1).toLocaleDateString(locale.value, { month: 'short' });
 
-const showAvailabilityDialog = ref(false);
-const calendarView = ref('month');
-const focusedDate = ref<Date | string | string[]>(new Date());
+const projectLine = (p: Project) =>
+  [p.type ? t(p.type) : '', p.position ? t(p.position) : '', p.year].filter(Boolean).join(' · ');
 
-const normalizeDate = (date: Date | string | string[]): Date => {
-  if (date instanceof Date) return date;
-  if (Array.isArray(date)) return new Date(date[0] || new Date());
-  if (typeof date === 'string') return new Date(date);
-  return new Date();
+const experienceLine = (e: Experience) => {
+  const start = `${monthName(e.startMonth)} ${e.startYear}`;
+  const end = e.currentlyWorking
+    ? t('onboarding_present')
+    : e.endYear
+      ? (e.endMonth ? `${monthName(e.endMonth)} ${e.endYear}` : String(e.endYear))
+      : '';
+  const range = end ? `${start} – ${end}` : start;
+  return [t(e.employmentType), range].filter(Boolean).join(' · ');
 };
 
-const calendarDate = computed({
-  get: () => normalizeDate(focusedDate.value),
-  set: (value) => { focusedDate.value = value; },
-});
+const getUserAvatar = () =>
+  user.value?.avatar || new URL('@/assets/default.jpg', import.meta.url).href;
 
-const newAvailability = ref<Omit<Event, '_id' | 'userId'>>({
-  startDate: '',
-  endDate: '',
-  title: '',
-  color: 'primary',
-  startTime: '',
-  endTime: '',
-});
+// ── Presence flags ──
+const hasLanguages = computed(() => (user.value?.languages?.length ?? 0) > 0);
+const hasProjects = computed(() => (user.value?.projects?.length ?? 0) > 0);
+const hasExperience = computed(() => (user.value?.experience?.length ?? 0) > 0);
+const hasTools = computed(() => (user.value?.tools?.length ?? 0) > 0);
+const hasEquipment = computed(() => (user.value?.equipment?.length ?? 0) > 0);
 
-const titleError = ref('');
-const startDateError = ref('');
-const endDateError = ref('');
+const PRACTICALITY_KEYS: (keyof Practicalities)[] = [
+  'willingToTravel',
+  'availableForLongShoots',
+  'passportAvailable',
+  'visaAvailable',
+  'drivingLicenseAvailable',
+];
+const enabledPracticalities = computed(() =>
+  PRACTICALITY_KEYS.filter(k => user.value?.practicalities?.[k]),
+);
 
-const showEditProfileDialog = ref(false);
-const editBioValue = ref('');
-const editProfessionsValue = ref<string[]>([]);
-const editProjectsValue = ref<PersonalInfoProject[]>([]);
-const editProfessionsError = ref('');
-const editAvatarBlobName = ref('');
+// ── Projects inline expand ──
+const projectsExpanded = ref(false);
+const visibleProjects = computed(() =>
+  projectsExpanded.value
+    ? (user.value?.projects ?? [])
+    : (user.value?.projects ?? []).slice(0, PROJECTS_PREVIEW),
+);
 
-const colorOptions = computed(() => [
-  { title: t('common_primary'), value: 'primary' },
-  { title: t('common_success'), value: 'success' },
-  { title: t('common_warning'), value: 'warning' },
-  { title: t('common_error'), value: 'error' },
-  { title: t('common_info'), value: 'info' },
-]);
+// ── Edit popups ──
+const showEditInfo = ref(false);
+const showProjectsManager = ref(false);
+const projectsMode = ref<'list' | 'add'>('list');
+const showExperienceManager = ref(false);
+const experienceMode = ref<'list' | 'add'>('list');
 
-const hasAvailability = computed(() => {
-  return userEvents.value.length > 0;
-});
-
-const validUserEvents = computed(() => {
-  return userEvents.value.filter(event =>
-    event.startDate && event.endDate && event.title,
-  );
-});
-
-const professionOptions = computed(() => professions.map(profession => ({ title: t(profession), value: profession })));
-
-const calendarEvents = computed(() => {
-  return userEvents.value
-    .filter(event => event.startDate && event.endDate)
-    .map((event) => {
-      const startDateTime = event.startTime
-        ? `${event.startDate}T${event.startTime}`
-        : event.startDate;
-      const endDateTime = event.endTime
-        ? `${event.endDate}T${event.endTime}`
-        : event.endDate;
-
-      return {
-        title: event.title,
-        start: startDateTime,
-        end: endDateTime,
-        color: event.color || 'primary',
-      };
-    });
-});
-
-const getUserAvatar = () => {
-  if (user.value?.avatar) {
-    return fileStore.composeFileUrl(user.value.avatar);
-  }
-  return new URL(`@/assets/default.jpg`, import.meta.url).href;
+const openProjects = (mode: 'list' | 'add') => {
+  projectsMode.value = mode;
+  showProjectsManager.value = true;
+};
+const openExperience = (mode: 'list' | 'add') => {
+  experienceMode.value = mode;
+  showExperienceManager.value = true;
 };
 
-const onStartDateChange = (value: string) => {
-  startDateError.value = '';
-
-  // Auto-set endDate to startDate if empty
-  if (!newAvailability.value.endDate) {
-    newAvailability.value.endDate = value;
-  }
-
-  // Validate date range
-  if (newAvailability.value.endDate && newAvailability.value.endDate < value) {
-    endDateError.value = 'End date must be after or equal to start date';
-  }
-  else {
-    endDateError.value = '';
-  }
+const onSaved = () => {
+  // updateUser/attachAvatar already refreshed authStore.user.
+  if (authStore.user) user.value = authStore.user;
 };
 
-const validateForm = (): boolean => {
-  let isValid = true;
+// ── Profile-completion nudge (own profile, optional sections) ──
+const showDetailsPopup = ref(false);
+const showGearPopup = ref(false);
+const bannerDismissed = ref(false);
+const flowActive = ref(false);
 
-  if (!newAvailability.value.title) {
-    titleError.value = t('common_this_field_is_required');
-    isValid = false;
-  }
+const detailsComplete = computed(() =>
+  !!user.value?.education || !!user.value?.portfolio || hasProjects.value || hasExperience.value,
+);
+const gearComplete = computed(() => hasTools.value || hasEquipment.value);
+const remainingOptional = computed(() =>
+  (detailsComplete.value ? 0 : 1) + (gearComplete.value ? 0 : 1),
+);
+const showBanner = computed(() =>
+  canEdit.value && !bannerDismissed.value && remainingOptional.value > 0,
+);
 
-  if (!newAvailability.value.startDate) {
-    startDateError.value = t('common_this_field_is_required');
-    isValid = false;
-  }
-
-  if (!newAvailability.value.endDate) {
-    endDateError.value = t('common_this_field_is_required');
-    isValid = false;
-  }
-
-  if (newAvailability.value.startDate && newAvailability.value.endDate) {
-    if (newAvailability.value.endDate < newAvailability.value.startDate) {
-      endDateError.value = t('common_end_date_must_be_after_or_equal_to_start_date');
-      isValid = false;
-    }
-  }
-
-  return isValid;
+const openGear = () => {
+  flowActive.value = false;
+  showGearPopup.value = true;
 };
-
-const openAvailabilityDialog = () => {
-  showAvailabilityDialog.value = true;
+const openNextIncomplete = () => {
+  if (!detailsComplete.value) showDetailsPopup.value = true;
+  else if (!gearComplete.value) showGearPopup.value = true;
+  else flowActive.value = false;
 };
-
-const closeAvailabilityDialog = () => {
-  showAvailabilityDialog.value = false;
-  resetNewAvailability();
+const openCompletionFlow = () => {
+  flowActive.value = true;
+  openNextIncomplete();
 };
-
-const resetNewAvailability = () => {
-  newAvailability.value = {
-    startDate: '',
-    endDate: '',
-    title: '',
-    color: 'primary',
-    startTime: '',
-    endTime: '',
-  };
-  titleError.value = '';
-  startDateError.value = '';
-  endDateError.value = '';
+const onPopupCompleted = () => {
+  if (authStore.user) user.value = authStore.user;
+  if (flowActive.value) openNextIncomplete();
 };
+const dismissBanner = () => { bannerDismissed.value = true; };
 
-const addAvailability = async () => {
-  if (!validateForm()) {
-    return;
-  }
-
-  const event = await createEvent(newAvailability.value);
-  if (!event) return;
-
-  await loadUserData();
-  closeAvailabilityDialog();
-};
-
-const removeAvailability = async (eventId: string) => {
-  const ok = await deleteEvent(eventId);
-  if (!ok) return;
-
-  await loadUserData();
-};
-
-const openEditProfileDialog = () => {
-  editBioValue.value = user.value?.bio || '';
-  editProfessionsValue.value = [...(user.value?.profession || [])];
-  editProjectsValue.value = user.value?.projects ? JSON.parse(JSON.stringify(user.value.projects)) : [];
-  editAvatarBlobName.value = '';
-  showEditProfileDialog.value = true;
-};
-
-const closeEditProfileDialog = () => {
-  showEditProfileDialog.value = false;
-  editProfessionsError.value = '';
-  editAvatarBlobName.value = '';
-};
-
-const updateProjects = (newProjects: PersonalInfoProject[]) => {
-  editProjectsValue.value = newProjects;
-};
-
-const saveProfile = async () => {
-  editProfessionsError.value = '';
-
-  if (editProfessionsValue.value.length === 0) {
-    editProfessionsError.value = t('common_this_field_is_required');
-    return;
-  }
-
-  const data = await userStore.updateUser({
-    bio: editBioValue.value,
-    profession: editProfessionsValue.value,
-    projects: editProjectsValue.value,
-    avatar: editAvatarBlobName.value || undefined,
-  });
-
-  if (!data) return;
-
-  user.value = authStore.user;
-  closeEditProfileDialog();
-};
-
-const formatDate = (date?: string) => {
-  if (!date) return '';
-  return new Date(date).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-};
-
-const formatMonthYear = (date: Date | string | string[]) => {
-  return normalizeDate(date).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-  });
-};
-
-const previousMonth = () => {
-  const currentDate = normalizeDate(focusedDate.value);
-  currentDate.setMonth(currentDate.getMonth() - 1);
-  focusedDate.value = currentDate;
-};
-
-const nextMonth = () => {
-  const currentDate = normalizeDate(focusedDate.value);
-  currentDate.setMonth(currentDate.getMonth() + 1);
-  focusedDate.value = currentDate;
-};
-
-const goToToday = () => {
-  focusedDate.value = new Date();
-};
-
+// ── Load ──
 const loadUserData = async () => {
-  const currentUser = authStore.user;
-  const targetId = props.userId || currentUser?._id;
-
+  const targetId = props.userId || authStore.user?._id;
   if (!targetId) return;
 
-  const profile = await getUserProfile(targetId);
+  const profile = await userStore.getUserProfile(targetId);
   if (!profile) return;
 
-  const { events, ...userData } = profile;
-  user.value = userData;
-  userEvents.value = events;
+  // UserProfile is a superset of User (it carries `events`); fine to keep for
+  // display, and availability lives in its own component now.
+  user.value = profile;
 
-  if (targetId === currentUser?._id) {
-    authStore.setUser(userData);
-  }
+  if (targetId === authStore.user?._id) authStore.setUser(profile);
 };
 
-onMounted(() => {
-  loadUserData();
-});
-
-watch(() => props.userId, () => {
-  loadUserData();
-});
+onMounted(loadUserData);
+watch(() => props.userId, loadUserData);
 </script>
 
 <style scoped lang="scss">
 .user-profile {
   display: flex;
   flex-direction: column;
-  gap: 48px;
-}
-
-.left, .right {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.portfolio {
-  a {
-    text-decoration: none;
-    color: color(--v-theme-primary);
-  }
-}
-
-.profile-header {
-  display: flex;
   gap: 24px;
-  align-items: center;
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
 }
 
-.avatar-section {
-  flex-shrink: 0;
-}
-
-.user-avatar {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 3px solid rgba(var(--v-theme-primary), 0.2);
-}
-
-.personal-info {
+.container {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  flex: 1;
+  gap: 20px;
+  padding: 28px;
+  border-radius: 20px;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.1);
+  background-color: rgba(var(--v-theme-on-surface), 0.03);
 }
 
-.name-section {
+/* ── Personal info ── */
+.personal-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.identity {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.name-row {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 .name {
-  font-size: 32px;
-  font-weight: 500;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 48px;
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: 0.02em;
+  margin: 0;
 }
 
-.profession {
-  font-size: 14px;
-  color: color(--v-theme-primary);
+.professions {
+  font-size: 15px;
+  color: rgb(var(--v-theme-accent));
+}
+
+.experience-level {
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.avatar {
+  flex-shrink: 0;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid rgba(var(--v-theme-accent), 0.4);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 }
 
 .bio {
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0;
+  opacity: 0.9;
+}
+
+.meta {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.bio-title, .projects-title, .availability-title {
-  font-size: 24px;
-  font-weight: 500;
-}
-
-.bio-content {
+.meta-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 14px;
+  color: inherit;
+  text-decoration: none;
+
+  .v-icon {
+    opacity: 0.7;
+  }
 }
 
-.projects {
+.portfolio {
+  color: rgb(var(--v-theme-accent));
+  width: fit-content;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.chip-group {
   display: flex;
   flex-direction: column;
+  gap: 8px;
+}
+
+.chip-label-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.chip-label {
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0.7;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ── Section heads (projects / experience) ── */
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-title {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.section-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.empty-state {
+  font-size: 14px;
+  opacity: 0.6;
+  margin: 0;
+}
+
+/* ── Projects ── */
+.projects {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 16px;
 }
 
 .project-item {
   display: flex;
-  border-bottom: 1px solid color(--v-theme-primary);
-  width: fit-content;
-  color: color(--v-theme-primary);
-  cursor: pointer;
-  gap: 8px;
-
-  a {
-    text-decoration: none;
-    color: color(--v-theme-primary);
-  }
-}
-
-.availability-section {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-top: 32px;
-}
-
-.availability-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.calendar-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.calendar-controls {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 0;
-}
-
-.calendar-month-display {
-  font-size: 18px;
-  font-weight: 500;
-  min-width: 180px;
-  text-align: center;
-}
-
-.today-btn {
-  margin-left: auto;
-}
-
-.no-availability {
-  padding: 24px;
-  text-align: center;
-  font-size: 14px;
-  border: 1px dashed rgba(var(--v-theme-primary), 0.3);
-  border-radius: 8px;
-}
-
-.availability-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.existing-availability {
-  margin-top: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-
-  h4 {
-    font-size: 16px;
-    font-weight: 500;
-  }
-}
-
-.availability-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px;
-  border: 1px solid rgba(var(--v-theme-primary), 0.2);
-  border-radius: 4px;
-}
-
-.availability-item-info {
-  display: flex;
   flex-direction: column;
   gap: 4px;
+  // Grid cells default to min-width:auto, which lets long content force the
+  // column wider (overflow). 0 lets the card shrink so its text can wrap.
+  min-width: 0;
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+  background-color: rgba(var(--v-theme-on-surface), 0.03);
 }
 
-.availability-date {
+.project-name {
+  font-size: 16px;
   font-weight: 500;
-  color: color(--v-theme-primary);
+  color: inherit;
+  text-decoration: none;
+  // Break long unbreakable strings (URLs, single long words) instead of spilling.
+  overflow-wrap: anywhere;
 }
 
-.availability-title {
+a.project-name {
+  color: rgb(var(--v-theme-accent));
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.project-meta {
+  font-size: 13px;
+  opacity: 0.7;
+  overflow-wrap: anywhere;
+}
+
+.project-desc {
   font-size: 14px;
+  margin: 4px 0 0;
+  opacity: 0.85;
+  overflow-wrap: anywhere;
+  // Keep cards tidy — clamp long descriptions to a few lines.
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.availability-time {
-  font-size: 12px;
+/* ── Experience timeline ── */
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.timeline-item {
+  position: relative;
+  padding-left: 28px;
+  padding-bottom: 24px;
+
+  &:last-child {
+    padding-bottom: 0;
+  }
+
+  // Connecting line between dots.
+  &::before {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 14px;
+    bottom: -2px;
+    width: 2px;
+    background-color: rgba(var(--v-theme-accent), 0.35);
+  }
+
+  &:last-child::before {
+    display: none;
+  }
+}
+
+.timeline-marker {
+  position: absolute;
+  left: 0;
+  top: 4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: rgb(var(--v-theme-accent));
+}
+
+.timeline-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.exp-title {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.exp-date {
+  font-size: 13px;
   opacity: 0.7;
 }
 
-.edit-profile-form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+.exp-desc {
+  font-size: 14px;
+  margin: 4px 0 0;
+  opacity: 0.85;
 }
 </style>

@@ -1,4 +1,12 @@
 <template>
+  <v-defaults-provider
+    :defaults="{
+      VTextField:   { bgColor: 'accent' },
+      VTextarea:    { bgColor: 'accent' },
+      VAutocomplete:{ bgColor: 'accent' },
+      VFileInput:   { bgColor: 'accent' },
+    }"
+  >
   <div class="register-wizard">
     <div class="header">
       <!--
@@ -69,8 +77,9 @@
       v-if="effectiveProgressCurrent > 0"
       :total="effectiveProgressTotal"
       :current="effectiveProgressCurrent"
-    />
-  </div>
+      />
+    </div>
+  </v-defaults-provider>
 </template>
 
 <script lang="ts" setup>
@@ -98,12 +107,19 @@ const props = withDefaults(
      * with `currentIndex` to compute the true progress position. Defaults to 0.
      */
     progressOffset?: number;
+    /**
+     * Step index to start on. Used by the resume flow (/user) to land on the
+     * first incomplete step while keeping earlier (completed, reversible) steps
+     * in the array so Back still works.
+     */
+    initialIndex?: number;
   }>(),
   {
     title: '',
     initialFormData: () => ({}),
     progressTotal: undefined,
     progressOffset: 0,
+    initialIndex: 0,
   },
 );
 
@@ -117,22 +133,16 @@ const formData = reactive<RegisterFormData>({
   code: '',
   name: '',
   surname: '',
-  birthDate: '',
+  gender: null,
   location: '',
-  education: '',
-  languages: [],
-  fields: [],
+  birthDate: '',
   profession: [],
-  portfolio: '',
-  portfolioFile: '',
-  avatar: '',
-  bio: '',
   ...props.initialFormData,
 });
 
 provide(RegisterFormDataKey, formData);
 
-const currentIndex = ref(0);
+const currentIndex = ref(props.initialIndex);
 const busy = ref(false);
 const stepRef = ref<RegisterStepInstance | null>(null);
 

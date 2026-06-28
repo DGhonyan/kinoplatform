@@ -27,7 +27,10 @@
       :density="density"
       :required="required"
       :error-messages="errorMessages"
+      :hide-details="hideDetails"
       :append-inner-icon="isPassword ? (showPassword ? 'mdi-eye-off' : 'mdi-eye') : undefined"
+      :hint="hint"
+      :persistent-hint="persistentHint"
       @click:append-inner="togglePasswordVisibility"
       @update:model-value="updateModelValue"
     >
@@ -62,6 +65,9 @@ const props = withDefaults(defineProps<{
   required?: boolean;
   errorMessages?: string | string[];
   textPosition?: 'left' | 'center' | 'right';
+  hideDetails?: boolean | 'auto';
+  persistentHint?: boolean;
+  hint?: string;
   /**
    * Color of the typed text, placeholder, and inner icons. A theme token
    * (`background`, `on-surface`, …) or any CSS color. Use this instead of
@@ -78,6 +84,9 @@ const props = withDefaults(defineProps<{
   density: 'default',
   required: false,
   textPosition: 'left',
+  hint: '',
+  hideDetails: true,
+  persistentHint: false,
 });
 
 const emit = defineEmits<{

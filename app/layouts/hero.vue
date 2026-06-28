@@ -10,24 +10,35 @@
     >
   </div>
 
-  <Header />
+  <div class="layout">
+    <Header v-bind="header" />
 
-  <!-- Hero pages sit on the dark cover image but keep the light-theme card
-       look (white surface, dark text) while the app default stays dark.
-       v-theme-provider hands descendant Vuetify components the light theme via
-       inject, but with `with-background` off it renders no element of its own and
-       drops `class` — so wrap the slot in a real element that also carries
-       Vuetify's `v-theme--light` class. That re-resolves CSS `var(--v-theme-*)`
-       (and the inherited text color below) to light for the plain markup in the
-       card, which inject alone doesn't cover. -->
-  <v-theme-provider theme="light">
-    <div class="layout-content v-theme--light">
-      <slot />
-    </div>
-  </v-theme-provider>
+    <!-- Hero pages sit on the dark cover image but keep the light-theme card
+         look (white surface, dark text) while the app default stays dark.
+         v-theme-provider hands descendant Vuetify components the light theme via
+         inject, but with `with-background` off it renders no element of its own and
+         drops `class` — so wrap the slot in a real element that also carries
+         Vuetify's `v-theme--light` class. That re-resolves CSS `var(--v-theme-*)`
+         (and the inherited text color below) to light for the plain markup in the
+         card, which inject alone doesn't cover. -->
+    <v-theme-provider theme="light">
+      <div class="layout-content v-theme--light">
+        <slot />
+      </div>
+    </v-theme-provider>
+
+    <!-- Outside the light theme-provider, so the © stays light over the cover. -->
+    <Footer />
+  </div>
 </template>
 
 <script lang="ts" setup>
+import type { HeaderConfig } from '~~/shared/types/header';
+
+// Pages opt into the header cover/slogan via `definePageMeta({ header: {...} })`.
+const route = useRoute();
+const header = computed<HeaderConfig>(() => route.meta.header ?? {});
+
 // Add a body class while this layout is mounted so global styles below can
 // punch through Vuetify's white surfaces and recolor the header.
 useHead({
@@ -49,9 +60,16 @@ useHead({
   object-fit: cover;
 }
 
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
 .layout-content {
+  // Grow so the footer sits at the bottom on short pages.
+  flex: 1 0 auto;
   width: 100%;
-  height: 100%;
   padding: $base-padding;
   // This element carries `v-theme--light` (see template), so on-surface
   // re-resolves to the light value here — keeping plain text dark inside the

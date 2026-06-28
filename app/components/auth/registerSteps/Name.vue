@@ -22,36 +22,33 @@
       hide-details="auto"
       @update:model-value="surnameError = ''"
     />
-    <DateInput
-      v-model="formData.birthDate"
-      :placeholder="$t('register_birth_date_placeholder')"
-      :max="todayIsoDate"
-      required
-      :error-messages="birthDateError"
-      hide-details="auto"
-      prepend-icon="custom:birthday"
-      @update:model-value="birthDateError = ''"
+
+    <Select
+      v-model="formData.gender"
+      :placeholder="$t('onboarding_select_placeholder')"
+      :items="genders"
+      :error-messages="genderError"
+      @update:model-value="genderError = ''"
     />
   </div>
 </template>
 
 <script lang="ts" setup>
 import { RegisterFormDataKey } from '../registerSteps';
-
-const formData = inject(RegisterFormDataKey)!;
+import { GENDERS } from '~/utils/constants';
 
 const { t } = useI18n();
+const genders = computed(() => GENDERS.map((g) => ({ title: t(`gender_${g}`), value: g })));
+const formData = inject(RegisterFormDataKey)!;
 
 const nameError = ref('');
 const surnameError = ref('');
-const birthDateError = ref('');
-
-const todayIsoDate = new Date().toISOString().split('T')[0];
+const genderError = ref('');
 
 const validate = (): boolean => {
   nameError.value = '';
   surnameError.value = '';
-  birthDateError.value = '';
+  genderError.value = '';
   let ok = true;
 
   if (!formData.name.trim()) {
@@ -62,21 +59,9 @@ const validate = (): boolean => {
     surnameError.value = t('common_this_field_is_required');
     ok = false;
   }
-
-  if (!formData.birthDate) {
-    birthDateError.value = t('common_this_field_is_required');
+  if (!formData.gender) {
+    genderError.value = t('common_this_field_is_required');
     ok = false;
-  }
-  else {
-    const date = new Date(formData.birthDate);
-    if (Number.isNaN(date.getTime())) {
-      birthDateError.value = t('register_invalid_birth_date');
-      ok = false;
-    }
-    else if (date > new Date()) {
-      birthDateError.value = t('register_birth_date_in_future');
-      ok = false;
-    }
   }
 
   return ok;

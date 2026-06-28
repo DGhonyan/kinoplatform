@@ -30,6 +30,20 @@ const ERROR_MESSAGE_KEYS: Partial<Record<ErrorCode, string>> = {
   EVENT_NOT_FOUND: 'error_event_not_found',
   EVENT_FORBIDDEN: 'error_event_forbidden',
   EVENT_CREATE_FAILED: 'error_event_create_failed',
+  // recommendations
+  CANNOT_RECOMMEND_SELF: 'error_cannot_recommend_self',
+  ONBOARDING_INCOMPLETE: 'error_onboarding_incomplete',
+  RECOMMENDATION_NOT_FOUND: 'error_recommendation_not_found',
+  RECOMMENDATION_FORBIDDEN: 'error_recommendation_forbidden',
+  // files / uploads
+  FILE_NOT_FOUND: 'error_file_not_found',
+  FILE_FORBIDDEN: 'error_file_forbidden',
+  FILE_INVALID_KIND: 'error_file_invalid_kind',
+  FILE_INVALID_TYPE: 'error_file_invalid_type',
+  FILE_TOO_LARGE: 'error_file_too_large',
+  FILE_NOT_UPLOADED: 'error_file_not_uploaded',
+  FILE_NOT_READY: 'error_file_not_ready',
+  UPLOAD_VERIFICATION_FAILED: 'error_file_verification_failed',
   // validation — forms validate client-side, so this is a rare fallback; the
   // per-field detail is on `error.errors` for callers that want to show it inline.
   VALIDATION_ERROR: 'error_validation',

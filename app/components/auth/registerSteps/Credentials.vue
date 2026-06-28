@@ -4,13 +4,11 @@
       <p class="description">
         {{ $t('register_credentials_description') }}
       </p>
-      <p class="description small">
-        {{ $t('register_password_requirements') }}
-      </p>
     </div>
 
     <Input
       v-model="formData.email"
+      prepend-inner-icon="custom:mail"
       type="email"
       :placeholder="$t('common_email')"
       required
@@ -20,11 +18,14 @@
     />
     <Input
       v-model="formData.password"
+      prepend-inner-icon="custom:lock"
       type="password"
       :placeholder="$t('common_password')"
       required
       :error-messages="passwordError"
       hide-details="auto"
+      persistent-hint
+      :hint="$t('register_password_requirements')"
       @update:model-value="passwordError = ''"
     />
   </div>
@@ -38,7 +39,8 @@ const formData = inject(RegisterFormDataKey)!;
 const emailError = ref('');
 const passwordError = ref('');
 
-// Mirrors the backend's PASSWORD_REGEX in auth.dto.ts.
+// Mirrors the backend's PASSWORD_REGEX in auth.dto.ts. backend one doesn't need length limits as it has decorators.
+// const PASSWORD_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).+$/;
 const PASSWORD_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,32}$/;
 
 const validate = (): boolean => {

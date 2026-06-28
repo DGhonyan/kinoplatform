@@ -11,9 +11,33 @@
       > * </span>
     </label>
 
-    <div class="upload-area">
+    <!-- Custom activator: caller renders the trigger; we expose `open` + state. -->
+    <template v-if="$slots.activator">
+      <input
+        ref="fileInputRef"
+        type="file"
+        :accept="accept"
+        class="hidden-input"
+        @change="handleNativeFileSelect"
+      >
+      <slot
+        name="activator"
+        :open="openFilePicker"
+        :uploading="uploading"
+        :progress="uploadProgress"
+        :preview-url="previewUrl"
+        :file-name="fileName"
+        :file-id="fileId"
+        :remove="removeFile"
+      />
+    </template>
+
+    <div
+      v-else
+      class="upload-area"
+    >
       <div
-        v-if="!uploadedUrl && !uploading"
+        v-if="!fileId && !uploading"
         class="upload-input"
       >
         <v-file-input
@@ -43,11 +67,11 @@
       </div>
 
       <div
-        v-if="uploadedUrl && !uploading"
+        v-if="fileId && !uploading"
         class="upload-success"
       >
         <div
-          v-if="isImage"
+          v-if="isImage && previewUrl"
           class="image-preview"
         >
           <img
@@ -79,13 +103,17 @@
 </template>
 
 <script lang="ts" setup>
+import type { FileKind, UploadedFile } from '~~/shared/types/file';
+
 const props = withDefaults(defineProps<{
+  kind: FileKind;
   label?: string;
   required?: boolean;
   accept?: string;
   placeholder?: string;
   helperText?: string;
   errorMessages?: string | string[];
+  // v-model holds the confirmed file id (what you pass to the attach endpoints).
   modelValue?: string;
   autoUpload?: boolean;
   color?: string;
@@ -106,36 +134,31 @@ const resolvedColor = computed(() => resolveThemeColor(props.color));
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void;
   (e: 'upload:progress', progress: number): void;
-  (e: 'upload:complete', blobName: string, url: string): void;
-  (e: 'upload:error', error: Error): void;
+  (e: 'upload:complete', file: UploadedFile): void;
+  (e: 'upload:error'): void;
 }>();
 
 const fileStore = useFileStore();
-const appStore = useAppStore();
-
-const { composeFileUrl, uploadFile: uploadFileStore } = fileStore;
 
 const selectedFile = ref<File[] | null>(null);
+const fileInputRef = ref<HTMLInputElement | null>(null);
 const uploading = ref(false);
 const uploadProgress = ref(0);
-const uploadedUrl = ref('');
+// Confirmed file id (mirrors v-model).
+const fileId = ref(props.modelValue ?? '');
+// Local object URL of the picked file, for instant preview (no network).
+const previewUrl = ref('');
 const fileName = ref('');
 
-const isImage = computed(() => {
-  return fileName.value && /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(fileName.value);
-});
+const isImage = computed(() => props.accept.includes('image'));
 
-const previewUrl = computed(() => {
-  if (uploadedUrl.value) {
-    return composeFileUrl(uploadedUrl.value);
-  }
-  return '';
-});
-
-watch(() => props.modelValue, (newValue) => {
-  if (newValue && newValue !== uploadedUrl.value) {
-    uploadedUrl.value = newValue;
-    fileName.value = newValue.split('/').pop() || 'File';
+watch(() => props.modelValue, (value) => {
+  if ((value ?? '') !== fileId.value) {
+    fileId.value = value ?? '';
+    if (!value) {
+      previewUrl.value = '';
+      fileName.value = '';
+    }
   }
 });
 
@@ -143,12 +166,24 @@ const handleFileSelect = async (files: File | File[] | null) => {
   if (!files) return;
 
   const fileArray = Array.isArray(files) ? files : [files];
-  if (fileArray.length === 0) return;
-
   const file = fileArray[0];
   if (!file) return;
 
-  fileName.value = file.name;
+  if (props.autoUpload) {
+    await uploadFile(file);
+  }
+};
+
+const openFilePicker = () => {
+  fileInputRef.value?.click();
+};
+
+const handleNativeFileSelect = async (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  const file = target.files?.[0];
+  // Reset so re-selecting the same file still fires `change`.
+  target.value = '';
+  if (!file) return;
 
   if (props.autoUpload) {
     await uploadFile(file);
@@ -158,38 +193,34 @@ const handleFileSelect = async (files: File | File[] | null) => {
 const uploadFile = async (file: File) => {
   uploading.value = true;
   uploadProgress.value = 0;
+  fileName.value = file.name;
 
-  try {
-    const timestamp = Date.now();
-    const blobName = `${timestamp}-${file.name}`;
+  if (previewUrl.value) URL.revokeObjectURL(previewUrl.value);
+  previewUrl.value = URL.createObjectURL(file);
 
-    await uploadFileStore(
-      file,
-      blobName,
-      {},
-      (progress) => {
-        uploadProgress.value = progress;
-        emit('upload:progress', progress);
-      },
-    );
+  const result = await fileStore.uploadFile(file, props.kind, (progress) => {
+    uploadProgress.value = progress;
+    emit('upload:progress', progress);
+  });
 
-    uploadedUrl.value = blobName;
-    emit('update:modelValue', blobName);
-    emit('upload:complete', blobName, previewUrl.value);
+  uploading.value = false;
+
+  if (!result) {
+    // Store already surfaced the error snackbar.
+    emit('upload:error');
+    return;
   }
-  catch (error) {
-    console.error('Upload failed:', error);
-    appStore.showMessage('error_file_upload_failed', 'error');
-    emit('upload:error', error as Error);
-  }
-  finally {
-    uploading.value = false;
-  }
+
+  fileId.value = result._id;
+  emit('update:modelValue', result._id);
+  emit('upload:complete', result);
 };
 
 const removeFile = () => {
   selectedFile.value = null;
-  uploadedUrl.value = '';
+  if (previewUrl.value) URL.revokeObjectURL(previewUrl.value);
+  previewUrl.value = '';
+  fileId.value = '';
   fileName.value = '';
   uploadProgress.value = 0;
   emit('update:modelValue', '');
@@ -198,6 +229,7 @@ const removeFile = () => {
 defineExpose({
   uploadFile,
   removeFile,
+  openFilePicker,
 });
 </script>
 
@@ -271,5 +303,9 @@ defineExpose({
 .helper-text {
   font-size: 12px;
   opacity: 0.7;
+}
+
+.hidden-input {
+  display: none;
 }
 </style>

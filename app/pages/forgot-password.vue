@@ -17,6 +17,7 @@
         :error-messages="emailError"
         hide-details="auto"
         @update:model-value="emailError = ''"
+        bg-color="accent"
       />
 
       <v-btn

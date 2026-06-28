@@ -1,6 +1,6 @@
 <template>
   <div class="login-page">
-    <Card>
+    <Card :max-width="640">
       <h2 class="title">
         {{ $t('common_login') }}
       </h2>
