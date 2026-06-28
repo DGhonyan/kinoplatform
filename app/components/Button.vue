@@ -5,13 +5,22 @@
     :class="textColorClass"
     :rounded="effectiveRounded"
     :size="size"
-    :icon="icon"
+    :icon="iconShape"
     :block="block"
     :loading="loading"
     :disabled="disabled"
     v-bind="$attrs"
   >
-    <slot />
+    <!-- Render the icon glyph ourselves. VBtn only falls back to its `icon` prop
+         when NO default slot is passed, but this wrapper always passes one, so a
+         string icon would otherwise never show. `icon` goes to VBtn as a boolean
+         (shape only); the glyph comes from this slot fallback. -->
+    <slot>
+      <v-icon
+        v-if="icon"
+        :icon="icon"
+      />
+    </slot>
   </v-btn>
 </template>
 
@@ -99,6 +108,10 @@ const effectiveColor = computed(
 const effectiveRounded = computed(
   () => props.rounded ?? (props.icon ? undefined : 'pill'),
 );
+
+// Pass `icon` to VBtn as a boolean (shape only) — the glyph is rendered via the
+// template's slot fallback, since this wrapper's slot suppresses VBtn's own.
+const iconShape = computed(() => (props.icon ? true : undefined));
 
 const textColorClass = computed(() =>
   props.textColor ? `text-${props.textColor}` : undefined,

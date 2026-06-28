@@ -77,6 +77,11 @@
             min-width="180"
           >
             <v-list-item
+              to="/user"
+              prepend-icon="mdi-account-outline"
+              :title="$t('common_my_profile')"
+            />
+            <v-list-item
               to="/settings"
               prepend-icon="mdi-cog-outline"
               :title="$t('common_settings')"
