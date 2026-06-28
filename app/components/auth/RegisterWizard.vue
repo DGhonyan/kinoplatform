@@ -32,46 +32,55 @@
       </h2>
     </div>
 
-    <component
-      :is="currentStep.component"
-      ref="stepRef"
-    />
+    <!-- A real <form> so Enter submits the step. Only Next is type="submit";
+         Skip/Back are type="button" so they never submit on Enter or click. -->
+    <form
+      class="wizard-form"
+      @submit.prevent="next"
+    >
+      <component
+        :is="currentStep.component"
+        ref="stepRef"
+      />
 
-    <div class="actions">
-      <!-- Optional step → Skip occupies the secondary slot. -->
-      <v-btn
-        v-if="currentStep.optional"
-        variant="outlined"
-        color="primary"
-        rounded="pill"
-        size="large"
-        :disabled="busy"
-        @click="skip"
-      >
-        {{ $t('common_skip_for_now') }}
-      </v-btn>
-      <!-- Non-optional step → Back occupies the secondary slot (when available). -->
-      <v-btn
-        v-else-if="canGoBack"
-        variant="outlined"
-        color="primary"
-        rounded="pill"
-        size="large"
-        :disabled="busy"
-        @click="back"
-      >
-        {{ $t('common_go_back') }}
-      </v-btn>
-      <v-btn
-        color="primary"
-        rounded="pill"
-        size="large"
-        :loading="busy"
-        @click="next"
-      >
-        {{ isLastStep ? $t('common_finish') : $t('common_next') }}
-      </v-btn>
-    </div>
+      <div class="actions">
+        <!-- Optional step → Skip occupies the secondary slot. -->
+        <v-btn
+          v-if="currentStep.optional"
+          type="button"
+          variant="outlined"
+          color="primary"
+          rounded="pill"
+          size="large"
+          :disabled="busy"
+          @click="skip"
+        >
+          {{ $t('common_skip_for_now') }}
+        </v-btn>
+        <!-- Non-optional step → Back occupies the secondary slot (when available). -->
+        <v-btn
+          v-else-if="canGoBack"
+          type="button"
+          variant="outlined"
+          color="primary"
+          rounded="pill"
+          size="large"
+          :disabled="busy"
+          @click="back"
+        >
+          {{ $t('common_go_back') }}
+        </v-btn>
+        <v-btn
+          type="submit"
+          color="primary"
+          rounded="pill"
+          size="large"
+          :loading="busy"
+        >
+          {{ isLastStep ? $t('common_finish') : $t('common_next') }}
+        </v-btn>
+      </div>
+    </form>
 
     <AuthRegisterProgress
       v-if="effectiveProgressCurrent > 0"
@@ -163,6 +172,10 @@ const canGoBack = computed(() => {
 });
 
 const next = async () => {
+  // Guard re-entry: a <form> submit on Enter bypasses the button's loading
+  // state, so a second Enter could re-fire an irreversible step (account
+  // creation / email verification) before the first finishes.
+  if (busy.value) return;
   if (!stepRef.value?.validate()) return;
 
   busy.value = true;
@@ -212,6 +225,13 @@ const back = () => {
 
 <style scoped lang="scss">
 .register-wizard {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+// The form wraps the step + actions; keep the same column spacing the wizard had.
+.wizard-form {
   display: flex;
   flex-direction: column;
   gap: 24px;

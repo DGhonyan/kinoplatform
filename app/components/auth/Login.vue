@@ -1,5 +1,8 @@
 <template>
-  <div class="login-form">
+  <form
+    class="login-form"
+    @submit.prevent="handleLogin"
+  >
     <Input
       v-model="email"
       type="email"
@@ -38,15 +41,16 @@
     </div>
 
     <v-btn
+      type="submit"
       color="primary"
       rounded="pill"
       size="large"
       block
-      @click="handleLogin"
+      :loading="loggingIn"
     >
       {{ $t('common_login') }}
     </v-btn>
-  </div>
+  </form>
 </template>
 
 <script lang="ts" setup>
@@ -78,25 +82,35 @@ const validate = (): boolean => {
   return ok;
 };
 
+const loggingIn = ref(false);
+
 const handleLogin = async () => {
+  // Re-entry guard: Enter submits even while a request is in flight.
+  if (loggingIn.value) return;
   if (!validate()) return;
 
   const authStore = useAuthStore();
   const appStore = useAppStore();
 
-  const res = await authStore.login(email.value, password.value, rememberMe.value);
+  loggingIn.value = true;
+  try {
+    const res = await authStore.login(email.value, password.value, rememberMe.value);
 
-  if (res.data) {
-    navigateTo('/');
-    return;
+    if (res.data) {
+      navigateTo('/');
+      return;
+    }
+
+    if (res.error?.code === ERROR_CODE.EMAIL_NOT_VERIFIED) {
+      emit('unverified', email.value);
+      return;
+    }
+
+    appStore.showMessage(res.error ? apiErrorMessageKey(res.error) : GENERIC_ERROR_KEY, 'error');
   }
-
-  if (res.error?.code === ERROR_CODE.EMAIL_NOT_VERIFIED) {
-    emit('unverified', email.value);
-    return;
+  finally {
+    loggingIn.value = false;
   }
-
-  appStore.showMessage(res.error ? apiErrorMessageKey(res.error) : GENERIC_ERROR_KEY, 'error');
 };
 </script>
 

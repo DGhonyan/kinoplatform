@@ -14,9 +14,9 @@
       class="header-content"
       :class="{ 'bar-solid': cover && !coverNav }"
     >
-      <div class="title">
+      <NuxtLink to="/" class="title">
         <h1>Kinoplatform</h1>
-      </div>
+      </NuxtLink>
 
       <div
         v-if="visibleLinks.length"
@@ -123,6 +123,7 @@
     <div
       v-if="cover"
       class="header-hero"
+      :class="{ 'hero-centered': !coverNav }"
     >
       <p
         v-if="slogan"
@@ -136,17 +137,15 @@
         class="header-cta"
       >
         <Button
-          variant="primary"
-          color="white"
-          text-color="primary"
+          color="primary"
           rounded="pill"
           @click="navigateTo('/register')"
         >
           {{ $t('home_cta_join') }}
         </Button>
         <Button
-          variant="secondary"
           color="white"
+          text-color="primary"
           rounded="pill"
           @click="navigateTo('/login')"
         >
@@ -274,6 +273,7 @@ const confirmLogout = async () => {
 .title {
   justify-self: start;
   color: var(--header-accent);
+  text-decoration: none;
 }
 
 .links {
@@ -337,9 +337,22 @@ const confirmLogout = async () => {
   z-index: 2;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  // Home hero is left-aligned; the 16px padding matches $base-padding so the
+  // slogan lines up under the "Kinoplatform" title.
+  align-items: flex-start;
   gap: 28px;
   padding: 40px 16px 64px;
+  text-align: left;
+}
+
+// Cover-below-the-nav pages (crew): the band is shorter, so center the slogan
+// in it (both axes) with symmetric padding instead of top/left-aligning it.
+.header-hero.hero-centered {
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+  padding-top: 40px;
+  padding-bottom: 40px;
   text-align: center;
 }
 

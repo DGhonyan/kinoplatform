@@ -3,6 +3,7 @@
     <div class="filters">
       <div class="filters-content">
         <div class="filters-header">
+          <v-icon>custom:filter</v-icon>
           <h2 class="filters-title">
             {{ $t('crew_filters') }}
           </h2>
@@ -296,8 +297,7 @@ onMounted(async () => {
 
 .filters-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  gap: 12px;
 }
 
 .filters-title {

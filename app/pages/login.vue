@@ -29,6 +29,7 @@
           :error-messages="codeError"
           hide-details="auto"
           @update:model-value="codeError = ''"
+          @keyup.enter="handleVerify"
         />
 
         <div class="verification-actions">
@@ -99,6 +100,7 @@ const handleResendVerification = async () => {
 };
 
 const handleVerify = async () => {
+  if (verifying.value) return;
   codeError.value = '';
 
   if (!/^\d{6}$/.test(code.value.trim())) {

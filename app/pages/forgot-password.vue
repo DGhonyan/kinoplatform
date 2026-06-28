@@ -17,6 +17,7 @@
         :error-messages="emailError"
         hide-details="auto"
         @update:model-value="emailError = ''"
+        @keyup.enter="handleSubmit"
         bg-color="accent"
       />
 
@@ -55,6 +56,7 @@ const emailError = ref('');
 const loading = ref(false);
 
 const handleSubmit = async () => {
+  if (loading.value) return;
   emailError.value = '';
 
   const value = email.value.trim();

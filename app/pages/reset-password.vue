@@ -12,46 +12,51 @@
         {{ $t('register_password_requirements') }}
       </p>
 
-      <Input
-        v-model="email"
-        type="email"
-        :placeholder="$t('common_email')"
-        required
-        :error-messages="emailError"
-        hide-details="auto"
-        @update:model-value="emailError = ''"
-      />
-      <Input
-        v-model="code"
-        type="text"
-        :placeholder="$t('register_code_placeholder')"
-        required
-        maxlength="6"
-        inputmode="numeric"
-        :error-messages="codeError"
-        hide-details="auto"
-        @update:model-value="codeError = ''"
-      />
-      <Input
-        v-model="password"
-        type="password"
-        :placeholder="$t('auth_new_password')"
-        required
-        :error-messages="passwordError"
-        hide-details="auto"
-        @update:model-value="passwordError = ''"
-      />
-
-      <v-btn
-        color="primary"
-        rounded="pill"
-        size="large"
-        block
-        :loading="loading"
-        @click="handleReset"
+      <form
+        class="reset-form"
+        @submit.prevent="handleReset"
       >
-        {{ $t('auth_reset_password') }}
-      </v-btn>
+        <Input
+          v-model="email"
+          type="email"
+          :placeholder="$t('common_email')"
+          required
+          :error-messages="emailError"
+          hide-details="auto"
+          @update:model-value="emailError = ''"
+        />
+        <Input
+          v-model="code"
+          type="text"
+          :placeholder="$t('register_code_placeholder')"
+          required
+          maxlength="6"
+          inputmode="numeric"
+          :error-messages="codeError"
+          hide-details="auto"
+          @update:model-value="codeError = ''"
+        />
+        <Input
+          v-model="password"
+          type="password"
+          :placeholder="$t('auth_new_password')"
+          required
+          :error-messages="passwordError"
+          hide-details="auto"
+          @update:model-value="passwordError = ''"
+        />
+
+        <v-btn
+          type="submit"
+          color="primary"
+          rounded="pill"
+          size="large"
+          block
+          :loading="loading"
+        >
+          {{ $t('auth_reset_password') }}
+        </v-btn>
+      </form>
 
       <div class="footer">
         <NuxtLink
@@ -124,6 +129,7 @@ const validate = (): boolean => {
 };
 
 const handleReset = async () => {
+  if (loading.value) return;
   if (!validate()) return;
 
   loading.value = true;
@@ -145,6 +151,13 @@ const handleReset = async () => {
   align-items: center;
   justify-content: center;
   padding: $base-padding;
+}
+
+// Keep the 16px rhythm the Card gap gave the fields before they were wrapped.
+.reset-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .title {
