@@ -52,9 +52,10 @@ export const useFileStore = defineStore('file', {
       kind: FileKind,
       onProgress?: (percent: number) => void,
     ): Promise<UploadedFile | null> {
-      const init = await apiRequest('/files/initiate', {
-        errorMessage: 'error_file_upload_failed',
-      }).post<InitiateUploadResponse>({
+      // No blanket errorMessage here: let the specific backend code surface its
+      // own message (FILE_INVALID_TYPE → "use JPG/PNG/WebP", FILE_TOO_LARGE, …)
+      // instead of a generic "upload failed".
+      const init = await apiRequest('/files/initiate').post<InitiateUploadResponse>({
         kind,
         contentType: file.type,
         size: file.size,

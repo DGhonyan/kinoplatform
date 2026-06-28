@@ -15,7 +15,7 @@
       <FileUpload
         v-model="avatarFileId"
         kind="avatar"
-        accept="image/*"
+        accept="image/jpeg,image/png,image/webp"
         @update:model-value="avatarError = ''"
       >
         <template #activator="{ open: openPicker, previewUrl, uploading, progress }">

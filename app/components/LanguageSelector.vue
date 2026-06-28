@@ -6,7 +6,7 @@
     density="compact"
     hide-details
     class="language-selector"
-    @update:model-value="changeLanguage"
+    @update:model-value="setLocale"
   >
     <template #selection="{ item }">
       <span class="language-code">{{ item.value.toUpperCase() }}</span>
@@ -15,23 +15,13 @@
 </template>
 
 <script lang="ts" setup>
-type AppLocale = 'en' | 'hy';
+import type { AppLocale } from '~/composables/useAppLocale';
 
-const { locale } = useI18n();
+// Shared locale logic (see useLocale). Saved locale is restored at app boot by
+// plugins/restore-locale.client.ts, so `locale.value` is already correct here.
+const { locale, setLocale, languages } = useLocale();
 
 const currentLocale = ref<AppLocale>(locale.value as AppLocale);
-
-const languages: { title: string; value: AppLocale }[] = [
-  { title: 'English', value: 'en' },
-  { title: 'Հայերեն', value: 'hy' },
-];
-
-// Saved locale is restored at app boot by plugins/restore-locale.client.ts, so
-// `locale.value` is already correct when this mounts — we just persist changes.
-const changeLanguage = (newLocale: AppLocale) => {
-  locale.value = newLocale;
-  localStorage.setItem('locale', newLocale);
-};
 </script>
 
 <style scoped lang="scss">

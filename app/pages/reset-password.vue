@@ -58,6 +58,20 @@
         </Button>
       </form>
 
+      <!-- "Send again" for users who never got the code (or it expired). -->
+      <div class="resend">
+        <span>{{ $t('auth_resend_code_prompt') }}</span>
+        <Button
+          variant="text"
+          color="primary"
+          size="small"
+          :loading="resending"
+          @click="handleResend"
+        >
+          {{ $t('auth_resend_verification') }}
+        </Button>
+      </div>
+
       <div class="footer">
         <NuxtLink
           to="/login"
@@ -86,6 +100,7 @@ const emailError = ref('');
 const codeError = ref('');
 const passwordError = ref('');
 const loading = ref(false);
+const resending = ref(false);
 
 // Mirrors the backend's PASSWORD_REGEX in auth.dto.ts.
 const PASSWORD_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,32}$/;
@@ -126,6 +141,24 @@ const validate = (): boolean => {
   }
 
   return ok;
+};
+
+const handleResend = async () => {
+  if (resending.value) return;
+  const value = email.value.trim();
+  if (!value || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+    emailError.value = t('auth_invalid_email');
+    return;
+  }
+
+  resending.value = true;
+  const ok = await authStore.requestPasswordReset(value);
+  resending.value = false;
+
+  appStore.showMessage(
+    ok ? 'auth_reset_code_sent' : 'auth_password_reset_request_failed',
+    ok ? 'success' : 'error',
+  );
 };
 
 const handleReset = async () => {
@@ -172,6 +205,14 @@ const handleReset = async () => {
 .description.small {
   font-size: 12px;
   color: color(--v-theme-gray);
+}
+
+.resend {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
 }
 
 .footer {

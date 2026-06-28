@@ -17,8 +17,9 @@
       <NuxtLink
         to="/"
         class="title"
+        aria-label="Kinoplatform"
       >
-        <h1>Kinoplatform</h1>
+        <span class="logo-mark">K</span>
       </NuxtLink>
 
       <div
@@ -37,6 +38,9 @@
       </div>
 
       <div class="actions">
+        <!-- Guests-only: members switch language from Settings instead. -->
+        <LanguageSwitch v-if="!user" />
+
         <!-- Logged-out, off the home hero: a single auth toggle button.
              On the home hero the CTAs live under the slogan instead. -->
         <Button
@@ -280,8 +284,26 @@ const confirmLogout = async () => {
 
 .title {
   justify-self: start;
-  color: var(--header-accent);
   text-decoration: none;
+}
+
+// K badge: solid primary square, slightly rounded, white serif-ish letter.
+.logo-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: rgb(var(--v-theme-primary));
+  color: #fff;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 1px;
+  // Tiny optical lift so the K reads centered inside the box.
+  padding-top: 2px;
 }
 
 .links {
