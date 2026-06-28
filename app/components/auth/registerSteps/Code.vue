@@ -19,7 +19,7 @@
 
     <div class="extras">
       <span>{{ $t('register_didnt_receive_code') }}</span>
-      <v-btn
+      <Button
         variant="text"
         color="primary"
         size="small"
@@ -27,7 +27,7 @@
         @click="handleResend"
       >
         {{ $t('register_resend') }}
-      </v-btn>
+      </Button>
     </div>
   </div>
 </template>

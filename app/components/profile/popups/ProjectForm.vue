@@ -136,10 +136,22 @@ const commit = (): Project | null => {
 
   const d = draft.value;
   let ok = true;
-  if (!d.name.trim()) { errors.name = t('common_this_field_is_required'); ok = false; }
-  if (!d.type) { errors.type = t('common_this_field_is_required'); ok = false; }
-  if (!d.position) { errors.position = t('common_this_field_is_required'); ok = false; }
-  if (!d.year || !d.month) { errors.date = t('common_this_field_is_required'); ok = false; }
+  if (!d.name.trim()) {
+    errors.name = t('common_this_field_is_required');
+    ok = false;
+  }
+  if (!d.type) {
+    errors.type = t('common_this_field_is_required');
+    ok = false;
+  }
+  if (!d.position) {
+    errors.position = t('common_this_field_is_required');
+    ok = false;
+  }
+  if (!d.year || !d.month) {
+    errors.date = t('common_this_field_is_required');
+    ok = false;
+  }
 
   // Be forgiving with a bare host (matches the portfolio-link field).
   const rawLink = d.link.trim();

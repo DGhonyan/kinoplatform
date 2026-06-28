@@ -92,21 +92,16 @@
       description="onboarding_languages_description"
       required
     >
-      <v-autocomplete
+      <Select
         v-model="languages"
         class="languages-select"
         color="accent"
-        base-color="grey"
-        :placeholder="$t('register_languages_placeholder')"
+        multiple
         :items="languageItems"
         :custom-filter="filterLanguage"
-        :error-messages="languagesError"
+        :placeholder="$t('register_languages_placeholder')"
         :no-data-text="$t('register_no_languages_match')"
-        hide-details="auto"
-        multiple
-        chips
-        closable-chips
-        autocomplete="suppress"
+        :error-messages="languagesError"
         @update:model-value="languagesError = ''"
       />
     </FieldCard>

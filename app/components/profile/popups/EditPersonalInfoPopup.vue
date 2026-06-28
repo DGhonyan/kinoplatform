@@ -130,21 +130,16 @@
 
       <div class="field">
         <span class="field-label">{{ $t('onboarding_languages_title') }} <span class="asterisk">*</span></span>
-        <v-autocomplete
+        <Select
           v-model="form.languages"
           class="languages-select"
           color="accent"
-          base-color="grey"
-          :placeholder="$t('register_languages_placeholder')"
+          multiple
           :items="languageItems"
           :custom-filter="filterLanguage"
-          :error-messages="errors.languages"
+          :placeholder="$t('register_languages_placeholder')"
           :no-data-text="$t('register_no_languages_match')"
-          hide-details="auto"
-          multiple
-          chips
-          closable-chips
-          autocomplete="suppress"
+          :error-messages="errors.languages"
           @update:model-value="errors.languages = ''"
         />
       </div>
@@ -282,24 +277,57 @@ const validate = (): boolean => {
   (Object.keys(errors) as (keyof typeof errors)[]).forEach(k => (errors[k] = ''));
   let ok = true;
 
-  if (!form.firstName.trim()) { errors.firstName = t('common_this_field_is_required'); ok = false; }
-  if (!form.lastName.trim()) { errors.lastName = t('common_this_field_is_required'); ok = false; }
-  if (!form.gender) { errors.gender = t('common_this_field_is_required'); ok = false; }
+  if (!form.firstName.trim()) {
+    errors.firstName = t('common_this_field_is_required');
+    ok = false;
+  }
+  if (!form.lastName.trim()) {
+    errors.lastName = t('common_this_field_is_required');
+    ok = false;
+  }
+  if (!form.gender) {
+    errors.gender = t('common_this_field_is_required');
+    ok = false;
+  }
   if (!form.birthDate) {
     errors.birthDate = t('common_this_field_is_required');
     ok = false;
   }
   else {
     const date = new Date(form.birthDate);
-    if (Number.isNaN(date.getTime())) { errors.birthDate = t('register_invalid_birth_date'); ok = false; }
-    else if (date > new Date()) { errors.birthDate = t('register_birth_date_in_future'); ok = false; }
-    else if (date > minAgeCutoff) { errors.birthDate = t('register_min_age'); ok = false; }
+    if (Number.isNaN(date.getTime())) {
+      errors.birthDate = t('register_invalid_birth_date');
+      ok = false;
+    }
+    else if (date > new Date()) {
+      errors.birthDate = t('register_birth_date_in_future');
+      ok = false;
+    }
+    else if (date > minAgeCutoff) {
+      errors.birthDate = t('register_min_age');
+      ok = false;
+    }
   }
-  if (!form.location.trim()) { errors.location = t('common_this_field_is_required'); ok = false; }
-  if (form.profession.length === 0) { errors.profession = t('common_this_field_is_required'); ok = false; }
-  if (!form.experienceLevel) { errors.experienceLevel = t('common_this_field_is_required'); ok = false; }
-  if (form.languages.length === 0) { errors.languages = t('common_this_field_is_required'); ok = false; }
-  if (!form.bio.trim()) { errors.bio = t('common_this_field_is_required'); ok = false; }
+  if (!form.location.trim()) {
+    errors.location = t('common_this_field_is_required');
+    ok = false;
+  }
+  if (form.profession.length === 0) {
+    errors.profession = t('common_this_field_is_required');
+    ok = false;
+  }
+  if (!form.experienceLevel) {
+    errors.experienceLevel = t('common_this_field_is_required');
+    ok = false;
+  }
+  if (form.languages.length === 0) {
+    errors.languages = t('common_this_field_is_required');
+    ok = false;
+  }
+  if (!form.bio.trim()) {
+    errors.bio = t('common_this_field_is_required');
+    ok = false;
+  }
 
   const link = form.portfolio.trim();
   if (link && !URL_RE.test(link.startsWith('http') ? link : `https://${link}`)) {

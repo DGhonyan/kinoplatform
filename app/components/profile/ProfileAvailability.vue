@@ -2,14 +2,14 @@
   <div class="availability-section">
     <div class="availability-header">
       <span class="section-title">{{ $t('profile_availability') }}</span>
-      <v-btn
+      <Button
         v-if="canEdit"
         size="small"
         color="primary"
         @click="showDialog = true"
       >
         {{ hasAvailability ? $t('profile_edit_availability') : $t('profile_add_availability') }}
-      </v-btn>
+      </Button>
     </div>
 
     <div
@@ -17,27 +17,27 @@
       class="calendar-wrapper"
     >
       <div class="calendar-controls">
-        <v-btn
+        <Button
           icon="mdi-chevron-left"
           size="small"
           variant="text"
           @click="shiftMonth(-1)"
         />
         <span class="calendar-month-display">{{ formatMonthYear(focusedDate) }}</span>
-        <v-btn
+        <Button
           icon="mdi-chevron-right"
           size="small"
           variant="text"
           @click="shiftMonth(1)"
         />
-        <v-btn
+        <Button
           size="small"
           variant="text"
           class="today-btn"
           @click="focusedDate = new Date()"
         >
           {{ $t('common_today') }}
-        </v-btn>
+        </Button>
       </div>
       <v-calendar
         v-model="calendarDate"
@@ -141,7 +141,7 @@
                   {{ event.startTime }} - {{ event.endTime }}
                 </span>
               </div>
-              <v-btn
+              <Button
                 size="small"
                 color="error"
                 variant="text"
@@ -153,20 +153,20 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn
+          <Button
             color="grey"
             variant="text"
             @click="closeDialog"
           >
             {{ $t('common_cancel') }}
-          </v-btn>
-          <v-btn
+          </Button>
+          <Button
             color="primary"
             variant="text"
             @click="addEvent"
           >
             {{ $t('common_save') }}
-          </v-btn>
+          </Button>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -266,9 +266,18 @@ const onStartDateChange = (value: string) => {
 
 const validateForm = (): boolean => {
   let ok = true;
-  if (!draft.value.title) { titleError.value = t('common_this_field_is_required'); ok = false; }
-  if (!draft.value.startDate) { startDateError.value = t('common_this_field_is_required'); ok = false; }
-  if (!draft.value.endDate) { endDateError.value = t('common_this_field_is_required'); ok = false; }
+  if (!draft.value.title) {
+    titleError.value = t('common_this_field_is_required');
+    ok = false;
+  }
+  if (!draft.value.startDate) {
+    startDateError.value = t('common_this_field_is_required');
+    ok = false;
+  }
+  if (!draft.value.endDate) {
+    endDateError.value = t('common_this_field_is_required');
+    ok = false;
+  }
   if (draft.value.startDate && draft.value.endDate && draft.value.endDate < draft.value.startDate) {
     endDateError.value = t('common_end_date_must_be_after_or_equal_to_start_date');
     ok = false;

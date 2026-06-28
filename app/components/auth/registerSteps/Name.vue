@@ -38,7 +38,7 @@ import { RegisterFormDataKey } from '../registerSteps';
 import { GENDERS } from '~/utils/constants';
 
 const { t } = useI18n();
-const genders = computed(() => GENDERS.map((g) => ({ title: t(`gender_${g}`), value: g })));
+const genders = computed(() => GENDERS.map(g => ({ title: t(`gender_${g}`), value: g })));
 const formData = inject(RegisterFormDataKey)!;
 
 const nameError = ref('');

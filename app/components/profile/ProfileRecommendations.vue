@@ -56,7 +56,7 @@
               >
               <span class="rec-name">{{ rec.author.firstName }} {{ rec.author.lastName }}</span>
             </NuxtLink>
-            <v-btn
+            <Button
               v-if="canDelete(rec)"
               icon="mdi-close"
               variant="text"
@@ -118,7 +118,7 @@ const saving = ref(false);
 const dirty = ref(false);
 
 // Re-seed the input when the data loads/changes, but never over a live draft.
-watch(myRecommendation, rec => {
+watch(myRecommendation, (rec) => {
   if (!dirty.value) text.value = rec?.text ?? '';
 });
 

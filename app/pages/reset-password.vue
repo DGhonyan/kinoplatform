@@ -46,7 +46,7 @@
           @update:model-value="passwordError = ''"
         />
 
-        <v-btn
+        <Button
           type="submit"
           color="primary"
           rounded="pill"
@@ -55,7 +55,7 @@
           :loading="loading"
         >
           {{ $t('auth_reset_password') }}
-        </v-btn>
+        </Button>
       </form>
 
       <div class="footer">

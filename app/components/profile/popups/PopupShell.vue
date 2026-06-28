@@ -11,7 +11,7 @@
       :theme="theme || undefined"
     >
       <div class="popup-header">
-        <v-btn
+        <Button
           v-if="showBack"
           class="header-icon back"
           variant="text"
@@ -26,7 +26,7 @@
         >
           {{ title }}
         </h2>
-        <v-btn
+        <Button
           v-if="!persistent"
           class="header-icon close"
           variant="text"

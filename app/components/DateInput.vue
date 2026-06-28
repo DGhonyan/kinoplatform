@@ -39,7 +39,7 @@
       @update:model-value="onPick"
     >
       <template #controls="{ disabled, nextMonth, prevMonth, monthYearText }">
-        <v-btn
+        <Button
           :disabled="viewMode !== 'month' || disabled.includes('prev-month')"
           color="primary"
           icon="$prev"
@@ -59,7 +59,7 @@
           </div>
         </button>
         <v-spacer />
-        <v-btn
+        <Button
           :disabled="viewMode !== 'month' || disabled.includes('next-month')"
           color="primary"
           icon="$next"

@@ -33,7 +33,7 @@
         />
 
         <div class="verification-actions">
-          <v-btn
+          <Button
             variant="text"
             color="primary"
             size="small"
@@ -41,15 +41,15 @@
             @click="handleResendVerification"
           >
             {{ $t('auth_resend_verification') }}
-          </v-btn>
-          <v-btn
+          </Button>
+          <Button
             color="primary"
             rounded="pill"
             :loading="verifying"
             @click="handleVerify"
           >
             {{ $t('common_next') }}
-          </v-btn>
+          </Button>
         </div>
       </div>
 

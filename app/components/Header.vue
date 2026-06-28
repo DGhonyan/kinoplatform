@@ -14,7 +14,10 @@
       class="header-content"
       :class="{ 'bar-solid': cover && !coverNav }"
     >
-      <NuxtLink to="/" class="title">
+      <NuxtLink
+        to="/"
+        class="title"
+      >
         <h1>Kinoplatform</h1>
       </NuxtLink>
 
@@ -100,20 +103,20 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer />
-            <v-btn
+            <Button
               color="grey"
               variant="text"
               @click="showLogoutDialog = false"
             >
               {{ $t('common_cancel') }}
-            </v-btn>
-            <v-btn
+            </Button>
+            <Button
               color="primary"
               variant="text"
               @click="confirmLogout"
             >
               {{ $t('common_logout') }}
-            </v-btn>
+            </Button>
           </v-card-actions>
         </v-card>
       </v-dialog>

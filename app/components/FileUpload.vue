@@ -85,7 +85,7 @@
           </v-icon>
           <span>{{ fileName }}</span>
         </div>
-        <v-btn
+        <Button
           size="small"
           variant="text"
           color="error"

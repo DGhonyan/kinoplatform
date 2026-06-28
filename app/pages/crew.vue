@@ -7,7 +7,7 @@
           <h2 class="filters-title">
             {{ $t('crew_filters') }}
           </h2>
-          <v-btn
+          <Button
             v-if="activeDrawerFilterCount > 0"
             variant="text"
             color="primary"
@@ -15,7 +15,7 @@
             @click="clearDrawerFilters"
           >
             {{ $t('crew_filter_clear_all') }}
-          </v-btn>
+          </Button>
         </div>
 
         <div class="filters-section">

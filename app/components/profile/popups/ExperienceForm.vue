@@ -167,10 +167,22 @@ const commit = (): Experience | null => {
 
   const d = draft.value;
   let ok = true;
-  if (!d.position.trim()) { errors.position = t('common_this_field_is_required'); ok = false; }
-  if (!d.company.trim()) { errors.company = t('common_this_field_is_required'); ok = false; }
-  if (!d.employmentType) { errors.employmentType = t('common_this_field_is_required'); ok = false; }
-  if (!d.startYear || !d.startMonth) { errors.start = t('common_this_field_is_required'); ok = false; }
+  if (!d.position.trim()) {
+    errors.position = t('common_this_field_is_required');
+    ok = false;
+  }
+  if (!d.company.trim()) {
+    errors.company = t('common_this_field_is_required');
+    ok = false;
+  }
+  if (!d.employmentType) {
+    errors.employmentType = t('common_this_field_is_required');
+    ok = false;
+  }
+  if (!d.startYear || !d.startMonth) {
+    errors.start = t('common_this_field_is_required');
+    ok = false;
+  }
 
   if (!d.currentlyWorking) {
     if (!d.endYear || !d.endMonth) {

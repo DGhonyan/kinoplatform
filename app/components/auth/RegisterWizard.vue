@@ -1,91 +1,91 @@
 <template>
   <v-defaults-provider
     :defaults="{
-      VTextField:   { bgColor: 'accent' },
-      VTextarea:    { bgColor: 'accent' },
-      VAutocomplete:{ bgColor: 'accent' },
-      VFileInput:   { bgColor: 'accent' },
+      VTextField: { bgColor: 'accent' },
+      VTextarea: { bgColor: 'accent' },
+      VAutocomplete: { bgColor: 'accent' },
+      VFileInput: { bgColor: 'accent' },
     }"
   >
-  <div class="register-wizard">
-    <div class="header">
-      <!--
+    <div class="register-wizard">
+      <div class="header">
+        <!--
         Top-left back icon only appears on optional steps, where Skip has
         displaced Back from the actions row. On non-optional steps Back keeps
         its original slot in the actions row.
       -->
-      <v-btn
-        v-if="canGoBack && currentStep.optional"
-        class="back-icon"
-        variant="text"
-        icon="mdi-chevron-left"
-        size="small"
-        :disabled="busy"
-        :aria-label="$t('common_go_back')"
-        @click="back"
-      />
-      <h2
-        v-if="title"
-        class="title"
-      >
-        {{ title }}
-      </h2>
-    </div>
-
-    <!-- A real <form> so Enter submits the step. Only Next is type="submit";
-         Skip/Back are type="button" so they never submit on Enter or click. -->
-    <form
-      class="wizard-form"
-      @submit.prevent="next"
-    >
-      <component
-        :is="currentStep.component"
-        ref="stepRef"
-      />
-
-      <div class="actions">
-        <!-- Optional step → Skip occupies the secondary slot. -->
-        <v-btn
-          v-if="currentStep.optional"
-          type="button"
-          variant="outlined"
-          color="primary"
-          rounded="pill"
-          size="large"
+        <Button
+          v-if="canGoBack && currentStep.optional"
+          class="back-icon"
+          variant="text"
+          icon="mdi-chevron-left"
+          size="small"
           :disabled="busy"
-          @click="skip"
-        >
-          {{ $t('common_skip_for_now') }}
-        </v-btn>
-        <!-- Non-optional step → Back occupies the secondary slot (when available). -->
-        <v-btn
-          v-else-if="canGoBack"
-          type="button"
-          variant="outlined"
-          color="primary"
-          rounded="pill"
-          size="large"
-          :disabled="busy"
+          :aria-label="$t('common_go_back')"
           @click="back"
+        />
+        <h2
+          v-if="title"
+          class="title"
         >
-          {{ $t('common_go_back') }}
-        </v-btn>
-        <v-btn
-          type="submit"
-          color="primary"
-          rounded="pill"
-          size="large"
-          :loading="busy"
-        >
-          {{ isLastStep ? $t('common_finish') : $t('common_next') }}
-        </v-btn>
+          {{ title }}
+        </h2>
       </div>
-    </form>
 
-    <AuthRegisterProgress
-      v-if="effectiveProgressCurrent > 0"
-      :total="effectiveProgressTotal"
-      :current="effectiveProgressCurrent"
+      <!-- A real <form> so Enter submits the step. Only Next is type="submit";
+         Skip/Back are type="button" so they never submit on Enter or click. -->
+      <form
+        class="wizard-form"
+        @submit.prevent="next"
+      >
+        <component
+          :is="currentStep.component"
+          ref="stepRef"
+        />
+
+        <div class="actions">
+          <!-- Optional step → Skip occupies the secondary slot. -->
+          <Button
+            v-if="currentStep.optional"
+            type="button"
+            variant="outlined"
+            color="primary"
+            rounded="pill"
+            size="large"
+            :disabled="busy"
+            @click="skip"
+          >
+            {{ $t('common_skip_for_now') }}
+          </Button>
+          <!-- Non-optional step → Back occupies the secondary slot (when available). -->
+          <Button
+            v-else-if="canGoBack"
+            type="button"
+            variant="outlined"
+            color="primary"
+            rounded="pill"
+            size="large"
+            :disabled="busy"
+            @click="back"
+          >
+            {{ $t('common_go_back') }}
+          </Button>
+          <Button
+            type="submit"
+            color="primary"
+            rounded="pill"
+            size="large"
+            :loading="busy"
+          >
+            {{ isLastStep ? $t('common_finish') : $t('common_next') }}
+          </Button>
+        </div>
+      </form>
+
+      <AuthRegisterProgress
+        v-if="effectiveProgressCurrent > 0"
+        :total="effectiveProgressTotal"
+        :current="effectiveProgressCurrent"
       />
     </div>
   </v-defaults-provider>

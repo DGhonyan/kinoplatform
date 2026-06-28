@@ -10,8 +10,8 @@
       required
       :error-messages="emailError"
       hide-details="auto"
-      @update:model-value="emailError = ''"
       bg-color="accent"
+      @update:model-value="emailError = ''"
     />
     <Input
       v-model="password"
@@ -20,8 +20,8 @@
       required
       :error-messages="passwordError"
       hide-details="auto"
-      @update:model-value="passwordError = ''"
       bg-color="accent"
+      @update:model-value="passwordError = ''"
     />
 
     <div class="login-options">
@@ -40,7 +40,7 @@
       </NuxtLink>
     </div>
 
-    <v-btn
+    <Button
       type="submit"
       color="primary"
       rounded="pill"
@@ -49,7 +49,7 @@
       :loading="loggingIn"
     >
       {{ $t('common_login') }}
-    </v-btn>
+    </Button>
   </form>
 </template>
 

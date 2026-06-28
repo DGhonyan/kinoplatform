@@ -32,17 +32,24 @@
           class="trigger-chips"
         >
           <v-chip
-            v-for="item in model"
+            v-for="item in visibleChips"
             :key="item"
             size="small"
             variant="flat"
             :color="light ? 'primary' : 'accent'"
             closable
+            class="trigger-chip"
             @click.stop
             @click:close.stop="remove(item)"
           >
             {{ display(item) }}
           </v-chip>
+          <span
+            v-if="overflowCount > 0"
+            class="trigger-overflow"
+          >
+            +{{ overflowCount }}
+          </span>
         </div>
       </div>
       <v-icon class="chevron">
@@ -108,8 +115,17 @@ const props = withDefaults(
     light?: boolean;
     /** Already-translated field error. */
     error?: string;
+    /** How many chips to show in the trigger before collapsing the rest to "+N". */
+    maxVisibleChips?: number;
   }>(),
-  { label: '', placeholder: '', searchPlaceholder: '', light: false, error: '' },
+  {
+    label: '',
+    placeholder: '',
+    searchPlaceholder: '',
+    light: false,
+    error: '',
+    maxVisibleChips: 2,
+  },
 );
 
 const { t, te } = useI18n();
@@ -117,6 +133,13 @@ const { t, te } = useI18n();
 // Selected values may be i18n keys (professions) or literals (gear) — translate
 // only when a key exists.
 const display = (value: string): string => (te(value) ? t(value) : value);
+
+// Cap the chips shown in the trigger so a big selection can't grow it and shift
+// the layout; the rest collapse into a "+N" badge (manage them in the popup).
+const visibleChips = computed(() => model.value.slice(0, props.maxVisibleChips));
+const overflowCount = computed(() =>
+  Math.max(0, model.value.length - props.maxVisibleChips),
+);
 
 const dialogOpen = ref(false);
 
@@ -180,7 +203,24 @@ const remove = (item: string) => {
 .trigger-chips {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 6px;
+}
+
+// Keep a single chip from blowing out the row; long labels ellipsize.
+.trigger-chip {
+  max-width: 130px;
+
+  :deep(.v-chip__content) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.trigger-overflow {
+  font-size: 13px;
+  white-space: nowrap;
+  opacity: 0.7;
 }
 
 .chevron {

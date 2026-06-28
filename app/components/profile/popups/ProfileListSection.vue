@@ -17,14 +17,14 @@
           />
         </span>
         <div class="row-actions">
-          <v-btn
+          <Button
             variant="text"
             size="x-small"
             icon="mdi-pencil"
             :aria-label="$t('common_edit')"
             @click="emit('edit', index)"
           />
-          <v-btn
+          <Button
             variant="text"
             size="x-small"
             color="error"

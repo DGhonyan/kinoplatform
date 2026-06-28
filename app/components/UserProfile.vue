@@ -12,8 +12,10 @@
       <div class="personal-top">
         <div class="identity">
           <div class="name-row">
-            <h1 class="name">{{ user?.firstName }} {{ user?.lastName }}</h1>
-            <v-btn
+            <h1 class="name">
+              {{ user?.firstName }} {{ user?.lastName }}
+            </h1>
+            <Button
               v-if="canEdit"
               icon="mdi-pencil"
               variant="text"
@@ -103,7 +105,7 @@
       >
         <div class="chip-label-row">
           <span class="chip-label">{{ $t('gear_title') }}</span>
-          <v-btn
+          <Button
             v-if="canEdit"
             icon="mdi-pencil"
             variant="text"
@@ -130,7 +132,7 @@
       >
         <div class="chip-label-row">
           <span class="chip-label">{{ $t('gear_practicalities_label') }}</span>
-          <v-btn
+          <Button
             v-if="canEdit"
             icon="mdi-pencil"
             variant="text"
@@ -165,7 +167,7 @@
           v-if="canEdit"
           class="section-actions"
         >
-          <v-btn
+          <Button
             variant="text"
             size="small"
             prepend-icon="mdi-plus"
@@ -173,8 +175,8 @@
             @click="openProjects('add')"
           >
             {{ $t('common_add') }}
-          </v-btn>
-          <v-btn
+          </Button>
+          <Button
             v-if="hasProjects"
             variant="text"
             size="small"
@@ -183,7 +185,7 @@
             @click="openProjects('list')"
           >
             {{ $t('common_edit') }}
-          </v-btn>
+          </Button>
         </div>
       </div>
 
@@ -244,7 +246,7 @@
           v-if="canEdit"
           class="section-actions"
         >
-          <v-btn
+          <Button
             variant="text"
             size="small"
             prepend-icon="mdi-plus"
@@ -252,8 +254,8 @@
             @click="openExperience('add')"
           >
             {{ $t('common_add') }}
-          </v-btn>
-          <v-btn
+          </Button>
+          <Button
             v-if="hasExperience"
             variant="text"
             size="small"
@@ -262,7 +264,7 @@
             @click="openExperience('list')"
           >
             {{ $t('common_edit') }}
-          </v-btn>
+          </Button>
         </div>
       </div>
 
@@ -456,9 +458,20 @@ const openExperience = (mode: 'list' | 'add') => {
   showExperienceManager.value = true;
 };
 
+// authStore.user is a plain User (no events/recommendations); keep the ones we
+// already loaded when folding the edited fields back into the profile view.
+const syncProfileFromAuth = () => {
+  if (!authStore.user) return;
+  user.value = {
+    ...authStore.user,
+    events: user.value?.events ?? [],
+    recommendations: user.value?.recommendations ?? [],
+  };
+};
+
 const onSaved = () => {
   // updateUser/attachAvatar already refreshed authStore.user.
-  if (authStore.user) user.value = authStore.user;
+  syncProfileFromAuth();
 };
 
 // ── Profile-completion nudge (own profile, optional sections) ──
@@ -492,10 +505,12 @@ const openCompletionFlow = () => {
   openNextIncomplete();
 };
 const onPopupCompleted = () => {
-  if (authStore.user) user.value = authStore.user;
+  syncProfileFromAuth();
   if (flowActive.value) openNextIncomplete();
 };
-const dismissBanner = () => { bannerDismissed.value = true; };
+const dismissBanner = () => {
+  bannerDismissed.value = true;
+};
 
 // ── Load ──
 const loadUserData = async () => {

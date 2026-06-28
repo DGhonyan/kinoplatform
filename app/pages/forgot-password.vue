@@ -16,12 +16,12 @@
         required
         :error-messages="emailError"
         hide-details="auto"
+        bg-color="accent"
         @update:model-value="emailError = ''"
         @keyup.enter="handleSubmit"
-        bg-color="accent"
       />
 
-      <v-btn
+      <Button
         color="primary"
         rounded="pill"
         size="large"
@@ -30,7 +30,7 @@
         @click="handleSubmit"
       >
         {{ $t('auth_send_reset_code') }}
-      </v-btn>
+      </Button>
 
       <div class="footer">
         <NuxtLink

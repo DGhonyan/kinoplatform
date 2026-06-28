@@ -22,7 +22,7 @@
       >
         {{ $t('profile_completion_cta') }}
       </Button>
-      <v-btn
+      <Button
         variant="text"
         size="small"
         icon="mdi-close"
