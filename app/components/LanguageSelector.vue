@@ -19,7 +19,7 @@ import type { AppLocale } from '~/composables/useAppLocale';
 
 // Shared locale logic (see useLocale). Saved locale is restored at app boot by
 // plugins/restore-locale.client.ts, so `locale.value` is already correct here.
-const { locale, setLocale, languages } = useLocale();
+const { locale, setLocale, languages } = useAppLocale();
 
 const currentLocale = ref<AppLocale>(locale.value as AppLocale);
 </script>
