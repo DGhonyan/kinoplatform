@@ -82,11 +82,6 @@ defineExpose({ validate });
   gap: 16px;
 }
 
-.description {
-  text-align: center;
-  font-size: 14px;
-}
-
 .extras {
   display: flex;
   justify-content: center;

@@ -168,7 +168,7 @@ const remove = (item: string) => {
   width: 100%;
   min-height: 56px;
   padding: 8px 12px 8px 16px;
-  border: 1px solid rgba(var(--v-theme-on-surface), 0.38);
+  border: 1px solid color(--v-theme-on-surface, 0.38);
   border-radius: 16px;
   // Dark popups: transparent fill to match the sibling Input/Select fields.
   background: transparent;
@@ -178,15 +178,15 @@ const remove = (item: string) => {
 
   // Light card (registration wizard): white-ish accent field.
   &.is-light {
-    background: rgb(var(--v-theme-accent));
+    background: color(--v-theme-accent);
   }
 
   &:hover {
-    border-color: rgba(var(--v-theme-on-surface), 0.6);
+    border-color: color(--v-theme-on-surface, 0.6);
   }
 
   &.has-error {
-    border-color: rgb(var(--v-theme-error));
+    border-color: color(--v-theme-error);
   }
 }
 
@@ -230,7 +230,7 @@ const remove = (item: string) => {
 
 .field-error {
   font-size: 12px;
-  color: rgb(var(--v-theme-error));
+  color: color(--v-theme-error);
   padding-left: 16px;
 }
 </style>

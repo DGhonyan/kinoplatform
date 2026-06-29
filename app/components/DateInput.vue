@@ -166,7 +166,7 @@ const onPick = (newDate: Date | string | number | undefined) => {
 
 <style scoped lang="scss">
 .weekdays-primary :deep(.v-date-picker-month__weekday) {
-  color: rgb(var(--v-theme-primary));
+  color: color(--v-theme-primary);
 }
 
 .month-year-toggle {
@@ -178,7 +178,7 @@ const onPick = (newDate: Date | string | number | undefined) => {
   transition: background-color 0.15s ease;
 
   &:hover {
-    background-color: rgba(var(--v-theme-primary), 0.08);
+    background-color: color(--v-theme-primary, 0.08);
   }
 }
 </style>

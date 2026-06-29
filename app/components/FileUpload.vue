@@ -270,9 +270,9 @@ defineExpose({
   align-items: center;
   gap: 12px;
   padding: 12px;
-  border: 1px solid rgba(var(--v-theme-success), 0.3);
+  border: 1px solid color(--v-theme-success, 0.3);
   border-radius: 4px;
-  background-color: rgba(var(--v-theme-success), 0.05);
+  background-color: color(--v-theme-success, 0.05);
 }
 
 .image-preview {

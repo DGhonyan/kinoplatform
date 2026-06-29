@@ -58,8 +58,8 @@ const emit = defineEmits<{
   justify-content: space-between;
   gap: 16px;
   padding: 12px 16px;
-  border: 1px solid rgba(var(--v-theme-primary), 0.3);
-  background-color: rgba(var(--v-theme-primary), 0.06);
+  border: 1px solid color(--v-theme-primary, 0.3);
+  background-color: color(--v-theme-primary, 0.06);
   border-radius: 16px;
 }
 

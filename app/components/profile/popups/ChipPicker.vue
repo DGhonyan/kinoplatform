@@ -212,7 +212,7 @@ const filtered = computed<ChipGroup[]>(() => {
 .group-label {
   font-size: 15px;
   font-weight: 600;
-  color: rgb(var(--v-theme-accent));
+  color: color(--v-theme-accent);
 }
 
 .subgroup {
@@ -226,7 +226,7 @@ const filtered = computed<ChipGroup[]>(() => {
 .subgroup-label {
   font-size: 13px;
   font-weight: 500;
-  color: rgb(var(--v-theme-accent));
+  color: color(--v-theme-accent);
   opacity: 0.85;
 }
 
@@ -245,11 +245,11 @@ const filtered = computed<ChipGroup[]>(() => {
 // Light-card variant (registration wizard): red category/brand titles.
 .is-light {
   .group-label {
-    color: rgb(var(--v-theme-primary));
+    color: color(--v-theme-primary);
   }
 
   .subgroup-label {
-    color: rgb(var(--v-theme-primary));
+    color: color(--v-theme-primary);
   }
 }
 </style>

@@ -279,7 +279,7 @@ const confirmLogout = async () => {
 
 // Opaque bar that hides the cover behind it, so the cover starts below the nav.
 .header-content.bar-solid {
-  background: rgb(var(--v-theme-background));
+  background: color(--v-theme-background);
 }
 
 .title {
@@ -295,7 +295,7 @@ const confirmLogout = async () => {
   width: 40px;
   height: 40px;
   border-radius: 8px;
-  background: rgb(var(--v-theme-primary));
+  background: color(--v-theme-primary);
   color: #fff;
   font-family: 'Bebas Neue', sans-serif;
   font-size: 22px;

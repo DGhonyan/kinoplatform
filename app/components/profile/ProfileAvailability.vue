@@ -361,7 +361,7 @@ watch(() => props.userId, loadEvents);
   padding: 24px;
   text-align: center;
   font-size: 14px;
-  border: 1px dashed rgba(var(--v-theme-primary), 0.3);
+  border: 1px dashed color(--v-theme-primary, 0.3);
   border-radius: 8px;
 }
 
@@ -388,7 +388,7 @@ watch(() => props.userId, loadEvents);
   justify-content: space-between;
   align-items: center;
   padding: 12px;
-  border: 1px solid rgba(var(--v-theme-primary), 0.2);
+  border: 1px solid color(--v-theme-primary, 0.2);
   border-radius: 4px;
 }
 

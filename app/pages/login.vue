@@ -160,8 +160,8 @@ const handleVerify = async () => {
   flex-direction: column;
   gap: 12px;
   padding: 16px;
-  background-color: rgba(var(--v-theme-info), 0.08);
-  border: 1px solid rgba(var(--v-theme-info), 0.3);
+  background-color: color(--v-theme-info, 0.08);
+  border: 1px solid color(--v-theme-info, 0.3);
   border-radius: 8px;
   font-size: 14px;
 }

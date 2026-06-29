@@ -423,7 +423,7 @@ const save = async () => {
 }
 
 .asterisk {
-  color: rgb(var(--v-theme-error));
+  color: color(--v-theme-error);
 }
 
 .languages-select :deep(.v-field) {

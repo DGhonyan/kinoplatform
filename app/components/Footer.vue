@@ -14,6 +14,6 @@ const year = new Date().getFullYear();
   padding: 20px $base-padding;
   text-align: center;
   font-size: 13px;
-  color: rgba(var(--v-theme-on-surface), 0.55);
+  color: color(--v-theme-on-surface, 0.55);
 }
 </style>

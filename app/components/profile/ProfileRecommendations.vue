@@ -199,8 +199,8 @@ const removeRec = async (id: string) => {
   margin-right: 12px;
   padding: 16px;
   border-radius: 14px;
-  border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
-  background-color: rgba(var(--v-theme-on-surface), 0.03);
+  border: 1px solid color(--v-theme-on-surface, 0.12);
+  background-color: color(--v-theme-on-surface, 0.03);
 }
 
 .rec-head {

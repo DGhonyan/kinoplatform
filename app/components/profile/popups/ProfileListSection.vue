@@ -88,7 +88,7 @@ const emit = defineEmits<{
   justify-content: space-between;
   gap: 8px;
   padding: 8px 12px;
-  border: 1px solid rgba(var(--v-theme-on-surface), 0.15);
+  border: 1px solid color(--v-theme-on-surface, 0.15);
   border-radius: 12px;
 }
 

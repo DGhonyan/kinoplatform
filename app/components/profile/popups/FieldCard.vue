@@ -78,13 +78,13 @@ withDefaults(
   gap: 16px;
   padding: 16px 20px;
   border-radius: 16px;
-  border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
-  background-color: rgba(var(--v-theme-on-surface), 0.03);
+  border: 1px solid color(--v-theme-on-surface, 0.12);
+  background-color: color(--v-theme-on-surface, 0.03);
   transition: border-color 0.2s ease;
 }
 
 .field-card.has-error {
-  border-color: rgb(var(--v-theme-error));
+  border-color: color(--v-theme-error);
 }
 
 .field-icon {
@@ -95,8 +95,8 @@ withDefaults(
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  color: rgb(var(--v-theme-primary));
-  background-color: rgb(var(--v-theme-accent));
+  color: color(--v-theme-primary);
+  background-color: color(--v-theme-accent);
 }
 
 .field-body {
@@ -119,7 +119,7 @@ withDefaults(
 }
 
 .asterisk {
-  color: rgb(var(--v-theme-error));
+  color: color(--v-theme-error);
 }
 
 .field-description {
@@ -129,6 +129,6 @@ withDefaults(
 
 .field-error {
   font-size: 12px;
-  color: rgb(var(--v-theme-error));
+  color: color(--v-theme-error);
 }
 </style>

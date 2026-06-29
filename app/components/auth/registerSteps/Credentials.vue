@@ -85,14 +85,4 @@ defineExpose({ validate });
   flex-direction: column;
   gap: 4px;
 }
-
-.description {
-  text-align: center;
-  font-size: 14px;
-}
-
-.description.small {
-  font-size: 12px;
-  color: color(--v-theme-gray);
-}
 </style>

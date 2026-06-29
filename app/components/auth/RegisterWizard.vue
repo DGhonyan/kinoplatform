@@ -255,6 +255,16 @@ const back = () => {
 .title {
   text-align: center;
   margin: 0;
+  color: color(--v-theme-primary);
+}
+
+// Per-step prompt = the step's "title". Each step renders it as `.description`;
+// its look (and the primary color) is owned here, in ONE place, so steps never
+// hardcode it. Restyle all registration step titles from this rule alone.
+.wizard-form :deep(.description) {
+  margin: 0;
+  text-align: center;
+  font-size: 14px;
 }
 
 .actions {

@@ -87,9 +87,4 @@ defineExpose({ validate });
   flex-direction: column;
   gap: 16px;
 }
-
-.description {
-  text-align: center;
-  font-size: 14px;
-}
 </style>

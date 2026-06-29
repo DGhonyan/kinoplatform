@@ -239,7 +239,7 @@ onMounted(async () => {
 }
 
 .filter-btn.has-filters :deep(.v-btn__overlay) {
-  background: rgba(var(--v-theme-primary), 0.08);
+  background: color(--v-theme-primary, 0.08);
 }
 
 .filter-dot {
@@ -249,7 +249,7 @@ onMounted(async () => {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: rgb(var(--v-theme-primary));
+  background: color(--v-theme-primary);
 }
 
 .chip-row {
@@ -262,7 +262,7 @@ onMounted(async () => {
   scrollbar-width: thin;
   &::-webkit-scrollbar { height: 6px; }
   &::-webkit-scrollbar-thumb {
-    background: rgba(var(--v-theme-on-surface), 0.2);
+    background: color(--v-theme-on-surface, 0.2);
     border-radius: 3px;
   }
 }
@@ -284,7 +284,7 @@ onMounted(async () => {
   display: flex;
   justify-content: center;
   padding: 64px 16px;
-  color: rgba(var(--v-theme-on-surface), 0.6);
+  color: color(--v-theme-on-surface, 0.6);
 }
 
 // Drawer
@@ -315,6 +315,6 @@ onMounted(async () => {
 .filters-label {
   font-size: 13px;
   font-weight: 500;
-  color: rgba(var(--v-theme-on-surface), 0.7);
+  color: color(--v-theme-on-surface, 0.7);
 }
 </style>

@@ -41,8 +41,8 @@ const avatarSrc = computed(
   flex-direction: column;
   gap: 12px;
   padding: 12px;
-  background: rgba(var(--v-theme-on-surface), 0.04);
-  border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+  background: color(--v-theme-on-surface, 0.04);
+  border: 1px solid color(--v-theme-on-surface, 0.12);
   border-radius: 16px;
   cursor: pointer;
   text-align: left;
@@ -51,7 +51,7 @@ const avatarSrc = computed(
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-    border-color: rgba(var(--v-theme-primary), 0.3);
+    border-color: color(--v-theme-primary, 0.3);
   }
 }
 
@@ -73,7 +73,7 @@ const avatarSrc = computed(
   margin: 0;
   font-size: 20px;
   font-weight: 600;
-  color: rgba(var(--v-theme-on-surface), 0.87);
+  color: color(--v-theme-on-surface, 0.87);
   display: -webkit-box;
   -webkit-line-clamp: 1;
   line-clamp: 1;

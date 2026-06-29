@@ -34,7 +34,7 @@
 
 .settings-section {
   padding: 20px;
-  border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+  border: 1px solid color(--v-theme-on-surface, 0.12);
   border-radius: 14px;
 }
 
