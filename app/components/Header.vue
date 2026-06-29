@@ -38,7 +38,7 @@
 
       <div class="actions">
         <!-- Guests-only: members switch language from Settings instead. -->
-        <LanguageSwitch v-if="!user" />
+        <LanguageSwitch />
 
         <!-- Logged-out, off the home hero: a single auth toggle button.
              On the home hero the CTAs live under the slogan instead. -->

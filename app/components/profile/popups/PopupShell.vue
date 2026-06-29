@@ -94,6 +94,29 @@ withDefaults(
 const emit = defineEmits<{
   back: [];
 }>();
+
+// Let header controls (the LanguageSwitch) know a popup is up, so they can lift
+// themselves above this dialog's overlay. Guard with `registered` so the count
+// can't drift if `open` re-fires, and decrement on unmount-while-open.
+const { registerPopup, unregisterPopup } = useActivePopup();
+let registered = false;
+watch(
+  open,
+  (isOpen) => {
+    if (isOpen && !registered) {
+      registered = true;
+      registerPopup();
+    }
+    else if (!isOpen && registered) {
+      registered = false;
+      unregisterPopup();
+    }
+  },
+  { immediate: true },
+);
+onUnmounted(() => {
+  if (registered) unregisterPopup();
+});
 </script>
 
 <style scoped lang="scss">
