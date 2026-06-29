@@ -14,6 +14,13 @@ export default defineNuxtConfig({
   ssr: false,
   app: {
     baseURL: '/',
+    head: {
+      link: [
+        // Modern browsers use the crisp SVG; older ones fall back to the .ico.
+        { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
+        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+      ],
+    },
   },
 
   css: [

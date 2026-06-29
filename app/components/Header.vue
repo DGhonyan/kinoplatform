@@ -17,9 +17,8 @@
       <NuxtLink
         to="/"
         class="title"
-        aria-label="Kinoplatform"
       >
-        <span class="logo-mark">K</span>
+        <h1>Kinoplatform</h1>
       </NuxtLink>
 
       <div
@@ -284,26 +283,8 @@ const confirmLogout = async () => {
 
 .title {
   justify-self: start;
+  color: var(--header-accent);
   text-decoration: none;
-}
-
-// K badge: solid primary square, slightly rounded, white serif-ish letter.
-.logo-mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  background: color(--v-theme-primary);
-  color: #fff;
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 22px;
-  font-weight: 400;
-  line-height: 1;
-  letter-spacing: 1px;
-  // Tiny optical lift so the K reads centered inside the box.
-  padding-top: 2px;
 }
 
 .links {
