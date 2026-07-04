@@ -8,108 +8,20 @@
     />
 
     <!-- ───────────── 1. Personal info ───────────── -->
-    <section class="container">
-      <div class="personal-top">
-        <div class="identity">
-          <div class="name-row">
-            <h1 class="name">
-              {{ user?.firstName }} {{ user?.lastName }}
-            </h1>
-            <Button
-              v-if="canEdit"
-              icon="mdi-pencil"
-              variant="text"
-              size="small"
-              :aria-label="$t('profile_edit_personal_info')"
-              @click="showEditInfo = true"
-            />
-          </div>
-          <span
-            v-if="professionsText"
-            class="professions"
-          >{{ professionsText }}</span>
-          <span
-            v-if="user?.experienceLevel"
-            class="experience-level"
-          >{{ $t(user.experienceLevel) }}</span>
-        </div>
-
-        <div
-          v-if="user?.avatar"
-          class="avatar"
-        >
-          <img
-            :src="getUserAvatar()"
-            alt=""
-          >
-        </div>
-      </div>
-
-      <p
-        v-if="user?.bio"
-        class="bio"
-      >
-        {{ user.bio }}
-      </p>
-
-      <div class="meta">
-        <div
-          v-if="user?.location"
-          class="meta-line"
-        >
-          <v-icon size="18">
-            custom:map-pin
-          </v-icon>
-          <span>{{ user.location }}</span>
-        </div>
-        <div
-          v-if="user?.education"
-          class="meta-line"
-        >
-          <v-icon size="18">
-            custom:graduation-cap
-          </v-icon>
-          <span>{{ user.education }}</span>
-        </div>
-        <a
-          v-if="user?.portfolio"
-          class="meta-line portfolio"
-          :href="user.portfolio"
-          target="_blank"
-        >
-          <v-icon size="18">mdi-link-variant</v-icon>
-          <span>{{ $t('common_portfolio_link') }}</span>
-        </a>
-      </div>
-
-      <ProfileChipGroup
-        v-if="hasLanguages"
-        :label="$t('common_languages')"
-        :items="languageNames"
-      />
-
-      <ProfileChipGroup
-        v-if="hasTools || hasEquipment || canEdit"
-        :label="$t('gear_title')"
-        :items="gearItems"
-        :editable="canEdit && (hasTools || hasEquipment)"
-        :add-label="canEdit ? $t('gear_add_cta') : undefined"
-        @edit="openGear"
-        @add="openGear"
-      />
-
-      <ProfileChipGroup
-        v-if="enabledPracticalities.length"
-        :label="$t('gear_practicalities_label')"
-        :items="practicalityLabels"
-        :editable="canEdit"
-        @edit="openGear"
-      />
-    </section>
+    <!-- `id` falls through to the component's root <section> as the "about" anchor. -->
+    <ProfilePersonalInfo
+      id="profile-about"
+      :user="user"
+      :can-edit="canEdit"
+      :nav-sections="navSections"
+      @edit-info="showEditInfo = true"
+      @edit-gear="openGear"
+    />
 
     <!-- ───────────── 2. Projects ───────────── -->
     <section
       v-if="hasProjects || canEdit"
+      id="profile-projects"
       class="container"
     >
       <div class="section-head">
@@ -173,6 +85,7 @@
     <!-- ───────────── 3. Experience ───────────── -->
     <section
       v-if="hasExperience || canEdit"
+      id="profile-experience"
       class="container"
     >
       <div class="section-head">
@@ -227,6 +140,7 @@
     <!-- ───────────── Recommendations ───────────── -->
     <section
       v-if="showRecommendations"
+      id="profile-recommendations"
       class="container"
     >
       <h2 class="section-title">
@@ -280,14 +194,12 @@
 </template>
 
 <script lang="ts" setup>
-import type { Practicalities } from '~~/shared/types/user';
 import type { UserProfile } from '~/stores/user';
-import { getLanguageDisplayName } from '~/utils/languages';
 import { isOnboardingComplete } from '~/utils/onboarding';
 import Button from '~/components/Button.vue';
 import ProjectCard from '~/components/profile/ProjectCard.vue';
 import ExperienceItem from '~/components/profile/ExperienceItem.vue';
-import ProfileChipGroup from '~/components/profile/ProfileChipGroup.vue';
+import ProfilePersonalInfo from '~/components/profile/ProfilePersonalInfo.vue';
 import ProfileCompletionBanner from '~/components/profile/ProfileCompletionBanner.vue';
 import ProfileRecommendations from '~/components/profile/ProfileRecommendations.vue';
 import ProfileAvailability from '~/components/profile/ProfileAvailability.vue';
@@ -300,8 +212,6 @@ import ExperienceManagerPopup from '~/components/profile/popups/ExperienceManage
 const PROJECTS_PREVIEW = 3;
 // Availability is hidden for now (kept as a component) — flip to show it again.
 const showAvailability = false;
-
-const { t, locale } = useI18n();
 
 const props = defineProps<{
   userId: string | undefined;
@@ -320,41 +230,24 @@ const canLeaveRecommendation = computed(() =>
 );
 const showRecommendations = computed(() => hasRecommendations.value || canLeaveRecommendation.value);
 
-// ── Display helpers ──
-const professionsText = computed(() =>
-  (user.value?.profession ?? []).map(p => t(p)).join(' | '),
-);
-const languageName = (code: string) => getLanguageDisplayName(code, locale.value) ?? code;
-
-const getUserAvatar = () =>
-  user.value?.avatar || new URL('@/assets/default.jpg', import.meta.url).href;
-
-// ── Presence flags ──
-const hasLanguages = computed(() => (user.value?.languages?.length ?? 0) > 0);
+// ── Presence flags (gear ones also gate the completion-flow nudge below) ──
 const hasProjects = computed(() => (user.value?.projects?.length ?? 0) > 0);
 const hasExperience = computed(() => (user.value?.experience?.length ?? 0) > 0);
 const hasTools = computed(() => (user.value?.tools?.length ?? 0) > 0);
 const hasEquipment = computed(() => (user.value?.equipment?.length ?? 0) > 0);
 
-const PRACTICALITY_KEYS: (keyof Practicalities)[] = [
-  'willingToTravel',
-  'availableForLongShoots',
-  'passportAvailable',
-  'visaAvailable',
-  'drivingLicenseAvailable',
-];
-const enabledPracticalities = computed(() =>
-  PRACTICALITY_KEYS.filter(k => user.value?.practicalities?.[k]),
-);
-
-// ── Chip-group display strings ──
-const languageNames = computed(() => (user.value?.languages ?? []).map(languageName));
-const gearItems = computed(() => [
-  ...(user.value?.tools ?? []),
-  ...(user.value?.equipment ?? []),
-]);
-const practicalityLabels = computed(() =>
-  enabledPracticalities.value.map(k => t(`practicality_${k}`)),
+// Scroll-to tabs rendered in the personal-info card. Only sections that actually
+// exist appear — each id matches a section's DOM id below. Recommendations tracks
+// its own section's visibility (which can be false for an owner with no recs).
+const navSections = computed(() =>
+  [
+    { id: 'profile-about', label: 'profile_nav_about', show: !!user.value?.bio },
+    { id: 'profile-projects', label: 'common_projects', show: hasProjects.value },
+    { id: 'profile-experience', label: 'profile_experience', show: hasExperience.value },
+    { id: 'profile-recommendations', label: 'recommendation_title', show: showRecommendations.value },
+  ]
+    .filter(s => s.show)
+    .map(({ id, label }) => ({ id, label })),
 );
 
 // ── Projects inline expand ──
@@ -472,99 +365,6 @@ watch(() => props.userId, loadUserData);
   flex-direction: column;
   gap: 20px;
   padding: 14px;
-}
-
-/* ── Personal info ── */
-.personal-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 24px;
-  border-bottom: 1px solid color(--v-theme-accent);
-}
-
-.identity {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
-}
-
-.name-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.name {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 48px;
-  font-weight: 400;
-  line-height: 1.05;
-  letter-spacing: 0.02em;
-  margin: 0;
-}
-
-.professions {
-  font-size: 15px;
-  color: color(--v-theme-accent);
-}
-
-.experience-level {
-  font-size: 13px;
-  opacity: 0.7;
-}
-
-.avatar {
-  flex-shrink: 0;
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  overflow: hidden;
-  border: 2px solid color(--v-theme-accent, 0.4);
-  margin-bottom: 10px;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-}
-
-.bio {
-  font-size: 14px;
-  line-height: 1.6;
-  margin: 0;
-  opacity: 0.9;
-  overflow-wrap: anywhere;
-}
-
-.meta {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.meta-line {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: inherit;
-  text-decoration: none;
-
-  .v-icon {
-    opacity: 0.7;
-  }
-}
-
-.portfolio {
-  color: color(--v-theme-accent);
-  width: fit-content;
-
-  &:hover {
-    text-decoration: underline;
-  }
 }
 
 /* ── Section heads (projects / experience) ── */

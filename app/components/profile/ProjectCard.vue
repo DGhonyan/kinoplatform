@@ -103,7 +103,6 @@ const yearLine = computed(() =>
   // Fixed size; `flex: none` keeps it from stretching inside the flex-wrap grid.
   flex: 0 0 auto;
   width: 218px;
-  height: 397px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
