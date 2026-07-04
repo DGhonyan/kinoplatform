@@ -170,12 +170,16 @@ const practicalityLabels = computed(() =>
 <style scoped lang="scss">
 .personal-card {
   display: flex;
-  flex-direction: row;
   gap: 24px;
   padding: 14px;
+  justify-content: space-between;
 }
 
 .personal {
+  // Flex items default to min-width:auto (won't shrink below content), which
+  // lets wide text push the fixed-width avatar off-screen. min-width:0 lets this
+  // column shrink so its text wraps within the available space instead.
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -210,16 +214,20 @@ const practicalityLabels = computed(() =>
   line-height: 1.05;
   letter-spacing: 0.02em;
   margin: 0;
+  // Wrap (and break long unbreakable words) rather than force the row wider.
+  overflow-wrap: anywhere;
 }
 
 .professions {
   font-size: 15px;
   color: color(--v-theme-accent);
+  overflow-wrap: anywhere;
 }
 
 .experience-level {
   font-size: 13px;
   opacity: 0.7;
+  overflow-wrap: anywhere;
 }
 
 .avatar {
@@ -252,14 +260,20 @@ const practicalityLabels = computed(() =>
 
 .meta-line {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   font-size: 14px;
   color: inherit;
   text-decoration: none;
 
   .v-icon {
+    flex-shrink: 0;
     opacity: 0.7;
+  }
+
+  span {
+    min-width: 0;
+    overflow-wrap: anywhere;
   }
 }
 
