@@ -346,6 +346,14 @@ const loadUserData = async () => {
   if (targetId === authStore.user?._id) authStore.setUser(profile);
 };
 
+// The essentials popup lives in the page *alongside* this component, not inside
+// it, so it can't call onSaved. Mirror any change to your own auth-store user —
+// avatar attach, essentials completion, edits — straight into the view so it
+// appears without needing a refresh. (No-op when viewing someone else's profile.)
+watch(() => authStore.user, () => {
+  if (canEdit.value) syncProfileFromAuth();
+});
+
 onMounted(loadUserData);
 watch(() => props.userId, loadUserData);
 </script>
