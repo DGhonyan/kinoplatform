@@ -11,38 +11,45 @@
       :theme="theme || undefined"
     >
       <div class="popup-header">
-        <Button
-          v-if="showBack"
-          class="header-icon back"
-          variant="text"
-          icon="mdi-chevron-left"
-          size="small"
-          :aria-label="$t('common_go_back')"
-          @click="emit('back')"
-        />
-        <h2
-          v-if="title"
-          class="popup-title"
+        <div class="header-title">
+          <Button
+            v-if="showBack"
+            class="header-icon back"
+            variant="text"
+            icon="mdi-chevron-left"
+            size="small"
+            :aria-label="$t('common_go_back')"
+            @click="emit('back')"
+          />
+          <h2
+            v-if="title"
+            class="popup-title"
+          >
+            {{ title }}
+          </h2>
+          <LanguageSwitch
+            v-if="languageSwitch"
+            class="header-lang"
+          />
+          <Button
+            v-if="!persistent"
+            class="header-icon close"
+            variant="text"
+            icon="mdi-close"
+            size="small"
+            :aria-label="$t('common_cancel')"
+            @click="open = false"
+          />
+        </div>
+
+        <p
+          v-if="description"
+          class="popup-description"
         >
-          {{ title }}
-        </h2>
-        <Button
-          v-if="!persistent"
-          class="header-icon close"
-          variant="text"
-          icon="mdi-close"
-          size="small"
-          :aria-label="$t('common_cancel')"
-          @click="open = false"
-        />
+          {{ description }}
+        </p>
       </div>
 
-      <p
-        v-if="description"
-        class="popup-description"
-      >
-        {{ description }}
-      </p>
 
       <div class="popup-body">
         <slot />
@@ -80,6 +87,12 @@ withDefaults(
     showBack?: boolean;
     /** Force a Vuetify theme on the card (e.g. 'light' when launched from a light page). */
     theme?: string;
+    /**
+     * Show a language switch in the header. For persistent onboarding popups
+     * (e.g. Essentials), where the dialog scrim buries the header switch and the
+     * user has no other language control yet.
+     */
+    languageSwitch?: boolean;
   }>(),
   {
     title: '',
@@ -88,35 +101,13 @@ withDefaults(
     maxWidth: 800,
     showBack: false,
     theme: '',
+    languageSwitch: false,
   },
 );
 
 const emit = defineEmits<{
   back: [];
 }>();
-
-// Let header controls (the LanguageSwitch) know a popup is up, so they can lift
-// themselves above this dialog's overlay. Guard with `registered` so the count
-// can't drift if `open` re-fires, and decrement on unmount-while-open.
-const { registerPopup, unregisterPopup } = useActivePopup();
-let registered = false;
-watch(
-  open,
-  (isOpen) => {
-    if (isOpen && !registered) {
-      registered = true;
-      registerPopup();
-    }
-    else if (!isOpen && registered) {
-      registered = false;
-      unregisterPopup();
-    }
-  },
-  { immediate: true },
-);
-onUnmounted(() => {
-  if (registered) unregisterPopup();
-});
 </script>
 
 <style scoped lang="scss">
@@ -129,34 +120,32 @@ onUnmounted(() => {
 }
 
 .popup-header {
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.header-title {
+  width: 100%;
   display: flex;
   align-items: center;
-  justify-content: center;
-  min-height: 32px;
+  gap: 8px;
 }
 
 .popup-title {
-  text-align: center;
   margin: 0;
   font-size: 22px;
   font-weight: 600;
+  flex: 1;
 }
 
-.header-icon {
-  position: absolute;
-
-  &.back {
-    left: 0;
-  }
-
-  &.close {
-    right: 0;
-  }
+// Pin the language switch to the right (robust even when there's no title).
+.header-lang {
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .popup-description {
-  text-align: center;
   font-size: 14px;
   margin: 0;
   opacity: 0.8;

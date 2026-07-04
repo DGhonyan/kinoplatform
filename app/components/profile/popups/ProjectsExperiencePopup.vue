@@ -8,7 +8,7 @@
     <!-- ───────────────── List view ───────────────── -->
     <template v-if="view === 'list'">
       <FieldCard
-        icon="custom:camera-add"
+        icon="custom:graduation-cap"
         title="onboarding_education_title"
         description="onboarding_education_description"
       >
@@ -22,7 +22,7 @@
       </FieldCard>
 
       <FieldCard
-        icon="custom:camera-add"
+        icon="custom:portfolio-link"
         title="onboarding_portfolio_title"
         description="onboarding_portfolio_description"
         :error="portfolioError"
@@ -38,7 +38,7 @@
       </FieldCard>
 
       <FieldCard
-        icon="custom:camera-add"
+        icon="custom:clapperboard"
         title="onboarding_projects_title"
         description="onboarding_projects_description"
       >
@@ -56,7 +56,7 @@
       </FieldCard>
 
       <FieldCard
-        icon="custom:camera-add"
+        icon="custom:briefcase"
         title="onboarding_work_experience_title"
         description="onboarding_work_experience_description"
       >
@@ -98,12 +98,12 @@
           color="accent"
           size="large"
           :disabled="saving"
-          @click="open = false"
+          @click="skip"
         >
           {{ $t('common_skip_for_now') }}
         </Button>
         <Button
-          color="accent"
+          color="primary"
           size="large"
           :loading="saving"
           @click="save"
@@ -121,7 +121,7 @@
           {{ $t('common_cancel') }}
         </Button>
         <Button
-          color="accent"
+          color="primary"
           size="large"
           @click="view === 'project-form' ? commitProject() : commitExperience()"
         >
@@ -149,7 +149,15 @@ const open = defineModel<boolean>({ required: true });
 
 const emit = defineEmits<{
   completed: [];
+  skip: [];
 }>();
+
+// "Skip for now" is a wizard step-skip, not an abandon: close this step and let
+// the parent advance the completion flow to the next section (gear).
+const skip = () => {
+  open.value = false;
+  emit('skip');
+};
 
 const { t } = useI18n();
 const authStore = useAuthStore();
@@ -172,7 +180,12 @@ const viewTitle = computed(() => {
 });
 
 // ── List-row summaries ──
-const projectSummary = (p: Project) => [p.name, t(p.type), p.year].filter(Boolean).join(' · ');
+const projectSummary = (p: Project) =>
+  [
+    p.name,
+    (p.type ?? []).map(x => t(x)).join(', '),
+    p.workInProgress ? t('profile_in_progress') : p.year,
+  ].filter(Boolean).join(' · ');
 const experienceSummary = (e: Experience) => `${e.position} · ${e.company}`;
 
 const URL_RE = /^https?:\/\/[^\s.]+\.[^\s]+$/i;

@@ -7,16 +7,22 @@ export type Gender = 'male' | 'female' | 'other';
 
 export type Project = {
   name: string;
-  /** Production type — one of PRODUCTION_TYPES (short_film, feature, …). */
-  type: string;
-  /** Role on the project — a profession id from `professions`. */
-  position: string;
-  /** Release year. */
-  year: number;
-  /** Release month, 1–12. */
-  month: number;
+  /** Optional title in the original language (e.g. non-Latin original). */
+  nameOriginal?: string;
+  /** Production types — ids from PRODUCTION_TYPES (short_film, feature, …). */
+  type: string[];
+  /** Roles on the project — profession ids from `professions`. */
+  position: string[];
+  /** Release year. Omitted while the project is a work in progress. */
+  year?: number;
+  /** Release month, 1–12. Omitted while the project is a work in progress. */
+  month?: number;
+  /** True while the project is unreleased / in production (no release date). */
+  workInProgress?: boolean;
   link?: string;
   description?: string;
+  /** Optional media image URL (poster/still), shown on the project card. */
+  media?: string;
 };
 
 export type Experience = {
@@ -45,6 +51,7 @@ export type RecommendationAuthor = {
   firstName: string;
   lastName: string;
   avatar?: string;
+  profession?: string[];
 };
 
 export type Recommendation = {

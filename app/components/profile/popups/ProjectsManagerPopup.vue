@@ -106,7 +106,12 @@ const editingProject = computed(() =>
   editingIndex.value !== null ? projects.value[editingIndex.value] : undefined,
 );
 
-const projectSummary = (p: Project) => [p.name, t(p.type), p.year].filter(Boolean).join(' · ');
+const projectSummary = (p: Project) =>
+  [
+    p.name,
+    (p.type ?? []).map(x => t(x)).join(', '),
+    p.workInProgress ? t('profile_in_progress') : p.year,
+  ].filter(Boolean).join(' · ');
 
 const startAdd = () => {
   editingIndex.value = null;

@@ -9,7 +9,7 @@
     <!-- ───────────────── List view ───────────────── -->
     <template v-if="view === 'list'">
       <FieldCard
-        icon="custom:camera-add"
+        icon="custom:pencil-and-ruler-idk"
         title="gear_tools_label"
         description="gear_tools_description"
       >
@@ -42,7 +42,7 @@
       </FieldCard>
 
       <FieldCard
-        icon="custom:camera-add"
+        icon="custom:camera"
         title="gear_equipment_label"
         description="gear_equipment_description"
       >
@@ -75,7 +75,7 @@
       </FieldCard>
 
       <FieldCard
-        icon="custom:camera-add"
+        icon="custom:briefcase"
         title="gear_practicalities_label"
         description="gear_practicalities_description"
       >
@@ -158,7 +158,7 @@
           {{ $t('common_skip_for_now') }}
         </Button>
         <Button
-          color="accent"
+          color="primary"
           size="large"
           :loading="saving"
           @click="save"
@@ -168,7 +168,6 @@
       </template>
       <Button
         v-else
-        color="accent"
         size="large"
         @click="view = 'list'"
       >

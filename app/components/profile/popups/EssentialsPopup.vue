@@ -4,6 +4,7 @@
     :title="$t('onboarding_essentials_title')"
     :description="$t('onboarding_essentials_description')"
     persistent
+    language-switch
   >
     <FieldCard
       icon="custom:camera-add"
@@ -51,7 +52,7 @@
     </FieldCard>
 
     <FieldCard
-      icon="custom:camera-add"
+      icon="custom:form"
       title="onboarding_bio_title"
       description="onboarding_bio_description"
       required
@@ -71,7 +72,7 @@
     </FieldCard>
 
     <FieldCard
-      icon="custom:camera-add"
+      icon="custom:steps"
       title="onboarding_experience_level_title"
       description="onboarding_experience_level_description"
       required
@@ -87,7 +88,7 @@
     </FieldCard>
 
     <FieldCard
-      icon="custom:camera-add"
+      icon="custom:globe"
       title="onboarding_languages_title"
       description="onboarding_languages_description"
       required
@@ -108,7 +109,6 @@
 
     <template #actions>
       <Button
-        color="accent"
         size="large"
         :loading="saving"
         @click="save"

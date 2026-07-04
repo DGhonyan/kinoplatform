@@ -41,7 +41,6 @@ const avatarSrc = computed(
   flex-direction: column;
   gap: 12px;
   padding: 12px;
-  background: color(--v-theme-on-surface, 0.04);
   border: 1px solid color(--v-theme-on-surface, 0.12);
   border-radius: 16px;
   cursor: pointer;

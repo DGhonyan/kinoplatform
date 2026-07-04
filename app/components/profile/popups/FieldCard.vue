@@ -4,7 +4,7 @@
     :class="{ 'has-error': !!error }"
   >
     <div class="field-icon">
-      <v-icon size="24">
+      <v-icon size="28">
         {{ icon }}
       </v-icon>
     </div>
@@ -76,10 +76,9 @@ withDefaults(
 .field-card {
   display: flex;
   gap: 16px;
-  padding: 16px 20px;
+  padding: 12px;
   border-radius: 16px;
-  border: 1px solid color(--v-theme-on-surface, 0.12);
-  background-color: color(--v-theme-on-surface, 0.03);
+  border: 1px solid color(--v-theme-on-surface);
   transition: border-color 0.2s ease;
 }
 

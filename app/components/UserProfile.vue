@@ -82,76 +82,29 @@
         </a>
       </div>
 
-      <div
+      <ProfileChipGroup
         v-if="hasLanguages"
-        class="chip-group"
-      >
-        <span class="chip-label">{{ $t('common_languages') }}</span>
-        <div class="chips">
-          <v-chip
-            v-for="code in user?.languages"
-            :key="code"
-            size="small"
-            color="accent"
-          >
-            {{ languageName(code) }}
-          </v-chip>
-        </div>
-      </div>
+        :label="$t('common_languages')"
+        :items="languageNames"
+      />
 
-      <div
-        v-if="hasTools || hasEquipment"
-        class="chip-group"
-      >
-        <div class="chip-label-row">
-          <span class="chip-label">{{ $t('gear_title') }}</span>
-          <Button
-            v-if="canEdit"
-            icon="mdi-pencil"
-            variant="text"
-            size="x-small"
-            :aria-label="$t('common_edit')"
-            @click="openGear"
-          />
-        </div>
-        <div class="chips">
-          <v-chip
-            v-for="item in [...(user?.tools ?? []), ...(user?.equipment ?? [])]"
-            :key="item"
-            size="small"
-            color="accent"
-          >
-            {{ item }}
-          </v-chip>
-        </div>
-      </div>
+      <ProfileChipGroup
+        v-if="hasTools || hasEquipment || canEdit"
+        :label="$t('gear_title')"
+        :items="gearItems"
+        :editable="canEdit && (hasTools || hasEquipment)"
+        :add-label="canEdit ? $t('gear_add_cta') : undefined"
+        @edit="openGear"
+        @add="openGear"
+      />
 
-      <div
+      <ProfileChipGroup
         v-if="enabledPracticalities.length"
-        class="chip-group"
-      >
-        <div class="chip-label-row">
-          <span class="chip-label">{{ $t('gear_practicalities_label') }}</span>
-          <Button
-            v-if="canEdit"
-            icon="mdi-pencil"
-            variant="text"
-            size="x-small"
-            :aria-label="$t('common_edit')"
-            @click="openGear"
-          />
-        </div>
-        <div class="chips">
-          <v-chip
-            v-for="key in enabledPracticalities"
-            :key="key"
-            size="small"
-            color="accent"
-          >
-            {{ $t(`practicality_${key}`) }}
-          </v-chip>
-        </div>
-      </div>
+        :label="$t('gear_practicalities_label')"
+        :items="practicalityLabels"
+        :editable="canEdit"
+        @edit="openGear"
+      />
     </section>
 
     <!-- ───────────── 2. Projects ───────────── -->
@@ -200,27 +153,11 @@
         v-else
         class="projects"
       >
-        <div
+        <ProjectCard
           v-for="(p, i) in visibleProjects"
           :key="i"
-          class="project-item"
-        >
-          <component
-            :is="p.link ? 'a' : 'div'"
-            :href="p.link || undefined"
-            :target="p.link ? '_blank' : undefined"
-            class="project-name"
-          >
-            {{ p.name }}
-          </component>
-          <span class="project-meta">{{ projectLine(p) }}</span>
-          <p
-            v-if="p.description"
-            class="project-desc"
-          >
-            {{ p.description }}
-          </p>
-        </div>
+          :project="p"
+        />
       </div>
 
       <Button
@@ -279,23 +216,11 @@
         v-else
         class="timeline"
       >
-        <li
+        <ExperienceItem
           v-for="(e, i) in user?.experience"
           :key="i"
-          class="timeline-item"
-        >
-          <span class="timeline-marker" />
-          <div class="timeline-body">
-            <span class="exp-title">{{ e.position }} · {{ e.company }}</span>
-            <span class="exp-date">{{ experienceLine(e) }}</span>
-            <p
-              v-if="e.description"
-              class="exp-desc"
-            >
-              {{ e.description }}
-            </p>
-          </div>
-        </li>
+          :experience="e"
+        />
       </ol>
     </section>
 
@@ -343,22 +268,26 @@
     <ProjectsExperiencePopup
       v-if="canEdit && showDetailsPopup"
       v-model="showDetailsPopup"
-      @completed="onPopupCompleted"
+      @completed="afterDetails"
+      @skip="afterDetails"
     />
     <GearAndTravelPopup
       v-if="canEdit && showGearPopup"
       v-model="showGearPopup"
-      @completed="onPopupCompleted"
+      @completed="afterGear"
     />
   </div>
 </template>
 
 <script lang="ts" setup>
-import type { Project, Experience, Practicalities } from '~~/shared/types/user';
+import type { Practicalities } from '~~/shared/types/user';
 import type { UserProfile } from '~/stores/user';
 import { getLanguageDisplayName } from '~/utils/languages';
 import { isOnboardingComplete } from '~/utils/onboarding';
 import Button from '~/components/Button.vue';
+import ProjectCard from '~/components/profile/ProjectCard.vue';
+import ExperienceItem from '~/components/profile/ExperienceItem.vue';
+import ProfileChipGroup from '~/components/profile/ProfileChipGroup.vue';
 import ProfileCompletionBanner from '~/components/profile/ProfileCompletionBanner.vue';
 import ProfileRecommendations from '~/components/profile/ProfileRecommendations.vue';
 import ProfileAvailability from '~/components/profile/ProfileAvailability.vue';
@@ -393,25 +322,9 @@ const showRecommendations = computed(() => hasRecommendations.value || canLeaveR
 
 // ── Display helpers ──
 const professionsText = computed(() =>
-  (user.value?.profession ?? []).map(p => t(p)).join(', '),
+  (user.value?.profession ?? []).map(p => t(p)).join(' | '),
 );
 const languageName = (code: string) => getLanguageDisplayName(code, locale.value) ?? code;
-const monthName = (m: number) =>
-  new Date(2000, Math.max(0, m - 1), 1).toLocaleDateString(locale.value, { month: 'short' });
-
-const projectLine = (p: Project) =>
-  [p.type ? t(p.type) : '', p.position ? t(p.position) : '', p.year].filter(Boolean).join(' · ');
-
-const experienceLine = (e: Experience) => {
-  const start = `${monthName(e.startMonth)} ${e.startYear}`;
-  const end = e.currentlyWorking
-    ? t('onboarding_present')
-    : e.endYear
-      ? (e.endMonth ? `${monthName(e.endMonth)} ${e.endYear}` : String(e.endYear))
-      : '';
-  const range = end ? `${start} – ${end}` : start;
-  return [t(e.employmentType), range].filter(Boolean).join(' · ');
-};
 
 const getUserAvatar = () =>
   user.value?.avatar || new URL('@/assets/default.jpg', import.meta.url).href;
@@ -432,6 +345,16 @@ const PRACTICALITY_KEYS: (keyof Practicalities)[] = [
 ];
 const enabledPracticalities = computed(() =>
   PRACTICALITY_KEYS.filter(k => user.value?.practicalities?.[k]),
+);
+
+// ── Chip-group display strings ──
+const languageNames = computed(() => (user.value?.languages ?? []).map(languageName));
+const gearItems = computed(() => [
+  ...(user.value?.tools ?? []),
+  ...(user.value?.equipment ?? []),
+]);
+const practicalityLabels = computed(() =>
+  enabledPracticalities.value.map(k => t(`practicality_${k}`)),
 );
 
 // ── Projects inline expand ──
@@ -478,7 +401,6 @@ const onSaved = () => {
 const showDetailsPopup = ref(false);
 const showGearPopup = ref(false);
 const bannerDismissed = ref(false);
-const flowActive = ref(false);
 
 const detailsComplete = computed(() =>
   !!user.value?.education || !!user.value?.portfolio || hasProjects.value || hasExperience.value,
@@ -491,22 +413,26 @@ const showBanner = computed(() =>
   canEdit.value && !bannerDismissed.value && remainingOptional.value > 0,
 );
 
+// Gear can always be opened standalone (the section shows an entry point for the
+// owner even when empty) — no dependency on the banner flow.
 const openGear = () => {
-  flowActive.value = false;
   showGearPopup.value = true;
 };
-const openNextIncomplete = () => {
+
+// The banner walks the incomplete sections in order: it opens the first one, and
+// finishing OR skipping the details step advances to gear (details is flow-only,
+// so both its Save and Skip route through here). Gear is the last step — its Save
+// just refreshes, and Skip/close simply ends the flow.
+const openCompletionFlow = () => {
   if (!detailsComplete.value) showDetailsPopup.value = true;
   else if (!gearComplete.value) showGearPopup.value = true;
-  else flowActive.value = false;
 };
-const openCompletionFlow = () => {
-  flowActive.value = true;
-  openNextIncomplete();
-};
-const onPopupCompleted = () => {
+const afterDetails = () => {
   syncProfileFromAuth();
-  if (flowActive.value) openNextIncomplete();
+  if (!gearComplete.value) showGearPopup.value = true;
+};
+const afterGear = () => {
+  syncProfileFromAuth();
 };
 const dismissBanner = () => {
   bannerDismissed.value = true;
@@ -545,10 +471,7 @@ watch(() => props.userId, loadUserData);
   display: flex;
   flex-direction: column;
   gap: 20px;
-  padding: 28px;
-  border-radius: 20px;
-  border: 1px solid color(--v-theme-on-surface, 0.1);
-  background-color: color(--v-theme-on-surface, 0.03);
+  padding: 14px;
 }
 
 /* ── Personal info ── */
@@ -557,6 +480,7 @@ watch(() => props.userId, loadUserData);
   justify-content: space-between;
   align-items: flex-start;
   gap: 24px;
+  border-bottom: 1px solid color(--v-theme-accent);
 }
 
 .identity {
@@ -598,6 +522,7 @@ watch(() => props.userId, loadUserData);
   border-radius: 50%;
   overflow: hidden;
   border: 2px solid color(--v-theme-accent, 0.4);
+  margin-bottom: 10px;
 
   img {
     width: 100%;
@@ -611,6 +536,7 @@ watch(() => props.userId, loadUserData);
   line-height: 1.6;
   margin: 0;
   opacity: 0.9;
+  overflow-wrap: anywhere;
 }
 
 .meta {
@@ -641,35 +567,12 @@ watch(() => props.userId, loadUserData);
   }
 }
 
-.chip-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.chip-label-row {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.chip-label {
-  font-size: 13px;
-  font-weight: 500;
-  opacity: 0.7;
-}
-
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
 /* ── Section heads (projects / experience) ── */
 .section-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  border-bottom: 1px solid color(--v-theme-accent);
 }
 
 .section-title {
@@ -691,58 +594,9 @@ watch(() => props.userId, loadUserData);
 
 /* ── Projects ── */
 .projects {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 16px;
-}
-
-.project-item {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  // Grid cells default to min-width:auto, which lets long content force the
-  // column wider (overflow). 0 lets the card shrink so its text can wrap.
-  min-width: 0;
-  padding: 16px;
-  border-radius: 14px;
-  border: 1px solid color(--v-theme-on-surface, 0.12);
-  background-color: color(--v-theme-on-surface, 0.03);
-}
-
-.project-name {
-  font-size: 16px;
-  font-weight: 500;
-  color: inherit;
-  text-decoration: none;
-  // Break long unbreakable strings (URLs, single long words) instead of spilling.
-  overflow-wrap: anywhere;
-}
-
-a.project-name {
-  color: color(--v-theme-accent);
-
-  &:hover {
-    text-decoration: underline;
-  }
-}
-
-.project-meta {
-  font-size: 13px;
-  opacity: 0.7;
-  overflow-wrap: anywhere;
-}
-
-.project-desc {
-  font-size: 14px;
-  margin: 4px 0 0;
-  opacity: 0.85;
-  overflow-wrap: anywhere;
-  // Keep cards tidy — clamp long descriptions to a few lines.
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  line-clamp: 4;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
 /* ── Experience timeline ── */
@@ -752,62 +606,5 @@ a.project-name {
   padding: 0;
   display: flex;
   flex-direction: column;
-}
-
-.timeline-item {
-  position: relative;
-  padding-left: 28px;
-  padding-bottom: 24px;
-
-  &:last-child {
-    padding-bottom: 0;
-  }
-
-  // Connecting line between dots.
-  &::before {
-    content: '';
-    position: absolute;
-    left: 5px;
-    top: 14px;
-    bottom: -2px;
-    width: 2px;
-    background-color: color(--v-theme-accent, 0.35);
-  }
-
-  &:last-child::before {
-    display: none;
-  }
-}
-
-.timeline-marker {
-  position: absolute;
-  left: 0;
-  top: 4px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background-color: color(--v-theme-accent);
-}
-
-.timeline-body {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.exp-title {
-  font-size: 16px;
-  font-weight: 500;
-}
-
-.exp-date {
-  font-size: 13px;
-  opacity: 0.7;
-}
-
-.exp-desc {
-  font-size: 14px;
-  margin: 4px 0 0;
-  opacity: 0.85;
 }
 </style>

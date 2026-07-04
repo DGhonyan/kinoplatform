@@ -140,9 +140,9 @@ export const darkColors: Record<string, string> = {
   // Lifted a few % above the background so cards, dialogs, and menus read as
   // elevated instead of blending into the page (Vuetify paints v-card / v-menu
   // / v-dialog surfaces with this token).
-  'surface': '#262222',
+  'surface': '#161515',
   'on-background': '#FFF9F0',
-  'on-surface': '#FFF9F0',
+  'on-surface': '#FFFBF9',
 };
 
 export const iconAliases: Record<string, string> = {

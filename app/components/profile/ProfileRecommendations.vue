@@ -54,13 +54,20 @@
                 alt=""
                 class="rec-avatar"
               >
-              <span class="rec-name">{{ rec.author.firstName }} {{ rec.author.lastName }}</span>
+              <span class="rec-identity">
+                <span class="rec-name">{{ rec.author.firstName }} {{ rec.author.lastName }}</span>
+                <span
+                  v-if="authorProfession(rec)"
+                  class="rec-profession"
+                >{{ authorProfession(rec) }}</span>
+              </span>
             </NuxtLink>
             <Button
               v-if="canDelete(rec)"
               icon="mdi-close"
               variant="text"
               size="x-small"
+              color="#7a7a7a"
               :aria-label="$t('common_delete')"
               @click="removeRec(rec._id)"
             />
@@ -97,8 +104,13 @@ const emit = defineEmits<{ changed: [] }>();
 
 const MAX = 250;
 
+const { t } = useI18n();
 const authStore = useAuthStore();
 const recommendationStore = useRecommendationStore();
+
+// The author's professions, translated and joined (single line + ellipsis in CSS).
+const authorProfession = (rec: Recommendation) =>
+  (rec.author.profession ?? []).map(p => t(p)).join(' | ');
 
 // The viewer may leave one only on someone else's profile, once onboarded.
 const canLeave = computed(() =>
@@ -195,12 +207,12 @@ const removeRec = async (id: string) => {
   flex-direction: column;
   gap: 10px;
   width: 280px;
-  min-height: 140px;
   margin-right: 12px;
   padding: 16px;
   border-radius: 14px;
-  border: 1px solid color(--v-theme-on-surface, 0.12);
-  background-color: color(--v-theme-on-surface, 0.03);
+  // Light testimonial card, inverted from the dark profile page.
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: color(--v-theme-accent);
 }
 
 .rec-head {
@@ -227,9 +239,25 @@ const removeRec = async (id: string) => {
   flex-shrink: 0;
 }
 
+.rec-identity {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
 .rec-name {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 15px;
+  font-weight: 600;
+  color: color(--v-theme-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rec-profession {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.55);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -239,7 +267,7 @@ const removeRec = async (id: string) => {
   font-size: 14px;
   line-height: 1.5;
   margin: 0;
-  opacity: 0.9;
+  color: rgba(0, 0, 0, 0.8);
   overflow-wrap: anywhere;
 }
 

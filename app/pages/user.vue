@@ -107,6 +107,14 @@ watch(phase, (p) => {
   setPageLayout(p === 'wizard' ? 'hero' : 'default');
 }, { immediate: true });
 
+// `setPageLayout` is imperative, and Nuxt does NOT reset it when the next route
+// doesn't declare its own layout (home, about, crew…). Without this, the hero
+// layout — and its fixed, full-page cover image — stays mounted and bleeds onto
+// the next page until a hard refresh. Reset to default as we navigate away.
+onBeforeRouteLeave(() => {
+  setPageLayout('default');
+});
+
 onMounted(maybeOpenEssentials);
 </script>
 

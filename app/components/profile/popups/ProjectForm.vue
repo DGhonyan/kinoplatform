@@ -11,12 +11,21 @@
       hide-details="auto"
       @update:model-value="errors.name = ''"
     />
+    <Input
+      v-model="draft.nameOriginal"
+      color="accent"
+      type="text"
+      :label="'onboarding_project_name_original'"
+      :placeholder="$t('onboarding_project_name_original_placeholder')"
+      hide-details="auto"
+    />
     <Select
       v-model="draft.type"
       color="accent"
       :label="'onboarding_project_type'"
       :placeholder="$t('onboarding_select_placeholder')"
       :items="productionTypeItems"
+      multiple
       required
       :error-messages="errors.type"
       @update:model-value="errors.type = ''"
@@ -27,11 +36,24 @@
       :label="'onboarding_project_position'"
       :placeholder="$t('register_professions_placeholder')"
       :items="professionItems"
+      multiple
       required
       :error-messages="errors.position"
       @update:model-value="errors.position = ''"
     />
-    <div class="date-row">
+
+    <v-checkbox
+      v-model="draft.workInProgress"
+      color="accent"
+      density="compact"
+      hide-details
+      :label="$t('onboarding_work_in_progress')"
+    />
+
+    <div
+      v-if="!draft.workInProgress"
+      class="date-row"
+    >
       <Select
         v-model="draft.month"
         color="accent"
@@ -53,6 +75,59 @@
         @update:model-value="errors.date = ''"
       />
     </div>
+
+    <!-- Optional poster/still, uploaded immediately and stored as a public URL. -->
+    <div class="media-field">
+      <span class="media-label">{{ $t('onboarding_project_media') }}</span>
+      <FileUpload
+        v-model="mediaFileId"
+        kind="project_media"
+        accept="image/jpeg,image/png,image/webp"
+        @upload:complete="onMediaUploaded"
+      >
+        <template #activator="{ open: openPicker, previewUrl, uploading, progress }">
+          <div class="media-row">
+            <div
+              v-if="(previewUrl || draft.media) && !uploading"
+              class="media-thumb"
+            >
+              <img
+                :src="previewUrl || draft.media"
+                alt=""
+              >
+            </div>
+            <v-progress-circular
+              v-if="uploading"
+              :model-value="progress"
+              :size="44"
+              :width="4"
+              color="accent"
+            />
+            <div class="media-actions">
+              <Button
+                variant="secondary"
+                color="accent"
+                size="small"
+                :disabled="uploading"
+                @click="openPicker"
+              >
+                {{ draft.media ? $t('onboarding_change_media') : $t('onboarding_add_media') }}
+              </Button>
+              <Button
+                v-if="draft.media && !uploading"
+                variant="text"
+                color="error"
+                size="small"
+                icon="mdi-delete"
+                :aria-label="$t('common_delete')"
+                @click="removeMedia"
+              />
+            </div>
+          </div>
+        </template>
+      </FileUpload>
+    </div>
+
     <Input
       v-model="draft.link"
       color="accent"
@@ -76,9 +151,12 @@
 
 <script lang="ts" setup>
 import type { Project } from '~~/shared/types/user';
+import type { UploadedFile } from '~~/shared/types/file';
 import { professions, PRODUCTION_TYPES } from '~/utils/constants';
 import { monthOptions, yearOptions } from '~/utils/dateOptions';
 import Select from '~/components/Select.vue';
+import FileUpload from '~/components/FileUpload.vue';
+import Button from '~/components/Button.vue';
 
 /**
  * Reusable project form. Seeds an internal draft from `initial` (undefined = new)
@@ -93,37 +171,57 @@ const { t, locale } = useI18n();
 
 type ProjectDraft = {
   name: string;
-  type: string;
-  position: string;
+  nameOriginal: string;
+  type: string[];
+  position: string[];
+  workInProgress: boolean;
   year: string;
   month: string;
   link: string;
   description: string;
+  media: string;
 };
 
 const blank = (): ProjectDraft => ({
-  name: '', type: '', position: '', year: '', month: '', link: '', description: '',
+  name: '', nameOriginal: '', type: [], position: [], workInProgress: false,
+  year: '', month: '', link: '', description: '', media: '',
 });
 
 const draft = ref<ProjectDraft>(
   props.initial
     ? {
         name: props.initial.name,
-        type: props.initial.type,
-        position: props.initial.position,
-        year: String(props.initial.year),
-        month: String(props.initial.month),
+        nameOriginal: props.initial.nameOriginal ?? '',
+        type: [...(props.initial.type ?? [])],
+        position: [...(props.initial.position ?? [])],
+        workInProgress: props.initial.workInProgress ?? false,
+        year: props.initial.year != null ? String(props.initial.year) : '',
+        month: props.initial.month != null ? String(props.initial.month) : '',
         link: props.initial.link ?? '',
         description: props.initial.description ?? '',
+        media: props.initial.media ?? '',
       }
     : blank(),
 );
 const errors = reactive({ name: '', type: '', position: '', date: '', link: '' });
 
+// FileUpload needs a v-model (the confirmed file id); the URL we actually store
+// arrives via @upload:complete. Seeded blank — an existing project's media is
+// already a URL in `draft.media`, no id needed to re-display it.
+const mediaFileId = ref('');
+
 const professionItems = computed(() => professions.map(id => ({ value: id, title: t(id) })));
 const productionTypeItems = computed(() => PRODUCTION_TYPES.map(id => ({ value: id, title: t(id) })));
 const months = computed(() => monthOptions(locale.value));
 const years = yearOptions();
+
+const onMediaUploaded = (file: UploadedFile) => {
+  draft.value.media = file.url;
+};
+const removeMedia = () => {
+  draft.value.media = '';
+  mediaFileId.value = '';
+};
 
 const URL_RE = /^https?:\/\/[^\s.]+\.[^\s]+$/i;
 
@@ -140,15 +238,16 @@ const commit = (): Project | null => {
     errors.name = t('common_this_field_is_required');
     ok = false;
   }
-  if (!d.type) {
+  if (d.type.length === 0) {
     errors.type = t('common_this_field_is_required');
     ok = false;
   }
-  if (!d.position) {
+  if (d.position.length === 0) {
     errors.position = t('common_this_field_is_required');
     ok = false;
   }
-  if (!d.year || !d.month) {
+  // A work-in-progress has no release date; otherwise both parts are required.
+  if (!d.workInProgress && (!d.year || !d.month)) {
     errors.date = t('common_this_field_is_required');
     ok = false;
   }
@@ -164,12 +263,14 @@ const commit = (): Project | null => {
 
   return {
     name: d.name.trim(),
+    ...(d.nameOriginal.trim() ? { nameOriginal: d.nameOriginal.trim() } : {}),
     type: d.type,
     position: d.position,
-    year: Number(d.year),
-    month: Number(d.month),
+    workInProgress: d.workInProgress,
+    ...(d.workInProgress ? {} : { year: Number(d.year), month: Number(d.month) }),
     ...(normalizedLink ? { link: normalizedLink } : {}),
     ...(d.description.trim() ? { description: d.description.trim() } : {}),
+    ...(d.media ? { media: d.media } : {}),
   };
 };
 
@@ -190,5 +291,42 @@ defineExpose({ commit });
   > * {
     flex: 1;
   }
+}
+
+.media-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.media-label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.media-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.media-thumb {
+  width: 96px;
+  height: 64px;
+  border-radius: 10px;
+  overflow: hidden;
+  flex-shrink: 0;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.media-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 </style>
