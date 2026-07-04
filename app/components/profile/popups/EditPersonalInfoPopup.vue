@@ -8,6 +8,7 @@
       <FileUpload
         v-model="avatarFileId"
         kind="avatar"
+        :aspect-ratio="AVATAR_ASPECT_RATIO"
         accept="image/jpeg,image/png,image/webp"
         @update:model-value="avatarError = ''"
       >
@@ -194,7 +195,7 @@
 
 <script lang="ts" setup>
 import type { Gender } from '~~/shared/types/user';
-import { GENDERS, EXPERIENCE_LEVELS, PROFESSION_GROUPS } from '~/utils/constants';
+import { GENDERS, EXPERIENCE_LEVELS, PROFESSION_GROUPS, AVATAR_ASPECT_RATIO } from '~/utils/constants';
 import {
   LANGUAGE_CODES,
   getLanguageDisplayName,

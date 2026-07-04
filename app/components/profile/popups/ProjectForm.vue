@@ -82,6 +82,7 @@
       <FileUpload
         v-model="mediaFileId"
         kind="project_media"
+        :aspect-ratio="PROJECT_MEDIA_ASPECT_RATIO"
         accept="image/jpeg,image/png,image/webp"
         @upload:complete="onMediaUploaded"
       >
@@ -152,7 +153,7 @@
 <script lang="ts" setup>
 import type { Project } from '~~/shared/types/user';
 import type { UploadedFile } from '~~/shared/types/file';
-import { professions, PRODUCTION_TYPES } from '~/utils/constants';
+import { professions, PRODUCTION_TYPES, PROJECT_MEDIA_ASPECT_RATIO } from '~/utils/constants';
 import { monthOptions, yearOptions } from '~/utils/dateOptions';
 import Select from '~/components/Select.vue';
 import FileUpload from '~/components/FileUpload.vue';

@@ -1,5 +1,15 @@
 import type { ChipGroup } from '~/utils/gear';
 
+/**
+ * Crop-before-upload aspect ratios (width / height). Each MUST match its display
+ * container's box so a cropped image fills it via `object-fit: cover` with no
+ * further cropping. If a box is resized in CSS, update the matching value here.
+ *   AVATAR        → ProfilePersonalInfo `.avatar`   (320 × 400)
+ *   PROJECT_MEDIA → ProjectCard `.project-media`    (218 × 255)
+ */
+export const AVATAR_ASPECT_RATIO = 320 / 400;
+export const PROJECT_MEDIA_ASPECT_RATIO = 218 / 255;
+
 export const FIELD_IDS = [
   'field_directing_creative_leadership',
   'field_writing_development',

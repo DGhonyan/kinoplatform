@@ -99,6 +99,14 @@
       v-if="helperText"
       class="helper-text"
     >{{ $t(helperText) }}</span>
+
+    <ImageCropperDialog
+      v-if="cropOpen"
+      v-model="cropOpen"
+      :src="cropSrc"
+      :aspect-ratio="aspectRatio ?? 1"
+      @confirm="onCropConfirm"
+    />
   </div>
 </template>
 
@@ -117,6 +125,9 @@ const props = withDefaults(defineProps<{
   modelValue?: string;
   autoUpload?: boolean;
   color?: string;
+  /** When set, picked images open a crop dialog locked to this ratio (w / h)
+   *  before uploading — so the stored image matches its profile container. */
+  aspectRatio?: number;
 }>(), {
   label: '',
   required: false,
@@ -162,32 +173,55 @@ watch(() => props.modelValue, (value) => {
   }
 });
 
-const handleFileSelect = async (files: File | File[] | null) => {
-  if (!files) return;
+// A picked image either goes straight to upload, or (when aspectRatio is set)
+// through the crop dialog first.
+const cropOpen = ref(false);
+const cropSrc = ref('');
+const pendingName = ref('');
 
-  const fileArray = Array.isArray(files) ? files : [files];
-  const file = fileArray[0];
-  if (!file) return;
-
-  if (props.autoUpload) {
-    await uploadFile(file);
+const handlePicked = (file: File) => {
+  if (props.aspectRatio) {
+    if (cropSrc.value) URL.revokeObjectURL(cropSrc.value);
+    cropSrc.value = URL.createObjectURL(file);
+    pendingName.value = file.name;
+    cropOpen.value = true;
   }
+  else if (props.autoUpload) {
+    uploadFile(file);
+  }
+};
+
+const onCropConfirm = (blob: Blob) => {
+  cropOpen.value = false; // the watcher below frees cropSrc
+  const base = pendingName.value.replace(/\.[^.]+$/, '') || 'image';
+  const cropped = new File([blob], `${base}.webp`, { type: blob.type || 'image/webp' });
+  uploadFile(cropped);
+};
+
+// Free the crop object URL whenever the dialog closes (confirm, cancel, or X).
+watch(cropOpen, (isOpen) => {
+  if (!isOpen && cropSrc.value) {
+    URL.revokeObjectURL(cropSrc.value);
+    cropSrc.value = '';
+  }
+});
+
+const handleFileSelect = (files: File | File[] | null) => {
+  if (!files) return;
+  const file = Array.isArray(files) ? files[0] : files;
+  if (file) handlePicked(file);
 };
 
 const openFilePicker = () => {
   fileInputRef.value?.click();
 };
 
-const handleNativeFileSelect = async (event: Event) => {
+const handleNativeFileSelect = (event: Event) => {
   const target = event.target as HTMLInputElement;
   const file = target.files?.[0];
   // Reset so re-selecting the same file still fires `change`.
   target.value = '';
-  if (!file) return;
-
-  if (props.autoUpload) {
-    await uploadFile(file);
-  }
+  if (file) handlePicked(file);
 };
 
 const uploadFile = async (file: File) => {

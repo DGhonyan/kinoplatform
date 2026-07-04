@@ -309,6 +309,8 @@
     "onboarding_photo_description": "Add a photo so people on set recognize you.",
     "onboarding_upload_photo": "Upload photo",
     "onboarding_change_photo": "Change photo",
+    "cropper_title": "Crop & position",
+    "cropper_preview": "Preview",
     "onboarding_bio_title": "Bio",
     "onboarding_bio_description": "Tell us a bit about yourself and what you do.",
     "onboarding_experience_level_title": "Experience level",

@@ -16,6 +16,7 @@
       <FileUpload
         v-model="avatarFileId"
         kind="avatar"
+        :aspect-ratio="AVATAR_ASPECT_RATIO"
         accept="image/jpeg,image/png,image/webp"
         @update:model-value="avatarError = ''"
       >
@@ -121,7 +122,7 @@
 
 <script lang="ts" setup>
 import { STEP_IDS } from '~/components/auth/registerSteps';
-import { EXPERIENCE_LEVELS } from '~/utils/constants';
+import { EXPERIENCE_LEVELS, AVATAR_ASPECT_RATIO } from '~/utils/constants';
 import {
   LANGUAGE_CODES,
   getLanguageDisplayName,
