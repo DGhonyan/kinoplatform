@@ -22,16 +22,20 @@
         </button>
       </div>
 
-      <!-- Add tile — hidden once the max is reached. Each pick crops + uploads. -->
+      <!-- Add tile — the button hides at max, but FileUpload stays mounted so an
+           in-flight multi-select crop queue isn't torn down. Each pick crops +
+           uploads; a multi-select is capped to the remaining slots. -->
       <FileUpload
-        v-if="modelValue.length < max"
         kind="actor_photo"
         :aspect-ratio="ACTOR_PHOTO_ASPECT_RATIO"
         accept="image/jpeg,image/png,image/webp"
+        multiple
+        :max-files="max - modelValue.length"
         @upload:complete="onUploaded"
       >
         <template #activator="{ open: openPicker, uploading, progress }">
           <button
+            v-if="modelValue.length < max"
             type="button"
             class="add"
             :disabled="uploading"
@@ -72,12 +76,15 @@ import FileUpload from '~/components/FileUpload.vue';
  */
 const modelValue = defineModel<string[]>({ required: true });
 
-withDefaults(defineProps<{ min?: number; max?: number }>(), {
+const props = withDefaults(defineProps<{ min?: number; max?: number }>(), {
   min: 2,
   max: 6,
 });
 
 const onUploaded = (file: UploadedFile) => {
+  // Selection is already capped in FileUpload; guard here too so a late upload
+  // completing can't push us past the max.
+  if (modelValue.value.length >= props.max) return;
   modelValue.value = [...modelValue.value, file.url];
 };
 const removeAt = (i: number) => {

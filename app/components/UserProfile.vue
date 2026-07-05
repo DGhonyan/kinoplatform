@@ -16,7 +16,50 @@
       :nav-sections="navSections"
       @edit-info="showEditInfo = true"
       @edit-gear="openGear"
+      @edit-appearance="showActorEdit = true"
     />
+
+    <!-- ── Actor photos: public, chromeless — no label/border, just sit here ── -->
+    <div
+      v-if="showPhotos"
+      id="profile-photos"
+      class="photos-block"
+    >
+      <div
+        v-if="canEdit && isActorProfile"
+        class="photos-edit-row"
+      >
+        <Button
+          variant="text"
+          size="small"
+          :prepend-icon="hasPhotos ? 'mdi-pencil' : 'mdi-plus'"
+          color="accent"
+          @click="showActorEdit = true"
+        >
+          {{ hasPhotos ? $t('common_edit') : $t('common_add') }}
+        </Button>
+      </div>
+
+      <Carousel
+        v-if="hasPhotos"
+        :items="photos"
+        loop
+      >
+        <template #item="{ item }">
+          <img
+            :src="item"
+            alt=""
+            class="actor-photo"
+          >
+        </template>
+      </Carousel>
+      <p
+        v-else
+        class="empty-state"
+      >
+        {{ $t('actor_no_photos_yet') }}
+      </p>
+    </div>
 
     <!-- ───────────── 2. Projects ───────────── -->
     <section
@@ -190,13 +233,24 @@
       v-model="showGearPopup"
       @completed="afterGear"
     />
+    <ActorDetailsPopup
+      v-if="canEdit && showActorEdit"
+      v-model="showActorEdit"
+      dismissable
+      title="actor_details_edit_title"
+      description="actor_details_edit_description"
+      @completed="onSaved"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
 import type { UserProfile } from '~/stores/user';
 import { isOnboardingComplete } from '~/utils/onboarding';
+import { isActor } from '~/utils/persona';
 import Button from '~/components/Button.vue';
+import Carousel from '~/components/Carousel.vue';
+import ActorDetailsPopup from '~/components/profile/popups/ActorDetailsPopup.vue';
 import ProjectCard from '~/components/profile/ProjectCard.vue';
 import ExperienceItem from '~/components/profile/ExperienceItem.vue';
 import ProfilePersonalInfo from '~/components/profile/ProfilePersonalInfo.vue';
@@ -230,6 +284,15 @@ const canLeaveRecommendation = computed(() =>
 );
 const showRecommendations = computed(() => hasRecommendations.value || canLeaveRecommendation.value);
 
+// ── Actor photos (public carousel) + appearance (owner-only, filter-only) ──
+const isActorProfile = computed(() => isActor(user.value?.profession));
+const photos = computed(() => user.value?.additionalPhotos ?? []);
+const hasPhotos = computed(() => photos.value.length > 0);
+// Visitors see the photos only when there are some; the owner-actor always sees
+// the block, so they can add/manage even when empty.
+const showPhotos = computed(() => isActorProfile.value && (hasPhotos.value || canEdit.value));
+const showActorEdit = ref(false);
+
 // ── Presence flags (gear ones also gate the completion-flow nudge below) ──
 const hasProjects = computed(() => (user.value?.projects?.length ?? 0) > 0);
 const hasExperience = computed(() => (user.value?.experience?.length ?? 0) > 0);
@@ -242,6 +305,7 @@ const hasEquipment = computed(() => (user.value?.equipment?.length ?? 0) > 0);
 const navSections = computed(() =>
   [
     { id: 'profile-about', label: 'profile_nav_about', show: !!user.value?.bio },
+    { id: 'profile-photos', label: 'actor_photos_title', show: hasPhotos.value },
     { id: 'profile-projects', label: 'common_projects', show: hasProjects.value },
     { id: 'profile-experience', label: 'profile_experience', show: hasExperience.value },
     { id: 'profile-recommendations', label: 'recommendation_title', show: showRecommendations.value },
@@ -398,6 +462,27 @@ watch(() => props.userId, loadUserData);
   font-size: 14px;
   opacity: 0.6;
   margin: 0;
+}
+
+/* ── Actor photos (chromeless — no section head/border, just sit here) ── */
+.photos-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 14px;
+}
+
+.photos-edit-row {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.actor-photo {
+  display: block;
+  width: 300px;
+  height: 370px;
+  object-fit: cover;
+  border-radius: 12px;
 }
 
 /* ── Projects ── */

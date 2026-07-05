@@ -50,7 +50,6 @@
         </p>
       </div>
 
-
       <div class="popup-body">
         <slot />
       </div>

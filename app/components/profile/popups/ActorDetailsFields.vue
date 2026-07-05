@@ -1,6 +1,6 @@
 <template>
   <FieldCard
-    icon="custom:camera-add"
+    icon="custom:person-video"
     title="actor_photos_title"
     description="actor_photos_description"
     required
@@ -10,7 +10,7 @@
   </FieldCard>
 
   <FieldCard
-    icon="custom:form"
+    icon="custom:face"
     title="appearance_title"
     description="appearance_description"
     required

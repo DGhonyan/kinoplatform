@@ -1,9 +1,9 @@
 <template>
   <PopupShell
     v-model="open"
-    :title="$t('actor_details_title')"
-    :description="$t('actor_details_description')"
-    persistent
+    :title="$t(title)"
+    :description="$t(description)"
+    :persistent="!dismissable"
   >
     <ActorDetailsFields
       v-model:photos="additionalPhotos"
@@ -13,6 +13,16 @@
     />
 
     <template #actions>
+      <Button
+        v-if="dismissable"
+        variant="secondary"
+        color="accent"
+        size="large"
+        :disabled="saving"
+        @click="open = false"
+      >
+        {{ $t('common_cancel') }}
+      </Button>
       <Button
         size="large"
         :loading="saving"
@@ -32,11 +42,25 @@ import ActorDetailsFields from '~/components/profile/popups/ActorDetailsFields.v
 import Button from '~/components/Button.vue';
 
 /**
- * Forced when a user adds an acting role after onboarding and still lacks the
- * mandatory appearance/photos (see `needsActorDetails`). Persistent — the only
- * exit is completing the fields.
+ * Two modes:
+ *  - forced (default) — persistent, only a Save button. Used when a user adds an
+ *    acting role after onboarding and still lacks the mandatory details (see
+ *    `needsActorDetails`); the only exit is completing them.
+ *  - dismissable — a cancelable editor. Photos and appearance are displayed in
+ *    separate places on the profile, but both edit affordances open this one
+ *    popup so the owner manages them together.
  */
 const open = defineModel<boolean>({ required: true });
+
+withDefaults(defineProps<{
+  dismissable?: boolean;
+  title?: string;
+  description?: string;
+}>(), {
+  dismissable: false,
+  title: 'actor_details_title',
+  description: 'actor_details_description',
+});
 
 const emit = defineEmits<{ completed: [] }>();
 

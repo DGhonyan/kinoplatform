@@ -92,6 +92,32 @@
         :editable="canEdit"
         @edit="emit('editGear')"
       />
+
+      <!-- Appearance is owner-only and never shown publicly — it powers casting
+           filters. This is the private edit entry point. -->
+      <div
+        v-if="canEdit && isActorProfile"
+        class="appearance-owner"
+      >
+        <div class="appearance-owner-head">
+          <span class="appearance-owner-label">{{ $t('appearance_title') }}</span>
+          <Button
+            variant="text"
+            size="small"
+            :prepend-icon="appearanceSet ? 'mdi-pencil' : 'mdi-plus'"
+            color="accent"
+            @click="emit('editAppearance')"
+          >
+            {{ appearanceSet ? $t('common_edit') : $t('common_add') }}
+          </Button>
+        </div>
+        <span class="appearance-owner-note">
+          <v-icon size="14">
+            mdi-eye-off-outline
+          </v-icon>
+          {{ $t('appearance_private_note') }}
+        </span>
+      </div>
     </div>
 
     <div
@@ -110,6 +136,8 @@
 import type { Practicalities } from '~~/shared/types/user';
 import type { UserProfile } from '~/stores/user';
 import { getLanguageDisplayName } from '~/utils/languages';
+import { isActor } from '~/utils/persona';
+import { isAppearanceComplete } from '~/utils/appearance';
 import Button from '~/components/Button.vue';
 import ProfileChipGroup from '~/components/profile/ProfileChipGroup.vue';
 import ProfileSectionNav from '~/components/profile/ProfileSectionNav.vue';
@@ -130,9 +158,13 @@ const props = defineProps<{
 const emit = defineEmits<{
   editInfo: [];
   editGear: [];
+  editAppearance: [];
 }>();
 
 const { t, locale } = useI18n();
+
+const isActorProfile = computed(() => isActor(props.user?.profession));
+const appearanceSet = computed(() => isAppearanceComplete(props.user?.appearance));
 
 const professionsText = computed(() =>
   (props.user?.profession ?? []).map(p => t(p)).join(' | '),
@@ -283,6 +315,37 @@ const practicalityLabels = computed(() =>
 
   &:hover {
     text-decoration: underline;
+  }
+}
+
+.appearance-owner {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.appearance-owner-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.appearance-owner-label {
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.appearance-owner-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  opacity: 0.55;
+
+  .v-icon {
+    flex-shrink: 0;
   }
 }
 </style>

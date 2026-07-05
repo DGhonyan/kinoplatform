@@ -13,41 +13,39 @@ export const hasRequiredActorPhotos = (photos?: string[] | null): boolean =>
   (photos?.length ?? 0) >= MIN_ACTOR_PHOTOS;
 
 /**
- * Predefined appearance option ids. Each id is both the stored value and its
- * i18n key. `hairColor` additionally accepts a free custom string (see the
- * AppearancePopup) when none of the presets fit.
+ * Whether a hex color reads as light — used to pick a contrasting checkmark on
+ * the selected appearance swatch. Falls back to "dark" for anything unparseable.
+ */
+export const isLightColor = (hex: string): boolean => {
+  const value = /^#?([0-9a-f]{6})$/i.exec(hex.trim())?.[1];
+  if (!value) return false;
+  const n = parseInt(value, 16);
+  const r = (n >> 16) & 255;
+  const g = (n >> 8) & 255;
+  const b = n & 255;
+  // Perceived (sRGB-weighted) luminance.
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.6;
+};
+
+/**
+ * Predefined appearance swatches — the stored value IS the hex string (not an
+ * i18n key; the swatch is purely visual). `hairColor` additionally accepts a
+ * custom hex from the color picker (see the AppearancePopup).
  */
 export const HAIR_COLORS = [
-  'hair_black',
-  'hair_dark_brown',
-  'hair_brown',
-  'hair_light_brown',
-  'hair_blonde',
-  'hair_red',
-  'hair_auburn',
-  'hair_gray',
-  'hair_white',
-  'hair_bald',
+  '#D1C1A3', '#B0997B', '#7F6652', '#7A372E', '#885537', '#937D58',
+  '#5A3E28', '#664F47', '#381F18', '#D9943B', '#276B1C', '#2B26B9',
+  '#8827A6', '#D92C96', '#D01821', '#848484', '#1D1D1D',
 ] as const;
 
 export const EYE_COLORS = [
-  'eye_brown',
-  'eye_hazel',
-  'eye_amber',
-  'eye_green',
-  'eye_blue',
-  'eye_gray',
-  'eye_black',
+  '#68707B', '#6BAFB8', '#206380', '#728567', '#313E2A',
+  '#D2AC6E', '#D59B51', '#9E5930', '#3B1C11',
 ] as const;
 
 export const SKIN_COLORS = [
-  'skin_fair',
-  'skin_light',
-  'skin_medium',
-  'skin_olive',
-  'skin_brown',
-  'skin_dark',
-  'skin_deep',
+  '#FAD4D1', '#F2B8AD', '#EDC190', '#D8AF7B', '#C0946F', '#9C6C44',
+  '#81543D', '#684332', '#4A2F24', '#3C1F11', '#2E2520',
 ] as const;
 
 /**

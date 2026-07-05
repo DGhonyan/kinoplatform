@@ -17,6 +17,7 @@
         ref="fileInputRef"
         type="file"
         :accept="accept"
+        :multiple="multiple || undefined"
         class="hidden-input"
         @change="handleNativeFileSelect"
       >
@@ -128,6 +129,10 @@ const props = withDefaults(defineProps<{
   /** When set, picked images open a crop dialog locked to this ratio (w / h)
    *  before uploading — so the stored image matches its profile container. */
   aspectRatio?: number;
+  /** Allow selecting several files at once; each runs the crop→upload flow in turn. */
+  multiple?: boolean;
+  /** Cap a multi-select to this many files (e.g. the caller's remaining slots). */
+  maxFiles?: number;
 }>(), {
   label: '',
   required: false,
@@ -136,6 +141,7 @@ const props = withDefaults(defineProps<{
   helperText: '',
   autoUpload: true,
   color: 'primary',
+  multiple: false,
 });
 
 // Let callers pass theme tokens (incl. `on-*`) by name; resolveThemeColor turns
@@ -191,6 +197,31 @@ const handlePicked = (file: File) => {
   }
 };
 
+// Multi-select: cap to the caller's remaining slots, then run each file through
+// the same crop→upload flow. Cropping is one-at-a-time, so the rest wait in a
+// queue and open as each crop dialog closes (see the cropOpen watcher).
+const cropQueue = ref<File[]>([]);
+
+const handleMultiplePicked = (files: File[]) => {
+  const cap = props.maxFiles && props.maxFiles > 0 ? props.maxFiles : files.length;
+  const [first, ...rest] = files.slice(0, cap);
+  if (!first) return;
+
+  if (props.aspectRatio) {
+    cropQueue.value = rest;
+    handlePicked(first);
+  }
+  else {
+    [first, ...rest].forEach(f => handlePicked(f));
+  }
+};
+
+const advanceCropQueue = () => {
+  const next = cropQueue.value.shift();
+  // Let the dialog unmount this tick, then reopen fresh for the next file.
+  if (next) nextTick(() => handlePicked(next));
+};
+
 const onCropConfirm = (blob: Blob) => {
   cropOpen.value = false; // the watcher below frees cropSrc
   const base = pendingName.value.replace(/\.[^.]+$/, '') || 'image';
@@ -198,12 +229,15 @@ const onCropConfirm = (blob: Blob) => {
   uploadFile(cropped);
 };
 
-// Free the crop object URL whenever the dialog closes (confirm, cancel, or X).
+// Free the crop object URL whenever the dialog closes (confirm, cancel, or X),
+// then advance to the next queued file (a no-op for a single pick).
 watch(cropOpen, (isOpen) => {
-  if (!isOpen && cropSrc.value) {
+  if (isOpen) return;
+  if (cropSrc.value) {
     URL.revokeObjectURL(cropSrc.value);
     cropSrc.value = '';
   }
+  advanceCropQueue();
 });
 
 const handleFileSelect = (files: File | File[] | null) => {
@@ -218,10 +252,13 @@ const openFilePicker = () => {
 
 const handleNativeFileSelect = (event: Event) => {
   const target = event.target as HTMLInputElement;
-  const file = target.files?.[0];
-  // Reset so re-selecting the same file still fires `change`.
+  const files = Array.from(target.files ?? []);
+  // Reset so re-selecting the same file(s) still fires `change`.
   target.value = '';
-  if (file) handlePicked(file);
+  const first = files[0];
+  if (!first) return;
+  if (props.multiple) handleMultiplePicked(files);
+  else handlePicked(first);
 };
 
 const uploadFile = async (file: File) => {

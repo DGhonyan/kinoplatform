@@ -34,15 +34,12 @@
     </div>
 
     <!-- Carousel of recommendation cards. -->
-    <v-slide-group
+    <Carousel
       v-if="recommendations.length"
-      show-arrows
-      class="carousel"
+      :items="recommendations"
+      key-field="_id"
     >
-      <v-slide-group-item
-        v-for="rec in recommendations"
-        :key="rec._id"
-      >
+      <template #item="{ item: rec }">
         <div class="rec-card">
           <div class="rec-head">
             <NuxtLink
@@ -76,8 +73,8 @@
             {{ rec.text }}
           </p>
         </div>
-      </v-slide-group-item>
-    </v-slide-group>
+      </template>
+    </Carousel>
 
     <p
       v-else-if="!canLeave"
@@ -92,6 +89,7 @@
 import type { Recommendation } from '~~/shared/types/user';
 import { isOnboardingComplete } from '~/utils/onboarding';
 import Button from '~/components/Button.vue';
+import Carousel from '~/components/Carousel.vue';
 
 const props = defineProps<{
   targetId: string;
@@ -197,17 +195,11 @@ const removeRec = async (id: string) => {
   justify-content: flex-end;
 }
 
-.carousel {
-  // v-slide-group overflows horizontally; keep the arrows reachable.
-  width: 100%;
-}
-
 .rec-card {
   display: flex;
   flex-direction: column;
   gap: 10px;
   width: 280px;
-  margin-right: 12px;
   padding: 16px;
   border-radius: 14px;
   // Light testimonial card, inverted from the dark profile page.

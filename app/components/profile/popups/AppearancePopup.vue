@@ -33,48 +33,33 @@
           />
         </div>
 
-        <div class="hair-field">
-          <Select
-            v-model="hairPreset"
-            color="accent"
-            label="appearance_hair_color"
-            :placeholder="$t('onboarding_select_placeholder')"
-            :items="hairItems"
-            :error-messages="errors.hairColor"
-            @update:model-value="errors.hairColor = ''"
-          />
-          <Input
-            v-if="hairPreset === CUSTOM"
-            v-model="hairCustom"
-            color="accent"
-            type="text"
-            :placeholder="$t('appearance_custom_color_placeholder')"
-            :error-messages="errors.hairCustom"
-            hide-details="auto"
-            @update:model-value="errors.hairCustom = ''"
-          />
-        </div>
+        <ColorSwatchGroup
+          v-model="draft.hairColor"
+          :colors="HAIR_COLORS"
+          label="appearance_hair_color"
+          required
+          custom
+          :error="errors.hairColor"
+          @update:model-value="errors.hairColor = ''"
+        />
 
-        <div class="row">
-          <Select
-            v-model="draft.eyeColor"
-            color="accent"
-            label="appearance_eye_color"
-            :placeholder="$t('onboarding_select_placeholder')"
-            :items="eyeItems"
-            :error-messages="errors.eyeColor"
-            @update:model-value="errors.eyeColor = ''"
-          />
-          <Select
-            v-model="draft.skinColor"
-            color="accent"
-            label="appearance_skin_color"
-            :placeholder="$t('onboarding_select_placeholder')"
-            :items="skinItems"
-            :error-messages="errors.skinColor"
-            @update:model-value="errors.skinColor = ''"
-          />
-        </div>
+        <ColorSwatchGroup
+          v-model="draft.eyeColor"
+          :colors="EYE_COLORS"
+          label="appearance_eye_color"
+          required
+          :error="errors.eyeColor"
+          @update:model-value="errors.eyeColor = ''"
+        />
+
+        <ColorSwatchGroup
+          v-model="draft.skinColor"
+          :colors="SKIN_COLORS"
+          label="appearance_skin_color"
+          required
+          :error="errors.skinColor"
+          @update:model-value="errors.skinColor = ''"
+        />
       </section>
 
       <!-- ── Optional ── -->
@@ -159,6 +144,7 @@
 import type { Appearance } from '~~/shared/types/user';
 import { HAIR_COLORS, EYE_COLORS, SKIN_COLORS, PHYSICAL_CHARACTERISTICS } from '~/utils/appearance';
 import PopupShell from '~/components/profile/popups/PopupShell.vue';
+import ColorSwatchGroup from '~/components/profile/popups/ColorSwatchGroup.vue';
 import Select from '~/components/Select.vue';
 import Button from '~/components/Button.vue';
 
@@ -179,11 +165,10 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 
-const CUSTOM = '__custom__';
-
 const draft = reactive({
   height: props.appearance?.height != null ? String(props.appearance.height) : '',
   weight: props.appearance?.weight != null ? String(props.appearance.weight) : '',
+  hairColor: props.appearance?.hairColor ?? '',
   eyeColor: props.appearance?.eyeColor ?? '',
   skinColor: props.appearance?.skinColor ?? '',
   tattoos: props.appearance?.tattoos ?? false,
@@ -193,22 +178,10 @@ const draft = reactive({
   shoeSize: props.appearance?.shoeSize ?? '',
 });
 
-// Hair color is a preset id OR a custom string; seed the two controls from it.
-const initialHair = props.appearance?.hairColor ?? '';
-const isPresetHair = (HAIR_COLORS as readonly string[]).includes(initialHair);
-const hairPreset = ref(initialHair ? (isPresetHair ? initialHair : CUSTOM) : '');
-const hairCustom = ref(isPresetHair ? '' : initialHair);
-
 const errors = reactive({
-  height: '', weight: '', hairColor: '', hairCustom: '', eyeColor: '', skinColor: '',
+  height: '', weight: '', hairColor: '', eyeColor: '', skinColor: '',
 });
 
-const hairItems = computed(() => [
-  ...HAIR_COLORS.map(id => ({ value: id, title: t(id) })),
-  { value: CUSTOM, title: t('appearance_custom_color') },
-]);
-const eyeItems = computed(() => EYE_COLORS.map(id => ({ value: id, title: t(id) })));
-const skinItems = computed(() => SKIN_COLORS.map(id => ({ value: id, title: t(id) })));
 const characteristicItems = computed(() =>
   PHYSICAL_CHARACTERISTICS.map(id => ({ value: id, title: t(id) })),
 );
@@ -227,12 +200,8 @@ const done = () => {
     errors.weight = t('appearance_weight_invalid');
     ok = false;
   }
-  if (!hairPreset.value) {
+  if (!draft.hairColor) {
     errors.hairColor = t('common_this_field_is_required');
-    ok = false;
-  }
-  else if (hairPreset.value === CUSTOM && !hairCustom.value.trim()) {
-    errors.hairCustom = t('common_this_field_is_required');
     ok = false;
   }
   if (!draft.eyeColor) {
@@ -245,12 +214,10 @@ const done = () => {
   }
   if (!ok) return;
 
-  const hairColor = hairPreset.value === CUSTOM ? hairCustom.value.trim() : hairPreset.value;
-
   emit('save', {
     height: h,
     weight: w,
-    hairColor,
+    hairColor: draft.hairColor,
     eyeColor: draft.eyeColor,
     skinColor: draft.skinColor,
     tattoos: draft.tattoos,
@@ -291,12 +258,6 @@ const done = () => {
   > * {
     flex: 1;
   }
-}
-
-.hair-field {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
 }
 
 .subgroup {
