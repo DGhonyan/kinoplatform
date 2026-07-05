@@ -34,9 +34,14 @@ const displayNamesFor = (locale: string): Intl.DisplayNames => {
  * the visible list — showing a raw code helps no one.
  */
 export const getLanguageDisplayName = (code: string, locale: string): string | null => {
-  return displayNamesFor(locale).of(code)
-    ?? displayNamesFor('en').of(code)
-    ?? null;
+  try {
+    return displayNamesFor(locale).of(code)
+      ?? displayNamesFor('en').of(code)
+      ?? null;
+  }
+  catch {
+    return null;
+  }
 };
 
 const HAYSTACK_CACHE = new Map<string, string>();

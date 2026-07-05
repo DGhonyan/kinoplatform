@@ -24,6 +24,10 @@
         v-model="essentialsOpen"
         @completed="onEssentialsCompleted"
       />
+      <ActorDetailsPopup
+        v-if="actorDetailsOpen"
+        v-model="actorDetailsOpen"
+      />
     </template>
   </div>
 </template>
@@ -37,6 +41,8 @@ import {
   type RegisterStep,
 } from '~/components/auth/registerSteps';
 import EssentialsPopup from '~/components/profile/popups/EssentialsPopup.vue';
+import ActorDetailsPopup from '~/components/profile/popups/ActorDetailsPopup.vue';
+import { needsActorDetails } from '~/utils/persona';
 
 const authStore = useAuthStore();
 const { user } = storeToRefs(authStore);
@@ -73,12 +79,24 @@ const progressOffset = WIZARD_STEP_IDS.length - wizardStepList.length;
 const allWizardStepsDone = wizardStepList.every(s => completedAtMount.has(s.id));
 const phase = ref<'wizard' | 'profile'>(allWizardStepsDone ? 'profile' : 'wizard');
 const essentialsOpen = ref(false);
+const actorDetailsOpen = ref(false);
 
 const essentialsDone = () => (user.value?.completedSteps ?? []).includes(STEP_IDS.ESSENTIALS);
 
-const maybeOpenEssentials = () => {
-  if (phase.value === 'profile' && !essentialsDone()) {
+// Decide which onboarding popup, if any, must be forced open. Essentials (the
+// required step) takes precedence; once it's done, an actor who still lacks the
+// mandatory appearance/photos — because they added an acting role after
+// onboarding — gets the actor-details popup instead.
+const maybeForcePopups = () => {
+  if (phase.value !== 'profile') return;
+
+  if (!essentialsDone()) {
     essentialsOpen.value = true;
+    return;
+  }
+
+  if (needsActorDetails(user.value)) {
+    actorDetailsOpen.value = true;
   }
 };
 
@@ -94,7 +112,7 @@ const initialFormData = computed<Partial<RegisterFormData>>(() => ({
 
 const onWizardCompleted = () => {
   phase.value = 'profile';
-  nextTick(maybeOpenEssentials);
+  nextTick(maybeForcePopups);
 };
 
 const onEssentialsCompleted = () => {
@@ -115,7 +133,14 @@ onBeforeRouteLeave(() => {
   setPageLayout('default');
 });
 
-onMounted(maybeOpenEssentials);
+onMounted(maybeForcePopups);
+
+// A profession edit after onboarding (via the profile's edit popup) can turn a
+// crew user into an actor who still lacks appearance/photos. `user` is replaced
+// wholesale on every store update, so this shallow watch catches that edit and
+// forces the actor-details popup. It never force-closes anything — each popup
+// owns its own dismissal once its fields are satisfied.
+watch(user, () => nextTick(maybeForcePopups));
 </script>
 
 <style scoped lang="scss">

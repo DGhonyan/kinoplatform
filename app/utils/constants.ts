@@ -9,6 +9,8 @@ import type { ChipGroup } from '~/utils/gear';
  */
 export const AVATAR_ASPECT_RATIO = 320 / 400;
 export const PROJECT_MEDIA_ASPECT_RATIO = 218 / 255;
+// Actor additional photos — portrait headshot crop.
+export const ACTOR_PHOTO_ASPECT_RATIO = 3 / 4;
 
 export const FIELD_IDS = [
   'field_directing_creative_leadership',
@@ -129,12 +131,12 @@ export const professions = [
 ] as const;
 
 /**
- * The same profession ids as `professions`, grouped by department for the
- * ChipPicker. This is purely a frontend presentation concern — the backend
- * still stores a flat `string[]` of profession ids. Category labels are the
- * `field_*` i18n keys (plus `field_camera`, added for the camera department).
+ * The crew profession ids (== `professions`), grouped by department for the
+ * ChipPicker. Purely a frontend presentation concern — the backend still stores
+ * a flat `string[]` of profession ids. Category labels are the `field_*` i18n
+ * keys (plus `field_camera`, added for the camera department).
  */
-export const PROFESSION_GROUPS: ChipGroup[] = [
+export const CREW_PROFESSION_GROUPS: ChipGroup[] = [
   {
     label: 'field_directing_creative_leadership',
     items: [
@@ -317,6 +319,94 @@ export const PROFESSION_GROUPS: ChipGroup[] = [
       'profession_interview_producer',
     ],
   },
+];
+
+// ── Actor / performer professions ──────────────────────────────────────────
+// A user is treated as an "actor" (unlocks appearance + additional photos, hides
+// gear) when any selected profession is in this set. See utils/persona.ts.
+export const ACTOR_PROFESSIONS = [
+  'profession_actor',
+  'profession_voice_actor',
+  'profession_theater_actor',
+  'profession_child_actor',
+  'profession_background_actor',
+  'profession_tv_host',
+  'profession_event_host',
+  'profession_interview_host',
+  'profession_dancer',
+  'profession_choreographer',
+  'profession_model',
+  'profession_circus_performer',
+  'profession_acrobat',
+  'profession_fire_performer',
+  'profession_puppeteer',
+  'profession_mime_artist',
+] as const;
+
+export const ACTOR_PROFESSION_GROUPS: ChipGroup[] = [
+  {
+    label: 'field_acting',
+    items: [
+      'profession_actor',
+      'profession_voice_actor',
+      'profession_theater_actor',
+      'profession_child_actor',
+      'profession_background_actor',
+    ],
+  },
+  {
+    label: 'field_presenting_hosting',
+    items: ['profession_tv_host', 'profession_event_host', 'profession_interview_host'],
+  },
+  {
+    label: 'field_dance',
+    items: ['profession_dancer', 'profession_choreographer'],
+  },
+  {
+    label: 'field_modeling',
+    items: ['profession_model'],
+  },
+  {
+    label: 'field_circus_specialty',
+    items: [
+      'profession_circus_performer',
+      'profession_acrobat',
+      'profession_fire_performer',
+      'profession_puppeteer',
+      'profession_mime_artist',
+    ],
+  },
+];
+
+// Voice & Audio talents. They register exactly like crew (no photos/appearance),
+// so they are NOT in ACTOR_PROFESSIONS, but they belong on the talents list — so
+// they ARE in TALENT_PROFESSIONS below.
+export const VOICE_PROFESSIONS = [
+  'profession_voiceover_artist',
+  'profession_dubbing_artist',
+  'profession_narrator',
+] as const;
+
+export const VOICE_PROFESSION_GROUP: ChipGroup = {
+  label: 'field_voice_audio',
+  items: [...VOICE_PROFESSIONS],
+};
+
+// The crew list keeps the `professions` name for existing call sites; this alias
+// makes the crew/actor split explicit for the persona helpers.
+export const CREW_PROFESSIONS = professions;
+
+// Everyone shown on the talents page: on-camera performers (who fill appearance)
+// plus voice talent (who don't). Membership, not the appearance gate — see
+// `isActor` vs `isTalent` in utils/persona.ts.
+export const TALENT_PROFESSIONS = [...ACTOR_PROFESSIONS, ...VOICE_PROFESSIONS] as const;
+
+// One picker for everything — crew departments first, then performer categories,
+// then voice/audio.
+export const PROFESSION_GROUPS: ChipGroup[] = [
+  ...CREW_PROFESSION_GROUPS,
+  ...ACTOR_PROFESSION_GROUPS,
+  VOICE_PROFESSION_GROUP,
 ];
 
 // Stored as the short enum value (matches User['gender']); display name comes

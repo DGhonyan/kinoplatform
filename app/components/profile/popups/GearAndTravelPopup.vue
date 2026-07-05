@@ -9,6 +9,7 @@
     <!-- ───────────────── List view ───────────────── -->
     <template v-if="view === 'list'">
       <FieldCard
+        v-if="showGear"
         icon="custom:pencil-and-ruler-idk"
         title="gear_tools_label"
         description="gear_tools_description"
@@ -42,6 +43,7 @@
       </FieldCard>
 
       <FieldCard
+        v-if="showGear"
         icon="custom:camera"
         title="gear_equipment_label"
         description="gear_equipment_description"
@@ -180,6 +182,7 @@
 <script lang="ts" setup>
 import { STEP_IDS } from '~/components/auth/registerSteps';
 import { SOFTWARE_TOOL_GROUPS, EQUIPMENT_GROUPS } from '~/utils/gear';
+import { isActor, isCrew } from '~/utils/persona';
 import type { Practicalities } from '~~/shared/types/user';
 import PopupShell from '~/components/profile/popups/PopupShell.vue';
 import FieldCard from '~/components/profile/popups/FieldCard.vue';
@@ -197,6 +200,13 @@ const emit = defineEmits<{
 const { t } = useI18n();
 const authStore = useAuthStore();
 const userStore = useUserStore();
+
+// Physical equipment + software is crew-only. A pure actor doesn't see them
+// (they get replacement fields later); anyone who is also crew still does.
+const showGear = computed(() => {
+  const p = authStore.user?.profession;
+  return isCrew(p) || !isActor(p);
+});
 
 const EMPTY_PRACTICALITIES: Practicalities = {
   willingToTravel: false,

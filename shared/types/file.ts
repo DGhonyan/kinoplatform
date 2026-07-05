@@ -1,4 +1,4 @@
-export type FileKind = 'avatar' | 'portfolio_file' | 'project_media';
+export type FileKind = 'avatar' | 'portfolio_file' | 'project_media' | 'actor_photo';
 
 export type FileStatus = 'pending' | 'uploaded' | 'ready' | 'failed';
 

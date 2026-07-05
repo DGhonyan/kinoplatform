@@ -108,6 +108,15 @@
       />
     </FieldCard>
 
+    <!-- ── Actor-only ── -->
+    <ActorDetailsFields
+      v-if="isActor"
+      v-model:photos="additionalPhotos"
+      v-model:appearance="appearance"
+      :photos-error="photosError"
+      :appearance-error="appearanceError"
+    />
+
     <template #actions>
       <Button
         size="large"
@@ -123,6 +132,9 @@
 <script lang="ts" setup>
 import { STEP_IDS } from '~/components/auth/registerSteps';
 import { EXPERIENCE_LEVELS, AVATAR_ASPECT_RATIO } from '~/utils/constants';
+import { isActor as checkIsActor } from '~/utils/persona';
+import { isAppearanceComplete, hasRequiredActorPhotos } from '~/utils/appearance';
+import type { Appearance } from '~~/shared/types/user';
 import {
   LANGUAGE_CODES,
   getLanguageDisplayName,
@@ -132,6 +144,7 @@ import PopupShell from '~/components/profile/popups/PopupShell.vue';
 import FieldCard from '~/components/profile/popups/FieldCard.vue';
 import Select from '~/components/Select.vue';
 import Button from '~/components/Button.vue';
+import ActorDetailsFields from '~/components/profile/popups/ActorDetailsFields.vue';
 
 const open = defineModel<boolean>({ required: true });
 
@@ -155,6 +168,13 @@ const bioError = ref('');
 const experienceLevelError = ref('');
 const languagesError = ref('');
 const saving = ref(false);
+
+// ── Actor-only: additional photos + appearance ──
+const isActor = computed(() => checkIsActor(authStore.user?.profession));
+const additionalPhotos = ref<string[]>([...(authStore.user?.additionalPhotos ?? [])]);
+const appearance = ref<Appearance | null>(authStore.user?.appearance ?? null);
+const photosError = ref('');
+const appearanceError = ref('');
 
 const existingAvatarUrl = computed(() => authStore.user?.avatar ?? '');
 // A photo is satisfied by either a freshly-uploaded file or one already on file.
@@ -188,6 +208,8 @@ const validate = (): boolean => {
   bioError.value = '';
   experienceLevelError.value = '';
   languagesError.value = '';
+  photosError.value = '';
+  appearanceError.value = '';
   let ok = true;
 
   if (!hasAvatar.value) {
@@ -211,6 +233,17 @@ const validate = (): boolean => {
     ok = false;
   }
 
+  if (isActor.value) {
+    if (!hasRequiredActorPhotos(additionalPhotos.value)) {
+      photosError.value = t('actor_photos_min_error');
+      ok = false;
+    }
+    if (!isAppearanceComplete(appearance.value)) {
+      appearanceError.value = t('appearance_incomplete_error');
+      ok = false;
+    }
+  }
+
   return ok;
 };
 
@@ -229,6 +262,9 @@ const save = async () => {
       bio: bio.value.trim(),
       experienceLevel: experienceLevel.value,
       languages: languages.value,
+      ...(isActor.value
+        ? { appearance: appearance.value ?? undefined, additionalPhotos: additionalPhotos.value }
+        : {}),
       completeStep: STEP_IDS.ESSENTIALS,
     });
     if (!data) return;

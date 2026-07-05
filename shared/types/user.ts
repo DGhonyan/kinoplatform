@@ -72,6 +72,25 @@ export type Event = {
   endTime?: string;
 };
 
+/**
+ * Actor/performer appearance. Mandatory fields (height…skinColor) are required
+ * for actors during onboarding; the rest are optional. Color fields hold a
+ * predefined id (see utils/appearance.ts) — `hairColor` may also hold a custom
+ * free-text value.
+ */
+export type Appearance = {
+  height?: number; // cm
+  weight?: number; // kg
+  hairColor?: string;
+  eyeColor?: string;
+  skinColor?: string;
+  tattoos?: boolean;
+  physicalCharacteristics?: string[];
+  otherCharacteristic?: string;
+  clothingSize?: string;
+  shoeSize?: string;
+};
+
 export type User = {
   _id: string;
   email: string;
@@ -105,5 +124,8 @@ export type User = {
   location?: string;
   education?: string;
   languages?: string[];
+  /** Actor-only: appearance details + extra photos (2–6). */
+  appearance?: Appearance;
+  additionalPhotos?: string[];
   completedSteps: string[];
 };
