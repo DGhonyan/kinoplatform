@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type { User, Event, Recommendation } from '~~/shared/types/user';
+import type { User, Event, Recommendation, TalentSearchFilters } from '~~/shared/types/user';
 
 export type UserProfile = User & {
   events: Event[];
@@ -74,6 +74,24 @@ export const useUserStore = defineStore('user', {
         loader: true,
         errorMessage: 'error_load_users_failed',
       }).get<User[]>();
+    },
+
+    // Server-side talent search: appearance/age/gender are filtered on the server;
+    // the response carries only public card fields (no appearance).
+    async searchTalents(filters: TalentSearchFilters) {
+      return apiRequest('/users/talents/search', {
+        loader: true,
+        errorMessage: 'error_load_talents_failed',
+      }).post<User[]>(filters);
+    },
+
+    // Facet lists (distinct locations + educations among talents) for the filter
+    // dropdowns — one "list meta" call until these get dedicated reference data.
+    async getTalentListMeta() {
+      return apiRequest('/users/talents/meta').get<{
+        locations: string[];
+        educations: string[];
+      }>();
     },
 
     async getUserProfile(userId: string) {

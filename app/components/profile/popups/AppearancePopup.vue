@@ -142,7 +142,14 @@
 
 <script lang="ts" setup>
 import type { Appearance } from '~~/shared/types/user';
-import { HAIR_COLORS, EYE_COLORS, SKIN_COLORS, PHYSICAL_CHARACTERISTICS } from '~/utils/appearance';
+import {
+  HAIR_COLORS,
+  EYE_COLORS,
+  SKIN_COLORS,
+  PHYSICAL_CHARACTERISTICS,
+  HEIGHT_RANGE,
+  WEIGHT_RANGE,
+} from '~/utils/appearance';
 import PopupShell from '~/components/profile/popups/PopupShell.vue';
 import ColorSwatchGroup from '~/components/profile/popups/ColorSwatchGroup.vue';
 import Select from '~/components/Select.vue';
@@ -192,11 +199,11 @@ const done = () => {
 
   const h = Number(draft.height);
   const w = Number(draft.weight);
-  if (!draft.height || Number.isNaN(h) || h < 30 || h > 300) {
+  if (!draft.height || Number.isNaN(h) || h < HEIGHT_RANGE.min || h > HEIGHT_RANGE.max) {
     errors.height = t('appearance_height_invalid');
     ok = false;
   }
-  if (!draft.weight || Number.isNaN(w) || w < 20 || w > 500) {
+  if (!draft.weight || Number.isNaN(w) || w < WEIGHT_RANGE.min || w > WEIGHT_RANGE.max) {
     errors.weight = t('appearance_weight_invalid');
     ok = false;
   }

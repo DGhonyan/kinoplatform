@@ -4,6 +4,14 @@ import type { Appearance } from '~~/shared/types/user';
 export const MIN_ACTOR_PHOTOS = 2;
 export const MAX_ACTOR_PHOTOS = 6;
 
+/**
+ * Numeric bounds for appearance measurements (cm / kg). MIRROR the backend
+ * AppearanceDto + TalentSearchDto so the appearance form and talent search reject
+ * the same out-of-range values the server would.
+ */
+export const HEIGHT_RANGE = { min: 30, max: 300 };
+export const WEIGHT_RANGE = { min: 20, max: 500 };
+
 /** The mandatory appearance fields, all present. Gates actor completeness. */
 export const isAppearanceComplete = (a?: Appearance | null): boolean =>
   !!(a && a.height && a.weight && a.hairColor && a.eyeColor && a.skinColor);

@@ -129,3 +129,29 @@ export type User = {
   additionalPhotos?: string[];
   completedSteps: string[];
 };
+
+/**
+ * Talent-search filter payload (POST /users/talents/search). Mirrors the backend
+ * TalentSearchDto. All fields optional — empty = all talents. Appearance is
+ * filtered server-side and never returned; disability characteristics are not
+ * filterable by design.
+ */
+export type TalentSearchFilters = {
+  q?: string;
+  professions?: string[];
+  locations?: string[];
+  educations?: string[];
+  languages?: string[];
+  genders?: string[];
+  minAge?: number;
+  maxAge?: number;
+  minHeight?: number;
+  maxHeight?: number;
+  minWeight?: number;
+  maxWeight?: number;
+  hairColors?: string[];
+  eyeColors?: string[];
+  skinColors?: string[];
+  page?: number;
+  limit?: number;
+};

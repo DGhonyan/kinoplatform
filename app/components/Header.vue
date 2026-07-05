@@ -200,6 +200,7 @@ const headerLinks: NavLink[] = [
   { path: '/', label: 'common_home', public: true },
   { path: '/about', label: 'common_about', public: true },
   { path: '/crew', label: 'common_crew', public: false },
+  { path: '/talents', label: 'common_talents', public: false },
 ];
 const visibleLinks = computed(() =>
   headerLinks.filter(link => link.public || isOnboarded.value),

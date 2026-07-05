@@ -1,0 +1,512 @@
+<template>
+  <!-- One form: Enter from any field runs the search; submit buttons disable while
+       a range is invalid, so the action is never silently dead. -->
+  <form
+    class="talents"
+    @submit.prevent="applyFilters"
+  >
+    <div class="filters">
+      <div class="filters-scroll">
+        <div class="filters-header">
+          <v-icon>custom:filter</v-icon>
+          <h2 class="filters-title">
+            {{ $t('crew_filters') }}
+          </h2>
+        </div>
+
+        <div class="filters-section">
+          <Select
+            v-model="professions"
+            :items="professionItems"
+            label="crew_filter_profession"
+            multiple
+          />
+        </div>
+
+        <div class="filters-section">
+          <Select
+            v-model="locations"
+            :items="locationOptions"
+            label="crew_filter_location"
+            multiple
+          />
+        </div>
+
+        <div class="filters-section">
+          <Select
+            v-model="educations"
+            :items="educationOptions"
+            label="register_education_label"
+            multiple
+          />
+        </div>
+
+        <div class="filters-section">
+          <Select
+            v-model="languages"
+            :items="languageItems"
+            label="crew_filter_languages"
+            multiple
+          />
+        </div>
+
+        <div class="filters-section">
+          <Select
+            v-model="genders"
+            :items="genderItems"
+            label="register_gender_label"
+            multiple
+          />
+        </div>
+
+        <div class="filters-section">
+          <span class="range-label">{{ $t('talent_filter_age') }}</span>
+          <div class="range-row">
+            <Input
+              v-model="minAge"
+              type="number"
+              :min="AGE_RANGE.min"
+              :max="AGE_RANGE.max"
+              step="1"
+              :placeholder="$t('talent_filter_min')"
+              :error-messages="rangeErrors.minAge"
+              hide-details="auto"
+              density="compact"
+            />
+            <Input
+              v-model="maxAge"
+              type="number"
+              :min="AGE_RANGE.min"
+              :max="AGE_RANGE.max"
+              step="1"
+              :placeholder="$t('talent_filter_max')"
+              :error-messages="rangeErrors.maxAge"
+              hide-details="auto"
+              density="compact"
+            />
+          </div>
+        </div>
+
+        <div class="filters-section">
+          <span class="range-label">{{ $t('appearance_height') }}</span>
+          <div class="range-row">
+            <Input
+              v-model="minHeight"
+              type="number"
+              :min="HEIGHT_RANGE.min"
+              :max="HEIGHT_RANGE.max"
+              step="1"
+              :placeholder="$t('talent_filter_min')"
+              :error-messages="rangeErrors.minHeight"
+              hide-details="auto"
+              density="compact"
+            />
+            <Input
+              v-model="maxHeight"
+              type="number"
+              :min="HEIGHT_RANGE.min"
+              :max="HEIGHT_RANGE.max"
+              step="1"
+              :placeholder="$t('talent_filter_max')"
+              :error-messages="rangeErrors.maxHeight"
+              hide-details="auto"
+              density="compact"
+            />
+          </div>
+        </div>
+
+        <div class="filters-section">
+          <span class="range-label">{{ $t('appearance_weight') }}</span>
+          <div class="range-row">
+            <Input
+              v-model="minWeight"
+              type="number"
+              :min="WEIGHT_RANGE.min"
+              :max="WEIGHT_RANGE.max"
+              step="1"
+              :placeholder="$t('talent_filter_min')"
+              :error-messages="rangeErrors.minWeight"
+              hide-details="auto"
+              density="compact"
+            />
+            <Input
+              v-model="maxWeight"
+              type="number"
+              :min="WEIGHT_RANGE.min"
+              :max="WEIGHT_RANGE.max"
+              step="1"
+              :placeholder="$t('talent_filter_max')"
+              :error-messages="rangeErrors.maxWeight"
+              hide-details="auto"
+              density="compact"
+            />
+          </div>
+        </div>
+
+        <ColorMultiSelect
+          v-model="hairColors"
+          :colors="HAIR_COLORS"
+          label="appearance_hair_color"
+          other-label="talent_filter_other"
+        />
+        <ColorMultiSelect
+          v-model="eyeColors"
+          :colors="EYE_COLORS"
+          label="appearance_eye_color"
+        />
+        <ColorMultiSelect
+          v-model="skinColors"
+          :colors="SKIN_COLORS"
+          label="appearance_skin_color"
+        />
+      </div>
+
+      <!-- Pinned so the actions are always reachable without scrolling the panel. -->
+      <div class="filters-footer">
+        <span
+          v-if="hasRangeErrors"
+          class="footer-error"
+        >{{ $t('talent_filter_fix_ranges') }}</span>
+        <div class="footer-actions">
+          <Button
+            v-if="hasActiveFilters"
+            color="white"
+            text-color="primary"
+            @click="clearFilters"
+          >
+            {{ $t('crew_filter_clear_all') }}
+          </Button>
+          <Button
+            type="submit"
+            class="apply-btn"
+            color="primary"
+            :loading="loading"
+            :disabled="hasRangeErrors"
+          >
+            {{ $t('talent_filter_apply') }}
+          </Button>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="toolbar">
+        <Input
+          v-model="q"
+          class="search"
+          :placeholder="$t('talent_search_placeholder')"
+          prepend-inner-icon="mdi-magnify"
+          maxlength="100"
+          bg-color="on-surface"
+          color="background"
+          text-color="background"
+          rounded="pill"
+          density="comfortable"
+          hide-details
+        />
+        <Button
+          type="submit"
+          color="primary"
+          prepend-icon="mdi-magnify"
+          :loading="loading"
+          :disabled="hasRangeErrors"
+        >
+          {{ $t('common_search') }}
+        </Button>
+      </div>
+
+      <div
+        v-if="results.length > 0"
+        class="user-grid"
+      >
+        <UserCard
+          v-for="user in results"
+          :key="user._id"
+          :user="user"
+        />
+      </div>
+
+      <div
+        v-else
+        class="no-results"
+      >
+        <span>{{ $t('talent_no_talents_found') }}</span>
+      </div>
+    </div>
+  </form>
+</template>
+
+<script lang="ts" setup>
+import type { User, TalentSearchFilters } from '~~/shared/types/user';
+import { TALENT_PROFESSIONS, GENDERS } from '~/utils/constants';
+import {
+  HAIR_COLORS,
+  EYE_COLORS,
+  SKIN_COLORS,
+  HEIGHT_RANGE,
+  WEIGHT_RANGE,
+} from '~/utils/appearance';
+import { LANGUAGE_CODES, getLanguageDisplayName } from '~/utils/languages';
+import Select from '~/components/Select.vue';
+import ColorMultiSelect from '~/components/ColorMultiSelect.vue';
+
+definePageMeta({
+  header: { cover: true, slogan: 'talent_page_slogan', coverNav: false },
+});
+
+const { t, locale } = useI18n();
+const userStore = useUserStore();
+
+const results = ref<User[]>([]);
+const loading = ref(false);
+const locationOptions = ref<string[]>([]);
+const educationOptions = ref<string[]>([]);
+
+// ── Filter state ──
+const q = ref('');
+const professions = ref<string[]>([]);
+const locations = ref<string[]>([]);
+const educations = ref<string[]>([]);
+const languages = ref<string[]>([]);
+const genders = ref<string[]>([]);
+const minAge = ref('');
+const maxAge = ref('');
+const minHeight = ref('');
+const maxHeight = ref('');
+const minWeight = ref('');
+const maxWeight = ref('');
+const hairColors = ref<string[]>([]);
+const eyeColors = ref<string[]>([]);
+const skinColors = ref<string[]>([]);
+
+// Numeric filter bounds — mirror the backend TalentSearchDto (integers, in range).
+const AGE_RANGE = { min: 0, max: 120 };
+
+const rangeFieldError = (value: string, bound: { min: number; max: number }): string => {
+  if (value === '') return '';
+  const n = Number(value);
+  if (!Number.isInteger(n) || n < bound.min || n > bound.max) {
+    return t('talent_filter_range_error', { min: bound.min, max: bound.max });
+  }
+  return '';
+};
+
+// Live validation — errors surface inline as the user types (not on submit), and
+// gate the submit buttons, so a bad range is obvious rather than silently blocking.
+const rangeErrors = computed(() => ({
+  minAge: rangeFieldError(minAge.value, AGE_RANGE),
+  maxAge: rangeFieldError(maxAge.value, AGE_RANGE),
+  minHeight: rangeFieldError(minHeight.value, HEIGHT_RANGE),
+  maxHeight: rangeFieldError(maxHeight.value, HEIGHT_RANGE),
+  minWeight: rangeFieldError(minWeight.value, WEIGHT_RANGE),
+  maxWeight: rangeFieldError(maxWeight.value, WEIGHT_RANGE),
+}));
+const hasRangeErrors = computed(() => Object.values(rangeErrors.value).some(Boolean));
+
+const professionItems = computed(() =>
+  (TALENT_PROFESSIONS as readonly string[]).map(id => ({ value: id, title: t(id) })),
+);
+const genderItems = computed(() =>
+  GENDERS.map(g => ({ value: g, title: t(`gender_${g}`) })),
+);
+const languageItems = computed(() =>
+  LANGUAGE_CODES
+    .map(code => ({ value: code, title: getLanguageDisplayName(code, locale.value) }))
+    .filter((item): item is { value: string; title: string } => item.title !== null)
+    .sort((a, b) => a.title.localeCompare(b.title, locale.value)),
+);
+
+const hasActiveFilters = computed(() =>
+  !!q.value
+  || professions.value.length > 0
+  || locations.value.length > 0
+  || educations.value.length > 0
+  || languages.value.length > 0
+  || genders.value.length > 0
+  || hairColors.value.length > 0
+  || eyeColors.value.length > 0
+  || skinColors.value.length > 0
+  || [minAge, maxAge, minHeight, maxHeight, minWeight, maxWeight].some(r => r.value !== ''),
+);
+
+// Only send fields the user actually set — an empty payload returns all talents.
+const buildFilters = (): TalentSearchFilters => {
+  const num = (v: string) => (v === '' ? undefined : Number(v));
+  const filters: TalentSearchFilters = {};
+
+  if (q.value.trim()) filters.q = q.value.trim();
+  if (professions.value.length) filters.professions = professions.value;
+  if (locations.value.length) filters.locations = locations.value;
+  if (educations.value.length) filters.educations = educations.value;
+  if (languages.value.length) filters.languages = languages.value;
+  if (genders.value.length) filters.genders = genders.value;
+  if (hairColors.value.length) filters.hairColors = hairColors.value;
+  if (eyeColors.value.length) filters.eyeColors = eyeColors.value;
+  if (skinColors.value.length) filters.skinColors = skinColors.value;
+
+  if (num(minAge.value) != null) filters.minAge = num(minAge.value);
+  if (num(maxAge.value) != null) filters.maxAge = num(maxAge.value);
+  if (num(minHeight.value) != null) filters.minHeight = num(minHeight.value);
+  if (num(maxHeight.value) != null) filters.maxHeight = num(maxHeight.value);
+  if (num(minWeight.value) != null) filters.minWeight = num(minWeight.value);
+  if (num(maxWeight.value) != null) filters.maxWeight = num(maxWeight.value);
+
+  return filters;
+};
+
+const applyFilters = async () => {
+  if (hasRangeErrors.value) return; // buttons are disabled too — this is a safety net
+
+  loading.value = true;
+  try {
+    results.value = (await userStore.searchTalents(buildFilters())) ?? [];
+  }
+  finally {
+    loading.value = false;
+  }
+};
+
+const clearFilters = () => {
+  q.value = '';
+  professions.value = [];
+  locations.value = [];
+  educations.value = [];
+  languages.value = [];
+  genders.value = [];
+  hairColors.value = [];
+  eyeColors.value = [];
+  skinColors.value = [];
+  [minAge, maxAge, minHeight, maxHeight, minWeight, maxWeight].forEach((r) => {
+    r.value = '';
+  });
+  applyFilters();
+};
+
+onMounted(async () => {
+  const meta = await userStore.getTalentListMeta();
+  locationOptions.value = meta?.locations ?? [];
+  educationOptions.value = meta?.educations ?? [];
+  await applyFilters();
+});
+</script>
+
+<style lang="scss" scoped>
+.talents {
+  display: flex;
+  width: 100%;
+  gap: 24px;
+}
+
+.filters {
+  width: 310px;
+  min-width: 310px;
+  // Fit the panel below the cover header (~330px: nav + hero band + padding) so a
+  // long filter list scrolls INSIDE the panel instead of forcing the whole page to
+  // scroll. Once you scroll past the hero it sticks.
+  position: sticky;
+  top: 16px;
+  align-self: flex-start;
+  max-height: calc(100vh - 330px);
+  // Column with a scrollable body + a pinned footer, so Apply is always reachable.
+  display: flex;
+  flex-direction: column;
+}
+
+.filters-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px;
+}
+
+.filters-footer {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 24px;
+  border-top: 1px solid color(--v-theme-on-surface, 0.12);
+}
+
+.footer-error {
+  font-size: 12px;
+  text-align: center;
+  color: color(--v-theme-error);
+}
+
+.footer-actions {
+  display: flex;
+  gap: 8px;
+}
+
+// Apply grows to fill; Clear (white / primary text) sits to its left.
+.apply-btn {
+  flex: 1;
+}
+
+.main-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.toolbar {
+  width: 100%;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.search {
+  flex: 1;
+}
+
+.user-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.no-results {
+  display: flex;
+  justify-content: center;
+  padding: 64px 16px;
+  color: color(--v-theme-on-surface, 0.6);
+}
+
+.filters-header {
+  display: flex;
+  gap: 12px;
+}
+
+.filters-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.filters-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.range-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: color(--v-theme-on-surface, 0.7);
+}
+
+.range-row {
+  display: flex;
+  gap: 8px;
+
+  > * {
+    flex: 1;
+  }
+}
+</style>
