@@ -23,7 +23,7 @@ const userStore = useUserStore();
 
 const users = ref<User[]>([]);
 // Only crew here — someone who is both crew and talent shows on both pages.
-const crewUsers = computed(() => users.value.filter(u => isCrew(u.profession) || u.profession.includes("my father")));
+const crewUsers = computed(() => users.value.filter(u => isCrew(u.profession) || (u.profession ?? []).includes('my father')));
 
 const professionItems = computed(() =>
   professions.map(id => ({ value: id, title: t(id) })),

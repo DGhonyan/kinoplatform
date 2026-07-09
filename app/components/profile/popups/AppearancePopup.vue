@@ -69,14 +69,9 @@
         </h3>
 
         <div class="subgroup">
-          <span class="subgroup-title">{{ $t('appearance_additional') }}</span>
-          <v-checkbox
-            v-model="draft.tattoos"
-            color="accent"
-            density="compact"
-            hide-details
-            :label="$t('appearance_tattoos')"
-          />
+          <span class="subgroup-title">{{ $t('appearance_tattoos') }}</span>
+          <span class="subgroup-hint">{{ $t('tattoo_pick_hint') }}</span>
+          <BodyTattooMap v-model="draft.tattoos" />
         </div>
 
         <div class="subgroup">
@@ -152,6 +147,7 @@ import {
 } from '~/utils/appearance';
 import PopupShell from '~/components/profile/popups/PopupShell.vue';
 import ColorSwatchGroup from '~/components/profile/popups/ColorSwatchGroup.vue';
+import BodyTattooMap from '~/components/profile/BodyTattooMap.vue';
 import Select from '~/components/Select.vue';
 import Button from '~/components/Button.vue';
 
@@ -178,7 +174,7 @@ const draft = reactive({
   hairColor: props.appearance?.hairColor ?? '',
   eyeColor: props.appearance?.eyeColor ?? '',
   skinColor: props.appearance?.skinColor ?? '',
-  tattoos: props.appearance?.tattoos ?? false,
+  tattoos: [...(props.appearance?.tattoos ?? [])],
   physicalCharacteristics: [...(props.appearance?.physicalCharacteristics ?? [])],
   otherCharacteristic: props.appearance?.otherCharacteristic ?? '',
   clothingSize: props.appearance?.clothingSize ?? '',
@@ -227,7 +223,7 @@ const done = () => {
     hairColor: draft.hairColor,
     eyeColor: draft.eyeColor,
     skinColor: draft.skinColor,
-    tattoos: draft.tattoos,
+    ...(draft.tattoos.length ? { tattoos: draft.tattoos } : {}),
     ...(draft.physicalCharacteristics.length ? { physicalCharacteristics: draft.physicalCharacteristics } : {}),
     ...(draft.otherCharacteristic.trim() ? { otherCharacteristic: draft.otherCharacteristic.trim() } : {}),
     ...(draft.clothingSize.trim() ? { clothingSize: draft.clothingSize.trim() } : {}),
@@ -277,5 +273,10 @@ const done = () => {
   font-size: 14px;
   font-weight: 500;
   opacity: 0.8;
+}
+
+.subgroup-hint {
+  font-size: 12px;
+  opacity: 0.6;
 }
 </style>

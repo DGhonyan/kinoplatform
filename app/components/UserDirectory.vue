@@ -186,7 +186,7 @@ const filteredUsers = computed(() => {
 
     // Profession (any-of).
     if (selectedProfessions.value.length > 0) {
-      if (!selectedProfessions.value.some(p => user.profession.includes(p))) return false;
+      if (!selectedProfessions.value.some(p => (user.profession ?? []).includes(p))) return false;
     }
 
     // Location (exact match against the stored location).

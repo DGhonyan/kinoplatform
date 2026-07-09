@@ -37,6 +37,7 @@ import { RegisterFormDataKey } from '../registerSteps';
 
 const formData = inject(RegisterFormDataKey)!;
 
+const { t } = useI18n();
 const appStore = useAppStore();
 const authStore = useAuthStore();
 
@@ -47,11 +48,11 @@ const validate = (): boolean => {
   codeError.value = '';
   const value = formData.code.trim();
   if (!value) {
-    codeError.value = 'common_this_field_is_required';
+    codeError.value = t('common_this_field_is_required');
     return false;
   }
   if (!/^\d{6}$/.test(value)) {
-    codeError.value = 'register_invalid_code';
+    codeError.value = t('register_invalid_code');
     return false;
   }
   return true;

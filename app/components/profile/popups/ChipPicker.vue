@@ -75,6 +75,7 @@
 
 <script lang="ts" setup>
 import type { ChipGroup } from '~/utils/gear';
+import { toggleInArray } from '~/utils/toggleInArray';
 import Input from '~/components/Input.vue';
 
 /**
@@ -116,9 +117,7 @@ const selected = computed(() => new Set(model.value));
 const isSelected = (item: string) => selected.value.has(item);
 
 const toggle = (item: string) => {
-  model.value = isSelected(item)
-    ? model.value.filter(i => i !== item)
-    : [...model.value, item];
+  model.value = toggleInArray(model.value, item);
 };
 
 const chipProps = (item: string) => {

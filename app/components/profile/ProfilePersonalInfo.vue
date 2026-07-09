@@ -59,10 +59,11 @@
           <span>{{ user.education }}</span>
         </div>
         <a
-          v-if="user?.portfolio"
+          v-if="portfolioUrl"
           class="meta-line portfolio"
-          :href="user.portfolio"
+          :href="portfolioUrl"
           target="_blank"
+          rel="noopener noreferrer"
         >
           <v-icon size="18">mdi-link-variant</v-icon>
           <span>{{ $t('common_portfolio_link') }}</span>
@@ -138,6 +139,7 @@ import type { UserProfile } from '~/stores/user';
 import { getLanguageDisplayName } from '~/utils/languages';
 import { isActor } from '~/utils/persona';
 import { isAppearanceComplete } from '~/utils/appearance';
+import { safeExternalUrl } from '~/utils/safeUrl';
 import Button from '~/components/Button.vue';
 import ProfileChipGroup from '~/components/profile/ProfileChipGroup.vue';
 import ProfileSectionNav from '~/components/profile/ProfileSectionNav.vue';
@@ -164,6 +166,7 @@ const emit = defineEmits<{
 const { t, locale } = useI18n();
 
 const isActorProfile = computed(() => isActor(props.user?.profession));
+const portfolioUrl = computed(() => safeExternalUrl(props.user?.portfolio));
 const appearanceSet = computed(() => isAppearanceComplete(props.user?.appearance));
 
 const professionsText = computed(() =>

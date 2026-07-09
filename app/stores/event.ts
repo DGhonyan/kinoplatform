@@ -2,9 +2,6 @@ import { defineStore } from 'pinia';
 import type { Event } from '~~/shared/types/user';
 
 export const useEventStore = defineStore('event', {
-  state: () => ({
-    events: [] as Event[],
-  }),
   actions: {
     async createEvent(event: Omit<Event, '_id' | 'userId'>) {
       return apiRequest('/event/create', {

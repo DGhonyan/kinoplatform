@@ -7,10 +7,6 @@ export type UserProfile = User & {
 };
 
 export const useUserStore = defineStore('user', {
-  state: () => ({
-    users: [] as User[],
-  }),
-
   actions: {
     async updateUser(payload: Partial<User> & { completeStep?: string }) {
       const authStore = useAuthStore();

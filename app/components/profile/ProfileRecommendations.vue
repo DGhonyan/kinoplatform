@@ -148,7 +148,7 @@ const save = async () => {
   const value = text.value.trim();
   if (!value) return;
   if (value.length > MAX) {
-    error.value = 'recommendation_too_long';
+    error.value = t('recommendation_too_long');
     return;
   }
 

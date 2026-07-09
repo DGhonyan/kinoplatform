@@ -84,7 +84,8 @@ export type Appearance = {
   hairColor?: string;
   eyeColor?: string;
   skinColor?: string;
-  tattoos?: boolean;
+  /** Tattoo locations — body-region ids from bodyMap (e.g. 'front_left_forearm'). */
+  tattoos?: string[];
   physicalCharacteristics?: string[];
   otherCharacteristic?: string;
   clothingSize?: string;

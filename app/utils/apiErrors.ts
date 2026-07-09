@@ -18,6 +18,9 @@ const ERROR_MESSAGE_KEYS: Partial<Record<ErrorCode, string>> = {
   INVALID_CURRENT_PASSWORD: 'error_invalid_current_password',
   SESSION_EXPIRED: 'common_session_expired',
   MFA_REQUIRED: 'error_mfa_required',
+  EMAIL_IN_USE: 'error_email_in_use',
+  // user onboarding
+  INVALID_STEP_DATA: 'error_invalid_step_data',
   // email verification codes — reuse the existing register-step copy
   INVALID_CODE: 'register_invalid_code',
   CODE_EXPIRED: 'register_code_expired',

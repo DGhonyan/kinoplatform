@@ -186,7 +186,7 @@ const props = defineProps<{
   canEdit: boolean;
 }>();
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const authStore = useAuthStore();
 const userStore = useUserStore();
 const eventStore = useEventStore();
@@ -238,10 +238,10 @@ const calendarDate = computed({
 });
 
 const formatMonthYear = (date: Date | string | string[]) =>
-  normalizeDate(date).toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+  normalizeDate(date).toLocaleDateString(locale.value, { year: 'numeric', month: 'long' });
 
 const formatDate = (date?: string) =>
-  date ? new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
+  date ? new Date(date).toLocaleDateString(locale.value, { year: 'numeric', month: 'long', day: 'numeric' }) : '';
 
 const shiftMonth = (delta: number) => {
   const d = normalizeDate(focusedDate.value);

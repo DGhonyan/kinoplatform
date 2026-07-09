@@ -36,6 +36,8 @@ import { RegisterFormDataKey } from '../registerSteps';
 
 const formData = inject(RegisterFormDataKey)!;
 
+const { t } = useI18n();
+
 const emailError = ref('');
 const passwordError = ref('');
 
@@ -50,20 +52,20 @@ const validate = (): boolean => {
 
   const email = formData.email.trim();
   if (!email) {
-    emailError.value = 'common_this_field_is_required';
+    emailError.value = t('common_this_field_is_required');
     ok = false;
   }
   else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    emailError.value = 'auth_invalid_email';
+    emailError.value = t('auth_invalid_email');
     ok = false;
   }
 
   if (!formData.password) {
-    passwordError.value = 'common_this_field_is_required';
+    passwordError.value = t('common_this_field_is_required');
     ok = false;
   }
   else if (!PASSWORD_RE.test(formData.password)) {
-    passwordError.value = 'register_password_requirements';
+    passwordError.value = t('register_password_requirements');
     ok = false;
   }
 

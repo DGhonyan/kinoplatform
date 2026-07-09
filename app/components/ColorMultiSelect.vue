@@ -46,6 +46,7 @@
 
 <script lang="ts" setup>
 import { isLightColor } from '~/utils/appearance';
+import { toggleInArray } from '~/utils/toggleInArray';
 
 /**
  * Multi-select color swatches for filters (v-model is a hex array). Shares the
@@ -64,9 +65,7 @@ defineProps<{
 const OTHER = '__other__';
 
 const toggle = (hex: string) => {
-  modelValue.value = modelValue.value.includes(hex)
-    ? modelValue.value.filter(c => c !== hex)
-    : [...modelValue.value, hex];
+  modelValue.value = toggleInArray(modelValue.value, hex);
 };
 </script>
 

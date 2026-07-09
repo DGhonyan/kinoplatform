@@ -58,10 +58,11 @@
 
       <!-- align-self keeps the hit area on the text, not the full card width. -->
       <a
-        v-if="project.link"
+        v-if="projectUrl"
         class="project-link"
-        :href="project.link"
+        :href="projectUrl"
         target="_blank"
+        rel="noopener noreferrer"
       >
         {{ $t('profile_project_link') }}
       </a>
@@ -71,6 +72,7 @@
 
 <script lang="ts" setup>
 import type { Project } from '~~/shared/types/user';
+import { safeExternalUrl } from '~/utils/safeUrl';
 
 /**
  * Fixed-size project card (218×397): a 218×255 media box up top — the uploaded
@@ -96,6 +98,8 @@ const typeRole = computed(() => {
 const yearLine = computed(() =>
   props.project.workInProgress ? t('profile_in_progress') : (props.project.year ?? ''),
 );
+
+const projectUrl = computed(() => safeExternalUrl(props.project.link));
 </script>
 
 <style scoped lang="scss">
