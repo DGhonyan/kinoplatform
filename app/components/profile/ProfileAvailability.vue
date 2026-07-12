@@ -1,185 +1,262 @@
 <template>
-  <div class="availability-section">
-    <div class="availability-header">
-      <span class="section-title">{{ $t('profile_availability') }}</span>
-      <Button
-        v-if="canEdit"
-        size="small"
-        color="primary"
-        @click="showDialog = true"
-      >
-        {{ hasAvailability ? $t('profile_edit_availability') : $t('profile_add_availability') }}
-      </Button>
-    </div>
-
-    <div
-      v-if="hasAvailability"
-      class="calendar-wrapper"
-    >
+  <div class="availability">
+    <div class="calendar-panel">
       <div class="calendar-controls">
         <Button
+          class="nav-btn"
           icon="mdi-chevron-left"
+          color="primary"
           size="small"
-          variant="text"
+          :aria-label="$t('availability_prev_month')"
           @click="shiftMonth(-1)"
         />
-        <span class="calendar-month-display">{{ formatMonthYear(focusedDate) }}</span>
+        <span class="month-label">{{ monthLabel }}</span>
         <Button
+          class="nav-btn"
           icon="mdi-chevron-right"
+          color="primary"
           size="small"
-          variant="text"
+          :aria-label="$t('availability_next_month')"
           @click="shiftMonth(1)"
         />
-        <Button
-          size="small"
-          variant="text"
-          class="today-btn"
-          @click="focusedDate = new Date()"
+      </div>
+
+      <div class="weekday-row">
+        <span
+          v-for="(wd, i) in weekdays"
+          :key="i"
+          class="weekday"
+        >{{ wd }}</span>
+      </div>
+
+      <div class="day-grid">
+        <template
+          v-for="(cell, i) in cells"
+          :key="i"
         >
-          {{ $t('common_today') }}
+          <div
+            v-if="!cell"
+            class="day-cell empty"
+          />
+          <button
+            v-else
+            type="button"
+            class="day-cell interactive"
+            :class="[
+              `status-${dayStatus(cell.date)}`,
+              {
+                selected: cell.date === selectedDate,
+                today: cell.date === todayStr,
+              },
+            ]"
+            :aria-pressed="cell.date === selectedDate"
+            @click="selectDay(cell.date)"
+          >
+            {{ cell.day }}
+          </button>
+        </template>
+      </div>
+
+      <div class="legend">
+        <span class="legend-item"><span class="dot status-available" />{{ $t('availability_legend_available') }}</span>
+        <span class="legend-item"><span class="dot status-partial" />{{ $t('availability_legend_partial') }}</span>
+        <span class="legend-item"><span class="dot status-unavailable" />{{ $t('availability_legend_unavailable') }}</span>
+      </div>
+
+      <div
+        v-if="canEdit && windows.length"
+        class="calendar-footer"
+      >
+        <Button
+          variant="secondary"
+          color="white"
+          size="small"
+          @click="showClearConfirm = true"
+        >
+          {{ $t('availability_clear_all') }}
         </Button>
       </div>
-      <v-calendar
-        v-model="calendarDate"
-        :events="calendarEvents"
-        view-mode="month"
-      />
-    </div>
-    <div
-      v-else
-      class="no-availability"
-    >
-      <span>{{ canEdit ? $t('profile_availability_description') : $t('profile_no_availability_information_added') }}</span>
     </div>
 
-    <v-dialog
-      v-model="showDialog"
-      max-width="600px"
+    <!-- Owner-only editor for the selected day -->
+    <div
+      v-if="canEdit"
+      class="editor-panel"
     >
-      <v-card>
-        <v-card-title>
-          <span class="text-h5">{{ $t('profile_manage_availability') }}</span>
-        </v-card-title>
-        <v-card-text>
-          <v-form class="availability-form">
-            <Input
-              v-model="draft.title"
-              label="common_title"
-              required
-              :error-messages="titleError"
-              @update:model-value="titleError = ''"
+      <template v-if="selectedDate">
+        <h3 class="editor-title">
+          {{ formatFullDate(selectedDate) }}
+        </h3>
+
+        <!-- Existing windows on this day -->
+        <ul
+          v-if="selectedWindows.length"
+          class="window-list"
+        >
+          <li
+            v-for="w in selectedWindows"
+            :key="w._id"
+            class="window-item"
+          >
+            <div class="window-info">
+              <span class="window-time">
+                {{ w.allDay ? $t('availability_all_day') : `${w.startTime} – ${w.endTime}` }}
+              </span>
+              <span
+                v-if="w.note"
+                class="window-note"
+              >{{ w.note }}</span>
+            </div>
+            <Button
+              icon="mdi-close"
+              variant="text"
+              size="x-small"
+              color="error"
+              :aria-label="$t('common_delete')"
+              @click="removeWindow(w._id!)"
             />
-            <v-row>
-              <v-col cols="6">
-                <Input
-                  v-model="draft.startDate"
-                  label="common_start_date"
-                  type="date"
-                  required
-                  :error-messages="startDateError"
-                  @update:model-value="onStartDateChange"
-                />
-              </v-col>
-              <v-col cols="6">
-                <Input
-                  v-model="draft.endDate"
-                  label="common_end_date"
-                  type="date"
-                  required
-                  :error-messages="endDateError"
-                  @update:model-value="endDateError = ''"
-                />
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col cols="6">
-                <Input
-                  v-model="draft.startTime"
-                  label="profile_start_time"
-                  type="time"
-                />
-              </v-col>
-              <v-col cols="6">
-                <Input
-                  v-model="draft.endTime"
-                  label="profile_end_time"
-                  type="time"
-                />
-              </v-col>
-            </v-row>
-            <v-select
-              v-model="draft.color"
-              :label="$t('common_color')"
-              :items="colorOptions"
-              variant="outlined"
-              hide-details
-            />
-          </v-form>
+          </li>
+        </ul>
+        <p
+          v-else
+          class="no-windows"
+        >
+          {{ $t('availability_no_windows') }}
+        </p>
+
+        <!-- Add a window -->
+        <form
+          class="window-form"
+          @submit.prevent="addWindow"
+        >
+          <v-switch
+            v-model="draft.allDay"
+            :label="$t('availability_all_day')"
+            color="primary"
+            density="comfortable"
+            hide-details
+            inset
+          />
 
           <div
-            v-if="validEvents.length > 0"
-            class="existing-availability"
+            v-if="!draft.allDay"
+            class="time-row"
           >
-            <h4>{{ $t('profile_current_availability') }}</h4>
-            <div
-              v-for="event in validEvents"
-              :key="event._id"
-              class="availability-item"
-            >
-              <div class="availability-item-info">
-                <span class="availability-date">
-                  {{ formatDate(event.startDate) }}
-                  <template v-if="event.startDate !== event.endDate">
-                    - {{ formatDate(event.endDate) }}
-                  </template>
-                </span>
-                <span class="availability-title">{{ event.title }}</span>
-                <span
-                  v-if="event.startTime && event.endTime"
-                  class="availability-time"
-                >
-                  {{ event.startTime }} - {{ event.endTime }}
-                </span>
-              </div>
-              <Button
-                size="small"
-                color="error"
-                variant="text"
-                icon="mdi-delete"
-                @click="removeEvent(event._id!)"
-              />
-            </div>
+            <Input
+              v-model="draft.startTime"
+              color="primary"
+              type="time"
+              label="availability_start_time"
+              hide-details="auto"
+              @update:model-value="timeError = ''"
+            />
+            <Input
+              v-model="draft.endTime"
+              color="primary"
+              type="time"
+              label="availability_end_time"
+              hide-details="auto"
+              @update:model-value="timeError = ''"
+            />
           </div>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <Button
-            color="grey"
-            variant="text"
-            @click="closeDialog"
-          >
-            {{ $t('common_cancel') }}
-          </Button>
-          <Button
+          <span
+            v-if="timeError"
+            class="time-error"
+          >{{ timeError }}</span>
+
+          <TextArea
+            v-model="draft.note"
             color="primary"
-            variant="text"
-            @click="addEvent"
+            label="availability_note"
+            :placeholder="$t('availability_note_placeholder')"
+            :maxlength="500"
+            :rows="2"
+            auto-grow
+            hide-details="auto"
+          />
+
+          <Button
+            color="white"
+            variant="secondary"
+            :loading="saving"
+            @click="addWindow"
           >
-            {{ $t('common_save') }}
+            {{ $t('availability_add_window') }}
           </Button>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+        </form>
+      </template>
+
+      <p
+        v-else
+        class="select-hint"
+      >
+        {{ $t('availability_select_day_hint') }}
+      </p>
+    </div>
+
+    <!-- Read-only view of the selected day's windows (non-owner / booker). -->
+    <div
+      v-else
+      class="editor-panel"
+    >
+      <template v-if="selectedDate">
+        <h3 class="editor-title">
+          {{ formatFullDate(selectedDate) }}
+        </h3>
+        <ul
+          v-if="selectedWindows.length"
+          class="window-list"
+        >
+          <li
+            v-for="w in selectedWindows"
+            :key="w._id"
+            class="window-item"
+          >
+            <span class="window-time">
+              {{ w.allDay ? $t('availability_all_day') : `${w.startTime} – ${w.endTime}` }}
+            </span>
+          </li>
+        </ul>
+        <p
+          v-else
+          class="no-windows"
+        >
+          {{ $t('availability_no_windows') }}
+        </p>
+      </template>
+    </div>
+
+    <!-- Clear-all is destructive (wipes the whole calendar) — confirm first. -->
+    <ConfirmDialog
+      v-model="showClearConfirm"
+      :title="$t('availability_clear_confirm_title')"
+      :text="$t('availability_clear_confirm_text')"
+      :confirm-label="$t('availability_clear_all')"
+      confirm-color="error"
+      :loading="clearing"
+      @confirm="clearAll"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
-import type { Event } from '~~/shared/types/user';
+import type { Availability } from '~~/shared/types/user';
+import Button from '~/components/Button.vue';
+import Input from '~/components/Input.vue';
+import TextArea from '~/components/TextArea.vue';
+import ConfirmDialog from '~/components/ConfirmDialog.vue';
+import { formatDate, formatMonthYear } from '~/utils/dates';
+import {
+  groupWindowsByDate,
+  dayStatus as computeDayStatus,
+  type DayStatus,
+} from '~/utils/availability';
 
 /**
- * Availability calendar + editor, extracted from UserProfile. Self-contained:
- * loads its own events for `userId`. Currently hidden from the profile
- * (showAvailability flag) — kept as a component so it's a one-line revisit.
+ * Availability calendar. A month grid of day tiles coloured by status —
+ * available (an all-day window), partially available (some windows), or
+ * unavailable (none) — derived from the user's availability windows. The owner
+ * gets a per-day editor to add/remove windows; other viewers see it read-only.
  */
 const props = defineProps<{
   userId: string | undefined;
@@ -188,227 +265,357 @@ const props = defineProps<{
 
 const { t, locale } = useI18n();
 const authStore = useAuthStore();
-const userStore = useUserStore();
-const eventStore = useEventStore();
+const availabilityStore = useAvailabilityStore();
 
-const events = ref<Event[]>([]);
-const showDialog = ref(false);
-const focusedDate = ref<Date | string | string[]>(new Date());
+const pad = (n: number) => String(n).padStart(2, '0');
+// Build 'YYYY-MM-DD' from parts directly (month is 0-based) — never via
+// toISOString, which shifts to UTC and can land on the wrong day.
+const toDateStr = (y: number, m: number, d: number) => `${y}-${pad(m + 1)}-${pad(d)}`;
 
-const draft = ref<Omit<Event, '_id' | 'userId'>>({
-  startDate: '', endDate: '', title: '', color: 'primary', startTime: '', endTime: '',
-});
-const titleError = ref('');
-const startDateError = ref('');
-const endDateError = ref('');
+const now = new Date();
+const todayStr = toDateStr(now.getFullYear(), now.getMonth(), now.getDate());
 
-const colorOptions = computed(() => [
-  { title: t('common_primary'), value: 'primary' },
-  { title: t('common_success'), value: 'success' },
-  { title: t('common_warning'), value: 'warning' },
-  { title: t('common_error'), value: 'error' },
-  { title: t('common_info'), value: 'info' },
-]);
+const windows = ref<Availability[]>([]);
+const focused = ref(new Date(now.getFullYear(), now.getMonth(), 1));
+const selectedDate = ref<string | null>(todayStr);
+const saving = ref(false);
+const clearing = ref(false);
+const showClearConfirm = ref(false);
 
-const hasAvailability = computed(() => events.value.length > 0);
-const validEvents = computed(() =>
-  events.value.filter(e => e.startDate && e.endDate && e.title),
-);
-const calendarEvents = computed(() =>
-  events.value
-    .filter(e => e.startDate && e.endDate)
-    .map(e => ({
-      title: e.title,
-      start: e.startTime ? `${e.startDate}T${e.startTime}` : e.startDate,
-      end: e.endTime ? `${e.endDate}T${e.endTime}` : e.endDate,
-      color: e.color || 'primary',
-    })),
+const draft = reactive({ allDay: false, startTime: '', endTime: '', note: '' });
+const timeError = ref('');
+
+// Localized Mon–Sun headers (Jan 1 2024 was a Monday).
+const weekdays = computed(() =>
+  Array.from({ length: 7 }, (_, i) =>
+    new Date(2024, 0, 1 + i).toLocaleDateString(locale.value, { weekday: 'short' }),
+  ),
 );
 
-const normalizeDate = (date: Date | string | string[]): Date => {
-  if (date instanceof Date) return date;
-  if (Array.isArray(date)) return new Date(date[0] || new Date());
-  if (typeof date === 'string') return new Date(date);
-  return new Date();
-};
+const monthLabel = computed(() => formatMonthYear(focused.value, locale.value));
 
-const calendarDate = computed({
-  get: () => normalizeDate(focusedDate.value),
-  set: (v) => { focusedDate.value = v; },
+// Always a fixed 6×7 grid (42 cells) so the calendar height — and the popup it
+// sits in — never changes between months. Leading/trailing slots are null (blank
+// tiles); 6 rows is the max any month needs, so nothing ever overflows.
+const cells = computed(() => {
+  const y = focused.value.getFullYear();
+  const m = focused.value.getMonth();
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  const firstWeekday = (new Date(y, m, 1).getDay() + 6) % 7; // Mon = 0
+
+  const result: ({ date: string; day: number } | null)[] = [];
+  for (let i = 0; i < firstWeekday; i++) result.push(null);
+  for (let d = 1; d <= daysInMonth; d++) result.push({ date: toDateStr(y, m, d), day: d });
+  while (result.length < 42) result.push(null);
+  return result;
 });
 
-const formatMonthYear = (date: Date | string | string[]) =>
-  normalizeDate(date).toLocaleDateString(locale.value, { year: 'numeric', month: 'long' });
+const windowsByDate = computed(() => groupWindowsByDate(windows.value));
 
-const formatDate = (date?: string) =>
-  date ? new Date(date).toLocaleDateString(locale.value, { year: 'numeric', month: 'long', day: 'numeric' }) : '';
+const dayStatus = (date: string): DayStatus =>
+  computeDayStatus(windowsByDate.value[date]);
 
-const shiftMonth = (delta: number) => {
-  const d = normalizeDate(focusedDate.value);
-  d.setMonth(d.getMonth() + delta);
-  focusedDate.value = d;
-};
+const selectedWindows = computed(() =>
+  selectedDate.value ? windowsByDate.value[selectedDate.value] ?? [] : [],
+);
 
-const loadEvents = async () => {
-  const targetId = props.userId || authStore.user?._id;
-  if (!targetId) return;
-  const profile = await userStore.getUserProfile(targetId);
-  if (profile) events.value = profile.events;
-};
-
-const onStartDateChange = (value: string) => {
-  startDateError.value = '';
-  if (!draft.value.endDate) draft.value.endDate = value;
-  endDateError.value = draft.value.endDate && draft.value.endDate < value
-    ? t('common_end_date_must_be_after_or_equal_to_start_date')
-    : '';
-};
-
-const validateForm = (): boolean => {
-  let ok = true;
-  if (!draft.value.title) {
-    titleError.value = t('common_this_field_is_required');
-    ok = false;
-  }
-  if (!draft.value.startDate) {
-    startDateError.value = t('common_this_field_is_required');
-    ok = false;
-  }
-  if (!draft.value.endDate) {
-    endDateError.value = t('common_this_field_is_required');
-    ok = false;
-  }
-  if (draft.value.startDate && draft.value.endDate && draft.value.endDate < draft.value.startDate) {
-    endDateError.value = t('common_end_date_must_be_after_or_equal_to_start_date');
-    ok = false;
-  }
-  return ok;
-};
+const formatFullDate = (date: string) => formatDate(date, locale.value);
 
 const resetDraft = () => {
-  draft.value = { startDate: '', endDate: '', title: '', color: 'primary', startTime: '', endTime: '' };
-  titleError.value = '';
-  startDateError.value = '';
-  endDateError.value = '';
+  draft.allDay = false;
+  draft.startTime = '';
+  draft.endTime = '';
+  draft.note = '';
+  timeError.value = '';
 };
 
-const closeDialog = () => {
-  showDialog.value = false;
-  resetDraft();
+const shiftMonth = (delta: number) => {
+  focused.value = new Date(focused.value.getFullYear(), focused.value.getMonth() + delta, 1);
 };
 
-const addEvent = async () => {
-  if (!validateForm()) return;
-  const created = await eventStore.createEvent(draft.value);
-  if (!created) return;
-  await loadEvents();
-  closeDialog();
+const selectDay = (date: string) => {
+  selectedDate.value = date;
+  if (props.canEdit) resetDraft();
 };
 
-const removeEvent = async (eventId: string) => {
-  const ok = await eventStore.deleteEvent(eventId);
-  if (!ok) return;
-  await loadEvents();
+const load = async () => {
+  const targetId = props.userId || authStore.user?._id;
+  if (!targetId) return;
+  const data = await availabilityStore.listAvailability(targetId);
+  windows.value = data ?? [];
 };
 
-onMounted(loadEvents);
-watch(() => props.userId, loadEvents);
+const addWindow = async () => {
+  if (saving.value || !selectedDate.value) return;
+
+  timeError.value = '';
+  if (!draft.allDay) {
+    if (!draft.startTime || !draft.endTime) {
+      timeError.value = t('common_all_fields_are_required');
+      return;
+    }
+    if (draft.startTime >= draft.endTime) {
+      timeError.value = t('availability_invalid_window');
+      return;
+    }
+  }
+
+  saving.value = true;
+  try {
+    const created = await availabilityStore.createAvailability({
+      date: selectedDate.value,
+      allDay: draft.allDay,
+      startTime: draft.allDay ? undefined : draft.startTime,
+      endTime: draft.allDay ? undefined : draft.endTime,
+      note: draft.note.trim() || undefined,
+    });
+    if (!created) return;
+    resetDraft();
+    await load();
+  }
+  finally {
+    saving.value = false;
+  }
+};
+
+const removeWindow = async (id: string) => {
+  const ok = await availabilityStore.deleteAvailability(id);
+  if (ok) await load();
+};
+
+const clearAll = async () => {
+  clearing.value = true;
+  try {
+    const ok = await availabilityStore.clearAvailability();
+    if (ok) await load();
+  }
+  finally {
+    clearing.value = false;
+    showClearConfirm.value = false;
+  }
+};
+
+onMounted(load);
+watch(() => props.userId, load);
 </script>
 
 <style scoped lang="scss">
-.availability-section {
+// Availability status palette — single source for both day tiles and legend dots.
+$status-available: #f4efe6;
+$status-partial: #e0a15e;
+$status-unavailable: color(--v-theme-on-surface, 0.1);
+$status-unavailable-dot: color(--v-theme-on-surface, 0.3);
+$status-selected: #3f6b53;
+
+.availability {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+.calendar-panel {
+  flex: 1;
+  min-width: 300px;
   display: flex;
   flex-direction: column;
   gap: 16px;
-}
-
-.section-title {
-  font-size: 24px;
-  font-weight: 500;
-}
-
-.availability-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.calendar-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
 }
 
 .calendar-controls {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px 0;
+  justify-content: center;
+  gap: 24px;
 }
 
-.calendar-month-display {
-  font-size: 18px;
+.nav-btn {
+  flex-shrink: 0;
+}
+
+.month-label {
+  font-size: 20px;
+  font-weight: 700;
+  min-width: 160px;
+  text-align: center;
+}
+
+.weekday-row,
+.day-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.weekday {
+  text-align: center;
+  font-size: 13px;
   font-weight: 500;
-  min-width: 180px;
-  text-align: center;
+  opacity: 0.7;
+  text-transform: capitalize;
 }
 
-.today-btn {
-  margin-left: auto;
+.day-cell {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 500;
+  border: 2px solid transparent;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+
+  &.empty {
+    visibility: hidden;
+  }
+
+  // Status colours.
+  &.status-available {
+    background-color: $status-available;
+    color: #1a1a1a;
+  }
+
+  &.status-partial {
+    background-color: $status-partial;
+    color: #1a1a1a;
+  }
+
+  &.status-unavailable {
+    background-color: $status-unavailable;
+    color: color(--v-theme-on-surface, 0.55);
+  }
+
+  &.today {
+    border-color: color(--v-theme-on-surface, 0.4);
+  }
+
+  &.interactive {
+    cursor: pointer;
+    font-family: inherit;
+
+    &:hover {
+      transform: translateY(-1px);
+    }
+  }
+
+  // Selected wins over status colour (matches the design's green highlight).
+  &.selected {
+    background-color: $status-selected;
+    color: #fff;
+    border-color: $status-selected;
+  }
 }
 
-.no-availability {
-  padding: 24px;
-  text-align: center;
-  font-size: 14px;
-  border: 1px dashed color(--v-theme-primary, 0.3);
-  border-radius: 8px;
+.legend {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding-top: 4px;
 }
 
-.availability-form {
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+
+  &.status-available { background-color: $status-available; }
+  &.status-partial { background-color: $status-partial; }
+  &.status-unavailable { background-color: $status-unavailable-dot; }
+}
+
+.calendar-footer {
+  display: flex;
+  padding-top: 4px;
+}
+
+.editor-panel {
+  width: 320px;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.existing-availability {
-  margin-top: 24px;
+.editor-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.window-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.window-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid color(--v-theme-on-surface, 0.16);
+  border-radius: 10px;
+}
+
+.window-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.window-time {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.window-note {
+  font-size: 12px;
+  opacity: 0.7;
+  overflow-wrap: anywhere;
+}
+
+.no-windows {
+  font-size: 13px;
+  opacity: 0.6;
+  margin: 0;
+}
+
+.window-form {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  padding-top: 8px;
+  border-top: 1px solid color(--v-theme-on-surface, 0.12);
+}
 
-  h4 {
-    font-size: 16px;
-    font-weight: 500;
+.time-row {
+  display: flex;
+  gap: 12px;
+
+  > * {
+    flex: 1;
   }
 }
 
-.availability-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px;
-  border: 1px solid color(--v-theme-primary, 0.2);
-  border-radius: 4px;
-}
-
-.availability-item-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.availability-date {
-  font-weight: 500;
-  color: color(--v-theme-primary);
-}
-
-.availability-title {
-  font-size: 14px;
-}
-
-.availability-time {
+.time-error {
   font-size: 12px;
-  opacity: 0.7;
+  color: color(--v-theme-error);
+}
+
+.select-hint {
+  font-size: 14px;
+  opacity: 0.6;
 }
 </style>

@@ -121,14 +121,26 @@
       </div>
     </div>
 
-    <div
-      v-if="user?.avatar"
-      class="avatar"
-    >
-      <img
-        :src="getUserAvatar()"
-        alt=""
+    <div class="side">
+      <div
+        v-if="user?.avatar"
+        class="avatar"
       >
+        <img
+          :src="getUserAvatar()"
+          alt=""
+        >
+      </div>
+      <Button
+        class="availability-btn"
+        color="primary"
+        text-color="white"
+        block
+        append-icon="custom:calendar"
+        @click="emit('openAvailability')"
+      >
+        {{ $t('profile_availability') }}
+      </Button>
     </div>
   </section>
 </template>
@@ -161,6 +173,7 @@ const emit = defineEmits<{
   editInfo: [];
   editGear: [];
   editAppearance: [];
+  openAvailability: [];
 }>();
 
 const { t, locale } = useI18n();
@@ -265,11 +278,17 @@ const practicalityLabels = computed(() =>
   overflow-wrap: anywhere;
 }
 
-.avatar {
+.side {
   flex-shrink: 0;
   width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.avatar {
+  width: 100%;
   height: 400px;
-  margin-bottom: 10px;
   border: 1px solid color(--v-theme-accent, 0.3);
 
   img {
@@ -277,6 +296,10 @@ const practicalityLabels = computed(() =>
     height: 100%;
     object-fit: cover;
   }
+}
+
+.availability-btn {
+  margin-bottom: 10px;
 }
 
 .bio {

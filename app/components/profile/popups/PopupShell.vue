@@ -50,9 +50,20 @@
         </p>
       </div>
 
-      <div class="popup-body">
+      <!-- Body is a <form> so children get Enter-to-submit; the hidden button
+           enables implicit submission and the consumer listens via @submit. -->
+      <form
+        class="popup-body"
+        @submit.prevent="emit('submit')"
+      >
         <slot />
-      </div>
+        <button
+          type="submit"
+          class="popup-hidden-submit"
+          aria-hidden="true"
+          tabindex="-1"
+        />
+      </form>
 
       <div
         v-if="$slots.actions"
@@ -106,6 +117,7 @@ withDefaults(
 
 const emit = defineEmits<{
   back: [];
+  submit: [];
 }>();
 </script>
 
@@ -156,6 +168,10 @@ const emit = defineEmits<{
   gap: 16px;
   overflow-y: auto;
   padding-right: 12px;
+}
+
+.popup-hidden-submit {
+  display: none;
 }
 
 .popup-actions {

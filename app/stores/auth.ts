@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type { User } from '~~/shared/types/user';
+import type { User, Session } from '~~/shared/types/user';
 
 let authInitialized = false;
 let initPromise: Promise<void> | null = null;
@@ -103,6 +103,56 @@ export const useAuthStore = defineStore('auth', {
       // we clear local auth regardless.
       await apiRequest('/auth/logout', { showError: false }).post();
       this.clearAuth();
+    },
+
+    // Change password (logged-in). Step-up = current password. The backend keeps
+    // THIS session alive (re-issues the access cookie) and revokes the others, so
+    // no re-login. useApi: the popup shows INVALID_CURRENT_PASSWORD inline.
+    async changePassword(currentPassword: string, newPassword: string) {
+      return useApi('/auth/password').patch<{ message: string }>({
+        currentPassword,
+        newPassword,
+      });
+    },
+
+    // Step 1 of email change: verify current password, send a code to the new
+    // address. useApi so the popup can branch on EMAIL_IN_USE / bad password.
+    async requestEmailChange(email: string, currentPassword: string) {
+      return useApi('/auth/email/change').post<{ message: string }>({
+        email,
+        currentPassword,
+      });
+    },
+
+    // Step 2: confirm with the code from the new address. On success, patch the
+    // one changed field locally (mirrors the backend's lowercase normalization)
+    // rather than refetching the whole profile.
+    async confirmEmailChange(code: string, newEmail: string) {
+      const res = await useApi('/auth/email/verify-change').post<{ message: string }>({ code });
+
+      if (!res.error && this.user) {
+        this.setUser({ ...this.user, email: newEmail.trim().toLowerCase() });
+      }
+
+      return res;
+    },
+
+    async listSessions() {
+      return apiRequest('/auth/sessions', {
+        errorMessage: 'error_load_sessions_failed',
+      }).get<Session[]>();
+    },
+
+    async revokeSession(id: string) {
+      return apiRequest(`/auth/sessions/${id}`, {
+        errorMessage: 'error_revoke_session_failed',
+      }).delete<{ message: string }>();
+    },
+
+    async revokeOtherSessions() {
+      return apiRequest('/auth/sessions', {
+        errorMessage: 'error_revoke_session_failed',
+      }).delete<{ message: string }>();
     },
 
     resetInitState() {

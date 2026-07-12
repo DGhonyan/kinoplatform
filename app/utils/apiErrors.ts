@@ -29,10 +29,11 @@ const ERROR_MESSAGE_KEYS: Partial<Record<ErrorCode, string>> = {
   INVALID_RESET_CODE: 'error_invalid_reset_code',
   RESET_CODE_EXPIRED: 'error_reset_code_expired',
   RESET_TOO_MANY_ATTEMPTS: 'register_too_many_attempts',
-  // events
-  EVENT_NOT_FOUND: 'error_event_not_found',
-  EVENT_FORBIDDEN: 'error_event_forbidden',
-  EVENT_CREATE_FAILED: 'error_event_create_failed',
+  // availability
+  AVAILABILITY_NOT_FOUND: 'error_availability_not_found',
+  AVAILABILITY_FORBIDDEN: 'error_availability_forbidden',
+  AVAILABILITY_CREATE_FAILED: 'error_availability_create_failed',
+  AVAILABILITY_INVALID_WINDOW: 'error_availability_invalid_window',
   // recommendations
   CANNOT_RECOMMEND_SELF: 'error_cannot_recommend_self',
   ONBOARDING_INCOMPLETE: 'error_onboarding_incomplete',

@@ -61,15 +61,16 @@ export type Recommendation = {
   createdAt: string;
 };
 
-export type Event = {
+// One availability window on a single day. Whitelist model: a day is unavailable
+// by default; `allDay` covers the whole day, otherwise it's the startTime–endTime
+// slot. A day may hold several windows (the gaps between them stay unavailable).
+export type Availability = {
   _id?: string;
-  userId: string;
-  startDate: string;
-  endDate: string;
-  title: string;
-  color?: string;
-  startTime?: string;
-  endTime?: string;
+  date: string; // YYYY-MM-DD
+  allDay: boolean;
+  startTime?: string; // HH:mm
+  endTime?: string; // HH:mm
+  note?: string;
 };
 
 /**
@@ -155,4 +156,14 @@ export type TalentSearchFilters = {
   skinColors?: string[];
   page?: number;
   limit?: number;
+};
+
+// An active login session (one stored refresh token) for the settings page.
+// `current` marks the device making the request.
+export type Session = {
+  id: string;
+  device: string;
+  ip: string;
+  createdAt: string;
+  current: boolean;
 };

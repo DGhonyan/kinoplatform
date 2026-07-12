@@ -3,9 +3,15 @@
     <h1 class="about-title">
       {{ $t('common_about') }}
     </h1>
-    <p class="about-intro">
-      {{ $t('about_intro') }}
+    <p class="about-tagline">
+      {{ $t('about_tagline') }}
     </p>
+    <div class="about-body">
+      <p>{{ $t('about_body_1') }}</p>
+      <p>{{ $t('about_body_2') }}</p>
+      <p>{{ $t('about_body_3') }}</p>
+      <p>{{ $t('about_body_4') }}</p>
+    </div>
   </div>
 </template>
 
@@ -20,7 +26,7 @@
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 
 .about-title {
@@ -28,9 +34,22 @@
   font-weight: 600;
 }
 
-.about-intro {
-  font-size: 16px;
-  line-height: 1.6;
-  opacity: 0.85;
+.about-tagline {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.about-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  p {
+    font-size: 16px;
+    line-height: 1.6;
+    opacity: 0.85;
+    margin: 0;
+  }
 }
 </style>

@@ -1,8 +1,7 @@
 import { defineStore } from 'pinia';
-import type { User, Event, Recommendation, TalentSearchFilters } from '~~/shared/types/user';
+import type { User, Recommendation, TalentSearchFilters } from '~~/shared/types/user';
 
 export type UserProfile = User & {
-  events: Event[];
   recommendations: Recommendation[];
 };
 

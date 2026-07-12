@@ -33,6 +33,8 @@
 
 <script lang="ts" setup>
 import { RegisterFormDataKey } from '../registerSteps';
+import { PASSWORD_RE } from '~/utils/password';
+import { isValidEmail } from '~/utils/email';
 
 const formData = inject(RegisterFormDataKey)!;
 
@@ -40,10 +42,6 @@ const { t } = useI18n();
 
 const emailError = ref('');
 const passwordError = ref('');
-
-// Mirrors the backend's PASSWORD_REGEX in auth.dto.ts. backend one doesn't need length limits as it has decorators.
-// const PASSWORD_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).+$/;
-const PASSWORD_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,32}$/;
 
 const validate = (): boolean => {
   emailError.value = '';
@@ -55,7 +53,7 @@ const validate = (): boolean => {
     emailError.value = t('common_this_field_is_required');
     ok = false;
   }
-  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  else if (!isValidEmail(email)) {
     emailError.value = t('auth_invalid_email');
     ok = false;
   }

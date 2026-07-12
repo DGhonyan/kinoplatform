@@ -98,36 +98,13 @@
         </v-menu>
       </div>
 
-      <v-dialog
+      <ConfirmDialog
         v-model="showLogoutDialog"
-        max-width="400px"
-      >
-        <v-card>
-          <v-card-title class="text-h5">
-            {{ $t('common_confirm_logout') }}
-          </v-card-title>
-          <v-card-text>
-            {{ $t('common_are_you_sure_you_want_to_logout') }}
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer />
-            <Button
-              color="grey"
-              variant="text"
-              @click="showLogoutDialog = false"
-            >
-              {{ $t('common_cancel') }}
-            </Button>
-            <Button
-              color="primary"
-              variant="text"
-              @click="confirmLogout"
-            >
-              {{ $t('common_logout') }}
-            </Button>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
+        :title="$t('common_confirm_logout')"
+        :text="$t('common_are_you_sure_you_want_to_logout')"
+        :confirm-label="$t('common_logout')"
+        @confirm="confirmLogout"
+      />
     </div>
 
     <!-- Hero band: the Bebas slogan, plus auth CTAs for logged-out visitors. -->
@@ -169,6 +146,7 @@
 
 <script lang="ts" setup>
 import Button from './Button.vue';
+import ConfirmDialog from './ConfirmDialog.vue';
 import { isOnboardingComplete } from '~/utils/onboarding';
 
 // Mirrors HeaderConfig (shared/types/header.ts). Kept as an inline literal —

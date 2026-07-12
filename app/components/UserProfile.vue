@@ -17,6 +17,7 @@
       @edit-info="showEditInfo = true"
       @edit-gear="openGear"
       @edit-appearance="showActorEdit = true"
+      @open-availability="showAvailabilityPopup = true"
     />
 
     <!-- ── Actor photos: public, chromeless — no label/border, just sit here ── -->
@@ -197,12 +198,17 @@
       />
     </section>
 
-    <!-- Availability — hidden for now; flip showAvailability to bring it back. -->
-    <ProfileAvailability
-      v-if="showAvailability"
-      :user-id="userId"
-      :can-edit="canEdit"
-    />
+    <!-- Availability — opened from the button under the profile picture. -->
+    <PopupShell
+      v-model="showAvailabilityPopup"
+      :title="$t('profile_availability')"
+      :max-width="900"
+    >
+      <ProfileAvailability
+        :user-id="userId"
+        :can-edit="canEdit"
+      />
+    </PopupShell>
 
     <!-- ───────────── Edit popups ───────────── -->
     <EditPersonalInfoPopup
@@ -257,6 +263,7 @@ import ProfilePersonalInfo from '~/components/profile/ProfilePersonalInfo.vue';
 import ProfileCompletionBanner from '~/components/profile/ProfileCompletionBanner.vue';
 import ProfileRecommendations from '~/components/profile/ProfileRecommendations.vue';
 import ProfileAvailability from '~/components/profile/ProfileAvailability.vue';
+import PopupShell from '~/components/profile/popups/PopupShell.vue';
 import ProjectsExperiencePopup from '~/components/profile/popups/ProjectsExperiencePopup.vue';
 import GearAndTravelPopup from '~/components/profile/popups/GearAndTravelPopup.vue';
 import EditPersonalInfoPopup from '~/components/profile/popups/EditPersonalInfoPopup.vue';
@@ -265,7 +272,7 @@ import ExperienceManagerPopup from '~/components/profile/popups/ExperienceManage
 
 const PROJECTS_PREVIEW = 3;
 // Availability is hidden for now (kept as a component) — flip to show it again.
-const showAvailability = false;
+const showAvailabilityPopup = ref(false);
 
 const props = defineProps<{
   userId: string | undefined;
@@ -338,13 +345,12 @@ const openExperience = (mode: 'list' | 'add') => {
   showExperienceManager.value = true;
 };
 
-// authStore.user is a plain User (no events/recommendations); keep the ones we
-// already loaded when folding the edited fields back into the profile view.
+// authStore.user is a plain User (no recommendations); keep the ones we already
+// loaded when folding the edited fields back into the profile view.
 const syncProfileFromAuth = () => {
   if (!authStore.user) return;
   user.value = {
     ...authStore.user,
-    events: user.value?.events ?? [],
     recommendations: user.value?.recommendations ?? [],
   };
 };
@@ -403,8 +409,8 @@ const loadUserData = async () => {
   const profile = await userStore.getUserProfile(targetId);
   if (!profile) return;
 
-  // UserProfile is a superset of User (it carries `events`); fine to keep for
-  // display, and availability lives in its own component now.
+  // UserProfile is a superset of User (it carries `recommendations`); availability
+  // lives in its own component + endpoint now.
   user.value = profile;
 
   if (targetId === authStore.user?._id) authStore.setUser(profile);
