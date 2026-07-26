@@ -9,6 +9,7 @@
       <Input
         v-bind="menuProps"
         :model-value="displayValue"
+        :label="label"
         :placeholder="placeholder"
         :error-messages="errorMessages"
         :required="required"
@@ -85,11 +86,16 @@
  *
  * `prependIcon` renders an icon inside the field on the left. For fully
  * custom content, use the `prepend-inner` slot.
+ *
+ * `label` (an i18n key, like Input's) renders above the field. Pass it whenever
+ * this sits beside a labelled field — otherwise the two fields misalign.
  */
 const modelValue = defineModel<string>({ default: '' });
 
 const props = withDefaults(
   defineProps<{
+    /** i18n key rendered as the field label. Omit for a bare field. */
+    label?: string;
     placeholder?: string;
     errorMessages?: string | string[];
     required?: boolean;
@@ -99,6 +105,7 @@ const props = withDefaults(
     prependIcon?: string;
   }>(),
   {
+    label: '',
     placeholder: '',
     errorMessages: undefined,
     required: false,

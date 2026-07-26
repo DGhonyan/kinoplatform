@@ -231,9 +231,9 @@ const form = reactive({
   birthDate: u?.birthDate ?? '',
   location: u?.location ?? '',
   education: u?.education ?? '',
-  profession: [...(u?.profession ?? [])],
+  profession: toArray<string>(u?.profession),
   experienceLevel: u?.experienceLevel ?? '',
-  languages: [...(u?.languages ?? [])],
+  languages: toArray<string>(u?.languages),
   portfolio: u?.portfolio ?? '',
   bio: u?.bio ?? '',
 });
@@ -429,5 +429,11 @@ const save = async () => {
 
 .languages-select :deep(.v-field) {
   border-radius: 16px;
+}
+
+@include mobile {
+  .row {
+    flex-direction: column;
+  }
 }
 </style>

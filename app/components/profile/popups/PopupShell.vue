@@ -3,6 +3,7 @@
     v-model="open"
     :max-width="maxWidth"
     :persistent="persistent"
+    content-class="popup-shell-dialog"
     scrollable
   >
     <v-card
@@ -180,6 +181,48 @@ const emit = defineEmits<{
 
   > * {
     flex: 1;
+  }
+}
+
+@include mobile {
+  .popup-card {
+    gap: 16px;
+    padding: 20px 16px;
+    // The dialog wrapper owns the height budget on mobile (see the rule below).
+    max-height: 100%;
+  }
+
+  .popup-title {
+    font-size: 18px;
+  }
+
+  .popup-body {
+    padding-right: 4px;
+  }
+
+  // Two large buttons rarely survive a 320px row; stack them, primary last.
+  .popup-actions {
+    flex-direction: column;
+    gap: 12px;
+
+    > * {
+      flex: none;
+    }
+  }
+}
+</style>
+
+<!-- Not scoped: the overlay is teleported out of this component's subtree, so the
+     scope attribute never reaches it — `content-class` is the only handle. The
+     selector outweighs Vuetify's own `.v-dialog > .v-overlay__content` sizing. -->
+<style lang="scss">
+@include mobile {
+  .v-dialog > .v-overlay__content.popup-shell-dialog {
+    // Vuetify reserves 24px on every side; give a phone most of that back.
+    margin: 12px;
+    width: calc(100% - 24px);
+    max-width: calc(100% - 24px);
+    max-height: calc(100% - 24px);
   }
 }
 </style>

@@ -152,6 +152,8 @@ watch(() => props.items.length, () => nextTick(measure));
   display: flex;
   align-items: center;
   gap: 8px;
+  // Anchor for the overlaid controls on narrow screens (see the mobile block).
+  position: relative;
 }
 
 .carousel-viewport {
@@ -195,6 +197,33 @@ watch(() => props.items.length, () => nextTick(measure));
   &.is-disabled {
     opacity: 0.3;
     pointer-events: none;
+  }
+}
+
+// Two inline 36px arrows plus gaps eat ~90px of a ~290px row, which is why they
+// used to be hidden outright on phones. Float them over the strip's edges
+// instead: still tappable, but they cost the viewport no width.
+@include mobile {
+  .carousel-control {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+    // The strip scrolls under them, so keep them legible over artwork.
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+
+    &:first-child {
+      left: 4px;
+    }
+
+    &:last-child {
+      right: 4px;
+    }
+
+    // The base rule's hover scale would drop the translate and un-center it.
+    &:hover {
+      transform: translateY(-50%) scale(1.06);
+    }
   }
 }
 </style>

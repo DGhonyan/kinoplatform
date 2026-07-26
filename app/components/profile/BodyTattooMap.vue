@@ -144,4 +144,15 @@ const regionLabel = (id: string): string => {
   text-align: center;
   opacity: 0.7;
 }
+
+@include mobile {
+  // Keep front and back side by side — wrapping them costs a full screen height.
+  .figures {
+    gap: 10px;
+  }
+
+  .figure-svg {
+    width: 110px;
+  }
+}
 </style>

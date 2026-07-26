@@ -55,10 +55,20 @@
 
 <script lang="ts" setup>
 const { t } = useI18n();
+const route = useRoute();
 
 const emit = defineEmits<{
   unverified: [email: string];
 }>();
+
+// Where to go after login: the `?redirect=` the auth middleware set when it
+// bounced a guest off a gated page — but only same-origin internal paths (guard
+// against open redirect), else home.
+const postLoginTarget = (): string => {
+  const raw = route.query.redirect;
+  const path = Array.isArray(raw) ? raw[0] : raw;
+  return typeof path === 'string' && /^\/(?![/\\])/.test(path) ? path : '/';
+};
 
 const email = ref('');
 const password = ref('');
@@ -97,7 +107,7 @@ const handleLogin = async () => {
     const res = await authStore.login(email.value, password.value, rememberMe.value);
 
     if (res.data) {
-      navigateTo('/');
+      navigateTo(postLoginTarget());
       return;
     }
 

@@ -3,7 +3,7 @@ import { isOnboardingComplete } from '~/utils/onboarding';
 export default defineNuxtRouteMiddleware(async (to) => {
   // Public = reachable without login. '/' and '/about' are marketing pages that
   // anyone can see; the auth screens are public too (but bounce logged-in users).
-  const publicPaths = ['/', '/about', '/login', '/register', '/forgot-password', '/reset-password'];
+  const publicPaths = ['/', '/about', '/announcements', '/login', '/register', '/forgot-password', '/reset-password'];
   const authOnlyScreens = ['/login', '/register'];
   const path = to.path.replace(/\/+$/, '') || '/';
   const isPublic = publicPaths.includes(path);
@@ -26,7 +26,11 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return;
   }
 
-  if (!user) return navigateTo('/login');
+  // Bounce guests to login, remembering where they were headed so login can
+  // return them there (e.g. a shared announcement detail link).
+  if (!user) {
+    return navigateTo({ path: '/login', query: { redirect: to.fullPath } });
+  }
   // Onboarding gate — NOT `active` (which is reserved for account status /
   // soft-delete). Unfinished onboarders are pinned to /user.
   if (!isOnboardingComplete(user) && path !== '/user') return navigateTo('/user');

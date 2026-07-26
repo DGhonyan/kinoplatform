@@ -268,4 +268,22 @@ const removeRec = async (id: string) => {
   opacity: 0.6;
   margin: 0;
 }
+
+@include mobile {
+  // The prompt reads as the section's own heading on a narrow column.
+  .leave-label {
+    font-size: 18px;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  // Pill field; Vuetify already right-aligns the counter underneath it.
+  .leave :deep(.v-field) {
+    border-radius: 24px;
+  }
+
+  .rec-card {
+    width: 240px;
+  }
+}
 </style>

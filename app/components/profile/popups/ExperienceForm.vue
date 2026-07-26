@@ -230,4 +230,11 @@ defineExpose({ commit });
     flex: 1;
   }
 }
+
+@include mobile {
+  // A labelled month/year pair doesn't survive half of a phone's width.
+  .date-row {
+    flex-direction: column;
+  }
+}
 </style>

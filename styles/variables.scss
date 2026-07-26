@@ -1,1 +1,21 @@
 $base-padding: 16px;
+
+// Responsive breakpoints, aligned with Vuetify's sm/md/lg boundaries so JS
+// (useDisplay) and SCSS agree. Prefer intrinsic (ResizeObserver) collapse where
+// content width varies by locale/content (e.g. the header nav); use these
+// mixins for coarse page-level shifts — stacking columns, sidebars, grid counts.
+$bp-mobile: 600px;
+$bp-tablet: 960px;
+
+// max-width queries (subtract a hair to avoid overlap at the exact boundary).
+// The app is designed desktop-first, so these two carry all the responsive
+// work. Deliberately no min-width mixins or a $bp-desktop: unused tokens in a
+// globally-injected file only advertise breakpoints nothing actually honours —
+// add one here the moment a rule genuinely needs it.
+@mixin mobile {
+  @media (max-width: #{$bp-mobile - 0.02px}) { @content; }
+}
+
+@mixin tablet-down {
+  @media (max-width: #{$bp-tablet - 0.02px}) { @content; }
+}

@@ -161,7 +161,7 @@ const MAX_BIO_LENGTH = 1000;
 const avatarFileId = ref('');
 const bio = ref(authStore.user?.bio ?? '');
 const experienceLevel = ref(authStore.user?.experienceLevel ?? '');
-const languages = ref<string[]>([...(authStore.user?.languages ?? [])]);
+const languages = ref<string[]>(toArray<string>(authStore.user?.languages));
 
 const avatarError = ref('');
 const bioError = ref('');
@@ -171,7 +171,7 @@ const saving = ref(false);
 
 // ── Actor-only: additional photos + appearance ──
 const isActor = computed(() => checkIsActor(authStore.user?.profession));
-const additionalPhotos = ref<string[]>([...(authStore.user?.additionalPhotos ?? [])]);
+const additionalPhotos = ref<string[]>(toArray<string>(authStore.user?.additionalPhotos));
 const appearance = ref<Appearance | null>(authStore.user?.appearance ?? null);
 const photosError = ref('');
 const appearanceError = ref('');

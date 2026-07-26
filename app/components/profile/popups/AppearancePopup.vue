@@ -174,8 +174,11 @@ const draft = reactive({
   hairColor: props.appearance?.hairColor ?? '',
   eyeColor: props.appearance?.eyeColor ?? '',
   skinColor: props.appearance?.skinColor ?? '',
-  tattoos: [...(props.appearance?.tattoos ?? [])],
-  physicalCharacteristics: [...(props.appearance?.physicalCharacteristics ?? [])],
+  // toArray, not `?? []` — see toArray's docs: these arrive over the wire and a
+  // non-array value would slip past `??` and throw on the spread, taking the
+  // whole popup down before it renders.
+  tattoos: toArray<string>(props.appearance?.tattoos),
+  physicalCharacteristics: toArray<string>(props.appearance?.physicalCharacteristics),
   otherCharacteristic: props.appearance?.otherCharacteristic ?? '',
   clothingSize: props.appearance?.clothingSize ?? '',
   shoeSize: props.appearance?.shoeSize ?? '',
@@ -278,5 +281,15 @@ const done = () => {
 .subgroup-hint {
   font-size: 12px;
   opacity: 0.6;
+}
+
+@include mobile {
+  .appearance-form {
+    gap: 20px;
+  }
+
+  .row {
+    flex-direction: column;
+  }
 }
 </style>

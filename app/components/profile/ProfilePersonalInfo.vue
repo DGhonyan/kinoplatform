@@ -300,6 +300,11 @@ const practicalityLabels = computed(() =>
 
 .availability-btn {
   margin-bottom: 10px;
+  // Vuetify's `block` is `flex: 1 0 auto`. `.side` is a column that stretches to
+  // the height of the identity column beside it, so without this the button
+  // swallows all the leftover height and visibly inflates as the bio grows.
+  // `block` should mean full width; `min-width: 100%` still delivers that.
+  flex-grow: 0;
 }
 
 .bio {
@@ -372,6 +377,70 @@ const practicalityLabels = computed(() =>
 
   .v-icon {
     flex-shrink: 0;
+  }
+}
+
+/* ── Mobile: one column, name → photo → professions → rule → the rest ── */
+@include mobile {
+  .personal-card {
+    display: flex;
+    flex-direction: column;
+    // Lean on the layout's own gutter instead of insetting a second time.
+    padding: 14px 0;
+    gap: 14px;
+  }
+
+  // The photo has to land between the name and the professions, which live in
+  // the *other* desktop column. Dropping the two columns' boxes makes all of
+  // their children direct flex items of the card, so `order` can interleave them.
+  .personal,
+  .personal-top,
+  .identity,
+  .side {
+    display: contents;
+  }
+
+  // Only the identity block is re-ordered (negatively, so everything else keeps
+  // the default 0 and follows in DOM order — bio, nav, meta, chips, then the
+  // availability button that trailed the photo in the desktop column).
+  .name-row {
+    order: -4;
+  }
+
+  .avatar {
+    order: -3;
+    width: 100%;
+    // Portrait, centered, and inset from the page edge — not full-bleed.
+    max-width: 280px;
+    height: auto;
+    margin-inline: auto;
+
+    img {
+      height: auto;
+      aspect-ratio: 4 / 5;
+    }
+  }
+
+  .professions {
+    order: -2;
+    font-size: 16px;
+  }
+
+  .experience-level {
+    order: -1;
+  }
+
+  // `.personal-top` lost its box (and with it the rule closing the identity
+  // block) to `display: contents` — redraw it as a flex item. A pseudo-element
+  // sorts ahead of its order-0 siblings, so it lands right after the identity.
+  .personal-card::before {
+    content: '';
+    height: 0;
+    border-top: 1px solid color(--v-theme-accent);
+  }
+
+  .name {
+    font-size: 34px;
   }
 }
 </style>

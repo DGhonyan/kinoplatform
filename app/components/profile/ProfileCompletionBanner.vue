@@ -90,4 +90,16 @@ const emit = defineEmits<{
   gap: 8px;
   flex-shrink: 0;
 }
+
+@include mobile {
+  .completion-banner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .banner-actions {
+    justify-content: flex-end;
+  }
+}
 </style>

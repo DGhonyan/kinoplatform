@@ -117,3 +117,36 @@ const textColorClass = computed(() =>
   props.textColor ? `text-${props.textColor}` : undefined,
 );
 </script>
+
+<style scoped lang="scss">
+/*
+ * Vuetify's v-btn combines `white-space: nowrap`, a fixed `height` and a
+ * per-size `min-width`. In a tight row that makes a long label spill out of its
+ * pill instead of reflowing. Clipping or ellipsising a label is the worst
+ * option — the label IS the affordance — so let it wrap and let the button grow
+ * to fit. `min-height` keeps single-line buttons exactly as they are today.
+ * Icon buttons opt out: they hold a glyph, not text, and must stay circular.
+ */
+.v-btn:not(.v-btn--icon) {
+  height: auto;
+  min-height: var(--v-btn-height);
+  padding-top: 6px;
+  padding-bottom: 6px;
+
+  :deep(.v-btn__content) {
+    white-space: normal;
+    text-align: center;
+    line-height: 1.25;
+  }
+}
+
+/*
+ * Only the per-size min-width is dropped, and NOT for `block` — a scoped
+ * selector here out-specifies Vuetify's `.v-btn--block { min-width: 100% }`,
+ * so zeroing it across the board would silently strip `block` of the very
+ * guarantee it exists to make.
+ */
+.v-btn:not(.v-btn--icon):not(.v-btn--block) {
+  min-width: 0;
+}
+</style>

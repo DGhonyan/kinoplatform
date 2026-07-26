@@ -10,21 +10,52 @@ const toDate = (value: string | Date): Date => {
     : new Date(value);
 };
 
+/*
+ * `toLocaleDateString(locale, options)` builds a fresh ICU formatter on every
+ * call — the slow path, and these run once per card in a list. Cache one
+ * formatter per (locale, shape) instead; there are only a handful of pairs.
+ */
+const formatters = new Map<string, Intl.DateTimeFormat>();
+
+const formatter = (
+  locale: string,
+  shape: string,
+  options: Intl.DateTimeFormatOptions,
+): Intl.DateTimeFormat => {
+  const key = `${locale}|${shape}`;
+  let f = formatters.get(key);
+  if (!f) {
+    f = new Intl.DateTimeFormat(locale, options);
+    formatters.set(key, f);
+  }
+  return f;
+};
+
 /** "June 1, 2026" — long date, no time. */
 export const formatDate = (value: string | Date, locale: string): string =>
-  toDate(value).toLocaleDateString(locale, {
+  formatter(locale, 'date', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
-  });
+  }).format(toDate(value));
 
 /** "Jun 1, 2026, 3:04 PM" — medium date + short time. */
 export const formatDateTime = (value: string | Date, locale: string): string =>
-  toDate(value).toLocaleString(locale, {
+  formatter(locale, 'dateTime', {
     dateStyle: 'medium',
     timeStyle: 'short',
-  });
+  }).format(toDate(value));
 
 /** "June 2026" — month + year, for calendar headers. */
 export const formatMonthYear = (value: string | Date, locale: string): string =>
-  toDate(value).toLocaleDateString(locale, { year: 'numeric', month: 'long' });
+  formatter(locale, 'monthYear', {
+    year: 'numeric',
+    month: 'long',
+  }).format(toDate(value));
+
+/** Today as a local 'YYYY-MM-DD' — for date-only min/expiry checks (no UTC drift). */
+export const todayLocalDate = (): string => {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+};

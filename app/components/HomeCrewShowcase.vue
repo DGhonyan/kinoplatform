@@ -73,5 +73,18 @@ onMounted(async () => {
   flex-wrap: wrap;
   justify-content: center;
   gap: 16px;
+
+  // Opt into UserCard's sizing contract on phones. The fixed 200x290 fits only
+  // one card per row here (this section adds its own padding on top of the
+  // layout's), while /crew and /talents both go 2-up — and UserCard's mobile
+  // type trims would otherwise leave dead space inside a still-290px box.
+  @include mobile {
+    --user-card-width: auto;
+    --user-card-height: auto;
+
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
 }
 </style>

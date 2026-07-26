@@ -68,7 +68,7 @@ const { t } = useI18n();
 const authStore = useAuthStore();
 const userStore = useUserStore();
 
-const additionalPhotos = ref<string[]>([...(authStore.user?.additionalPhotos ?? [])]);
+const additionalPhotos = ref<string[]>(toArray<string>(authStore.user?.additionalPhotos));
 const appearance = ref<Appearance | null>(authStore.user?.appearance ?? null);
 const photosError = ref('');
 const appearanceError = ref('');

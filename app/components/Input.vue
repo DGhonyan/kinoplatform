@@ -129,6 +129,13 @@ const updateModelValue = (value: string) => {
   gap: 8px;
 }
 
+// Vuetify's .v-input is `flex: 1 1 auto`, so in a stretched flex row a field
+// with no label would grow to swallow the label height of its taller sibling.
+// A single-line field should always keep its natural height.
+.input {
+  flex: 0 0 auto;
+}
+
 .input :deep(input) {
   text-align: v-bind(textPosition);
 }

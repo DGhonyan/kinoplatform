@@ -23,19 +23,16 @@
       density="compact"
       min-width="160"
     >
-      <v-list-item
-        v-for="lang in languages"
-        :key="lang.value"
-        :active="locale === lang.value"
-        :title="lang.title"
-        @click="setLocale(lang.value)"
-      />
+      <LanguageLinks />
     </v-list>
   </v-menu>
 </template>
 
 <script lang="ts" setup>
-const { locale, setLocale, languages } = useAppLocale();
+import LanguageLinks from '~/components/LanguageLinks.vue';
+
+// Only the trigger needs the current locale; the rows own their own switching.
+const { locale } = useAppLocale();
 </script>
 
 <style scoped lang="scss">

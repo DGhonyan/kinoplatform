@@ -96,4 +96,40 @@ onBeforeUnmount(() => observer?.disconnect());
     opacity: 1;
   }
 }
+
+/* ── Mobile: full-width row that scrolls sideways instead of wrapping ── */
+@include mobile {
+  .section-nav {
+    width: 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    // A scroll container clips its overflow on both axes, which would eat the
+    // active tab's indicator (it hangs 2px below the row via a negative margin).
+    // Paint the collective line as a background instead — it's anchored to the
+    // border box, so it stays put while the tabs scroll over it.
+    border-bottom: none;
+    background: linear-gradient(to top, color(--v-theme-on-surface, 0.4) 2px, transparent 2px);
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .nav-btn {
+    flex-shrink: 0;
+    // No negative margin to hide now that the line is a background.
+    margin-bottom: 0;
+    padding: 6px 10px;
+    white-space: nowrap;
+    // The nav is now a scroll container, so it clips an outset focus ring on
+    // every edge. Draw the ring inside the button rather than lose it.
+    outline-offset: -2px;
+
+    // Align the first tab (and its indicator) with the rest of the column.
+    &:first-child {
+      padding-left: 0;
+    }
+  }
+}
 </style>

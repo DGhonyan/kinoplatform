@@ -618,4 +618,46 @@ $status-selected: #3f6b53;
   font-size: 14px;
   opacity: 0.6;
 }
+
+@include mobile {
+  .availability {
+    gap: 20px;
+  }
+
+  // The 300px floor would put the whole popup into a horizontal scroll.
+  .calendar-panel {
+    min-width: 0;
+  }
+
+  .calendar-controls {
+    gap: 8px;
+  }
+
+  .month-label {
+    min-width: 0;
+    font-size: 17px;
+  }
+
+  .weekday-row,
+  .day-grid {
+    gap: 4px;
+  }
+
+  .day-cell {
+    font-size: 14px;
+    border-radius: 8px;
+  }
+
+  .legend {
+    gap: 12px;
+  }
+
+  .editor-panel {
+    width: 100%;
+  }
+
+  .time-row {
+    flex-direction: column;
+  }
+}
 </style>

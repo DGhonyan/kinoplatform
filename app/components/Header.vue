@@ -11,6 +11,7 @@
     </template>
 
     <div
+      ref="barRef"
       class="header-content"
       :class="{ 'bar-solid': cover && !coverNav }"
     >
@@ -23,7 +24,9 @@
 
       <div
         v-if="visibleLinks.length"
+        ref="linksRef"
         class="links"
+        :class="{ measuring: collapsed }"
       >
         <NuxtLink
           v-for="link in visibleLinks"
@@ -37,65 +40,40 @@
       </div>
 
       <div class="actions">
-        <!-- Guests-only: members switch language from Settings instead. -->
-        <LanguageSwitch />
-
-        <!-- Logged-out, off the home hero: a single auth toggle button.
-             On the home hero the CTAs live under the slogan instead. -->
-        <Button
-          v-if="!user && !authCta"
-          variant="primary"
-          color="white"
-          text-color="primary"
-          rounded="pill"
-          @click="navigateTo(isOnLogin ? '/register' : '/login')"
+        <div
+          ref="actionsInnerRef"
+          class="actions-inner"
+          :class="{ measuring: collapsed }"
         >
-          {{ $t(isOnLogin ? 'common_register' : 'common_login') }}
-        </Button>
+          <!-- Guests-only: members switch language from Settings instead. -->
+          <LanguageSwitch />
 
-        <v-menu
-          v-else-if="user"
-          location="bottom end"
-        >
-          <template #activator="{ props: menuProps }">
-            <button
-              type="button"
-              class="profile-trigger"
-              v-bind="menuProps"
-              :aria-label="$t('common_account_menu')"
-            >
-              <v-icon
-                icon="custom:profile"
-                class="profile-avatar-icon"
-              />
-              <v-icon
-                icon="mdi-chevron-down"
-                class="profile-chevron"
-              />
-            </button>
-          </template>
-
-          <v-list
-            density="compact"
-            min-width="180"
+          <!-- Logged-out, off the home hero: a single auth toggle button. -->
+          <Button
+            v-if="!user && !authCta"
+            variant="primary"
+            color="white"
+            text-color="primary"
+            rounded="pill"
+            @click="navigateTo(isOnLogin ? '/register' : '/login')"
           >
-            <v-list-item
-              to="/user"
-              prepend-icon="mdi-account-outline"
-              :title="$t('common_my_profile')"
-            />
-            <v-list-item
-              to="/settings"
-              prepend-icon="mdi-cog-outline"
-              :title="$t('common_settings')"
-            />
-            <v-list-item
-              prepend-icon="mdi-logout"
-              :title="$t('common_logout')"
-              @click="showLogoutDialog = true"
-            />
-          </v-list>
-        </v-menu>
+            {{ $t(isOnLogin ? 'common_register' : 'common_login') }}
+          </Button>
+
+          <HeaderAccountMenu
+            v-else-if="user"
+            @logout="showLogoutDialog = true"
+          />
+        </div>
+
+        <!-- Collapsed (nav no longer fits): everything folds into the drawer. -->
+        <HeaderMobileMenu
+          v-if="collapsed"
+          :links="visibleLinks"
+          :authed="!!user"
+          :is-on-login="isOnLogin"
+          @logout="showLogoutDialog = true"
+        />
       </div>
 
       <ConfirmDialog
@@ -107,46 +85,21 @@
       />
     </div>
 
-    <!-- Hero band: the Bebas slogan, plus auth CTAs for logged-out visitors. -->
-    <div
+    <HeaderHero
       v-if="cover"
-      class="header-hero"
-      :class="{ 'hero-centered': !coverNav }"
-    >
-      <p
-        v-if="slogan"
-        class="header-slogan"
-      >
-        {{ $t(slogan) }}
-      </p>
-
-      <div
-        v-if="showAuthCta"
-        class="header-cta"
-      >
-        <Button
-          color="primary"
-          rounded="pill"
-          @click="navigateTo('/register')"
-        >
-          {{ $t('home_cta_join') }}
-        </Button>
-        <Button
-          color="white"
-          text-color="primary"
-          rounded="pill"
-          @click="navigateTo('/login')"
-        >
-          {{ $t('home_cta_login') }}
-        </Button>
-      </div>
-    </div>
+      :slogan="slogan"
+      :show-cta="showAuthCta"
+      :centered="!coverNav"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
 import Button from './Button.vue';
 import ConfirmDialog from './ConfirmDialog.vue';
+import HeaderAccountMenu from './header/AccountMenu.vue';
+import HeaderMobileMenu from './header/MobileMenu.vue';
+import HeaderHero from './header/Hero.vue';
 import { isOnboardingComplete } from '~/utils/onboarding';
 
 // Mirrors HeaderConfig (shared/types/header.ts). Kept as an inline literal —
@@ -179,10 +132,53 @@ const headerLinks: NavLink[] = [
   { path: '/about', label: 'common_about', public: true },
   { path: '/crew', label: 'common_crew', public: false },
   { path: '/talents', label: 'common_talents', public: false },
+  { path: '/announcements', label: 'common_announcements', public: true },
 ];
 const visibleLinks = computed(() =>
   headerLinks.filter(link => link.public || isOnboarded.value),
 );
+
+// ── Intrinsic nav collapse ──────────────────────────────────────────────────
+// Collapse the inline nav into a hamburger when the pieces stop fitting, rather
+// than at a hardcoded viewport width. The nav + actions stay rendered (just
+// visually hidden when collapsed) so their *natural* widths remain measurable —
+// that makes the check stable (no expand/collapse oscillation) and locale-aware
+// (Armenian labels are wider, so the collapse point shifts automatically).
+const barRef = ref<HTMLElement | null>(null);
+const linksRef = ref<HTMLElement | null>(null);
+const actionsInnerRef = ref<HTMLElement | null>(null);
+const collapsed = ref(false);
+
+const measure = () => {
+  const bar = barRef.value;
+  const links = linksRef.value;
+  if (!bar || !links) return;
+
+  const title = bar.querySelector<HTMLElement>('.title');
+
+  // Read the real gap/padding rather than hardcoding copies of the SCSS —
+  // `$base-padding` is a shared token, and a silent drift here would move the
+  // collapse threshold with no error anywhere.
+  const cs = getComputedStyle(bar);
+  const gap = parseFloat(cs.columnGap) || 0;
+  const padding = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+
+  // `grid-template-columns: 1fr auto 1fr` forces the two side tracks to be
+  // EQUAL, so the bar needs twice the wider side — not title + actions. Using
+  // the sum under-estimates whenever the actions column outgrows the title
+  // (logged-in avatar, longer locale) and lets the nav overlap before collapsing.
+  const side = Math.max(
+    title?.offsetWidth ?? 0,
+    actionsInnerRef.value?.offsetWidth ?? 0,
+  );
+  const needed = side * 2 + links.scrollWidth + gap * 2 + padding;
+
+  collapsed.value = needed > bar.clientWidth;
+};
+
+// Observe the bar (viewport resize), the links (locale label-width changes), and
+// the actions (auth state changes the button vs. avatar width).
+useResizeObserver([barRef, linksRef, actionsInnerRef], measure);
 
 const coverSrc = computed(() =>
   props.coverImage === 'home'
@@ -236,6 +232,8 @@ const confirmLogout = async () => {
  * Skin tokens — override on an ancestor to recolor this header per-page.
  *   --header-fg     body text, link rest state
  *   --header-accent title, hover/active link state
+ * Consumed by descendants (nav links here; the profile trigger and hamburger
+ * in the header/* subcomponents), so they inherit it through the DOM.
  */
 .header-content {
   --header-fg: #{color(--v-theme-on-surface)};
@@ -253,6 +251,11 @@ const confirmLogout = async () => {
   padding: $base-padding;
   color: var(--header-fg);
   z-index: 2;
+  // Clips the hidden measuring probes (see `.measuring`), which are wider than
+  // the bar by definition when collapsed — otherwise they'd push a horizontal
+  // scrollbar onto every page. Menus/dialogs are teleported, so nothing real
+  // gets clipped.
+  overflow: hidden;
 }
 
 // Opaque bar that hides the cover behind it, so the cover starts below the nav.
@@ -260,48 +263,60 @@ const confirmLogout = async () => {
   background: color(--v-theme-background);
 }
 
+/*
+ * Columns are assigned explicitly, never by auto-placement. When the nav
+ * collapses, `.links` goes `position: absolute` (see `.measuring`) and an
+ * absolutely-positioned grid child drops out of auto-placement entirely — which
+ * would slide `.actions` from column 3 into the middle column and park the
+ * hamburger in the centre of the bar. Same story when `visibleLinks` is empty
+ * and `.links` never renders.
+ */
 .title {
+  grid-column: 1;
   justify-self: start;
   color: var(--header-accent);
   text-decoration: none;
 }
 
 .links {
+  grid-column: 2;
   justify-self: center;
   display: flex;
   gap: 16px;
 }
 
 .actions {
+  grid-column: 3;
   justify-self: end;
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
-.profile-trigger {
+.actions-inner {
   display: flex;
   align-items: center;
-  gap: 2px;
-  padding: 2px;
-  background: none;
-  border: none;
-  border-radius: 999px;
-  cursor: pointer;
-  color: var(--header-fg);
-
-  &:hover {
-    opacity: 0.85;
-  }
+  gap: 16px;
 }
 
-// v-icon sizes off font-size; the chevron is deliberately smaller than the icon.
-.profile-avatar-icon {
-  font-size: 30px;
-}
-
-.profile-chevron {
-  font-size: 18px;
+/*
+ * Collapsed pieces stay in the DOM (measurable natural width) but out of flow
+ * and invisible, so the fit check never oscillates.
+ *
+ * `width: max-content` is load-bearing: an absolutely-positioned grid child
+ * takes its own grid area as containing block, and that track collapses to 0
+ * once the child leaves the flow. Shrink-to-fit against 0 would squeeze the
+ * probe to min-content and report a bogus width — under-measuring, which lets
+ * the bar un-collapse at a size where it doesn't fit, then re-collapse. Pinning
+ * max-content makes the probe report its true natural width regardless.
+ */
+.measuring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: max-content;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .nav-link {
@@ -309,6 +324,9 @@ const confirmLogout = async () => {
   text-decoration: none;
   font-weight: 500;
   color: inherit;
+  // Keep each link on one line: a wrappable label ("About us") would let the
+  // grid squeeze the nav column word-by-word instead of tripping the collapse.
+  white-space: nowrap;
 
   &:visited {
     color: inherit;
@@ -318,58 +336,6 @@ const confirmLogout = async () => {
   &.active {
     text-underline-offset: 4px;
     text-decoration: underline;
-  }
-}
-
-// Hero band on cover pages: the Bebas slogan + optional logged-out CTAs.
-.header-hero {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  // Home hero is left-aligned; the 16px padding matches $base-padding so the
-  // slogan lines up under the "Kinoplatform" title.
-  align-items: flex-start;
-  gap: 28px;
-  padding: 40px 16px 64px;
-  text-align: left;
-}
-
-// Cover-below-the-nav pages (crew): the band is shorter, so center the slogan
-// in it (both axes) with symmetric padding instead of top/left-aligning it.
-.header-hero.hero-centered {
-  align-items: center;
-  justify-content: center;
-  min-height: 220px;
-  padding-top: 40px;
-  padding-bottom: 40px;
-  text-align: center;
-}
-
-.header-slogan {
-  margin: 0;
-  font-family: 'Bebas Neue', sans-serif;
-  text-transform: uppercase;
-  font-size: 56px;
-  line-height: 1.05;
-  font-weight: 400;
-  letter-spacing: 1px;
-  // Honor the `\n` in the slogan i18n value as a real line break.
-  white-space: pre-line;
-  color: #fbfbfb;
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
-}
-
-.header-cta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  justify-content: center;
-}
-
-@media (max-width: 600px) {
-  .header-slogan {
-    font-size: 40px;
   }
 }
 </style>

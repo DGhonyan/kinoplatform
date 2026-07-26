@@ -34,9 +34,13 @@ const avatarSrc = computed(
 <style scoped lang="scss">
 .user-card {
   // Fixed size; `flex: none` keeps it from shrinking inside a flex-wrap grid.
+  // Containers that lay the cards out themselves — UserDirectory's responsive
+  // grid — override these two custom properties to let the track do the sizing.
   flex: 0 0 auto;
-  width: 200px;
-  height: 290px;
+  width: var(--user-card-width, 200px);
+  height: var(--user-card-height, 290px);
+  max-width: 100%;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -89,5 +93,23 @@ const avatarSrc = computed(
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+// Two cards per row on phones leaves ~140px of width — trim the chrome and the
+// type so the image keeps the bulk of it.
+@include mobile {
+  .user-card {
+    gap: 8px;
+    padding: 8px;
+    border-radius: 12px;
+  }
+
+  .user-name {
+    font-size: 16px;
+  }
+
+  .user-profession {
+    font-size: 12px;
+  }
 }
 </style>

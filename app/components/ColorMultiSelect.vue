@@ -1,6 +1,11 @@
 <template>
   <div class="swatch-multi">
-    <span class="swatch-label">{{ $t(label) }}</span>
+    <!-- Optional: inside a FilterSection the section header already names the
+         facet, and rendering it here too would show the name twice. -->
+    <span
+      v-if="label"
+      class="swatch-label"
+    >{{ $t(label) }}</span>
     <div class="swatches">
       <button
         v-for="hex in colors"
@@ -54,12 +59,16 @@ import { toggleInArray } from '~/utils/toggleInArray';
  */
 const modelValue = defineModel<string[]>({ required: true });
 
-defineProps<{
-  colors: readonly string[];
-  label: string;
-  /** When set, render an "Other" swatch (this i18n key) that matches custom colors. */
-  otherLabel?: string;
-}>();
+withDefaults(
+  defineProps<{
+    colors: readonly string[];
+    /** i18n key naming the group. Omit when an ancestor already names it. */
+    label?: string;
+    /** When set, render an "Other" swatch (this i18n key) that matches custom colors. */
+    otherLabel?: string;
+  }>(),
+  { label: '', otherLabel: undefined },
+);
 
 // Sentinel the backend understands as "any custom (non-preset) color".
 const OTHER = '__other__';

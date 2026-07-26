@@ -217,8 +217,8 @@ const EMPTY_PRACTICALITIES: Practicalities = {
 };
 
 const view = ref<View>('list');
-const tools = ref<string[]>([...(authStore.user?.tools ?? [])]);
-const equipment = ref<string[]>([...(authStore.user?.equipment ?? [])]);
+const tools = ref<string[]>(toArray<string>(authStore.user?.tools));
+const equipment = ref<string[]>(toArray<string>(authStore.user?.equipment));
 const practicalities = ref<Practicalities>({
   ...EMPTY_PRACTICALITIES,
   ...(authStore.user?.practicalities ?? {}),

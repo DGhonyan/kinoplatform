@@ -506,4 +506,33 @@ watch(() => props.userId, loadUserData);
   display: flex;
   flex-direction: column;
 }
+
+@include mobile {
+  .user-profile {
+    gap: 16px;
+  }
+
+  // Lean on the layout's own gutter instead of insetting a second time.
+  .container {
+    padding: 14px 0;
+  }
+
+  .photos-block {
+    padding: 0;
+  }
+
+  .section-head {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .section-title {
+    font-size: 18px;
+  }
+
+  .actor-photo {
+    width: 240px;
+    height: 300px;
+  }
+}
 </style>

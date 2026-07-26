@@ -193,8 +193,8 @@ const draft = ref<ProjectDraft>(
     ? {
         name: props.initial.name,
         nameOriginal: props.initial.nameOriginal ?? '',
-        type: [...(props.initial.type ?? [])],
-        position: [...(props.initial.position ?? [])],
+        type: toArray<string>(props.initial.type),
+        position: toArray<string>(props.initial.position),
         workInProgress: props.initial.workInProgress ?? false,
         year: props.initial.year != null ? String(props.initial.year) : '',
         month: props.initial.month != null ? String(props.initial.month) : '',
@@ -329,5 +329,16 @@ defineExpose({ commit });
   display: flex;
   align-items: center;
   gap: 4px;
+}
+
+@include mobile {
+  // A labelled month/year pair doesn't survive half of a phone's width.
+  .date-row {
+    flex-direction: column;
+  }
+
+  .media-row {
+    flex-wrap: wrap;
+  }
 }
 </style>

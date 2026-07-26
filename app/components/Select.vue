@@ -139,6 +139,13 @@ onBeforeUnmount(() => observer?.disconnect());
   gap: 8px;
 }
 
+// Vuetify's .v-input is `flex: 1 1 auto`, so inside a stretched flex row this
+// field grows to swallow any extra height a taller sibling has — e.g. a
+// neighbour whose label wraps to two lines. Mirrors the guard in Input.vue.
+.select {
+  flex: 0 0 auto;
+}
+
 :deep(.v-input__details) {
   padding: 0 !important;
 }
