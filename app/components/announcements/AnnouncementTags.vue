@@ -42,8 +42,9 @@ defineProps<{
   font-weight: 600;
   padding: 3px 10px;
   border-radius: 999px;
-  background-color: color(--v-theme-primary, 0.18);
-  color: color(--v-theme-primary);
+
+  background-color: color(--v-theme-primary);
+  color: color(--v-theme-on-primary);
   text-transform: uppercase;
   letter-spacing: 0.02em;
 }
@@ -58,18 +59,18 @@ defineProps<{
   white-space: nowrap;
 
   &.status-pending {
-    background-color: color(--v-theme-warning, 0.18);
-    color: color(--v-theme-warning);
+    background-color: color(--v-theme-warning);
+    color: color(--v-theme-on-warning);
   }
 
   &.status-approved {
-    background-color: color(--v-theme-success, 0.18);
-    color: color(--v-theme-success);
+    background-color: color(--v-theme-success);
+    color: color(--v-theme-on-success);
   }
 
   &.status-rejected {
-    background-color: color(--v-theme-error, 0.18);
-    color: color(--v-theme-error);
+    background-color: color(--v-theme-error);
+    color: color(--v-theme-on-error);
   }
 }
 </style>

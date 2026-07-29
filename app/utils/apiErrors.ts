@@ -38,6 +38,12 @@ const ERROR_MESSAGE_KEYS: Partial<Record<ErrorCode, string>> = {
   ANNOUNCEMENT_NOT_FOUND: 'error_announcement_not_found',
   ANNOUNCEMENT_FORBIDDEN: 'error_announcement_forbidden',
   ANNOUNCEMENT_CREATE_FAILED: 'error_announcement_create_failed',
+  // locations / booking requests
+  LOCATION_NOT_FOUND: 'error_location_not_found',
+  BOOKING_REQUEST_INVALID_DATES: 'error_booking_invalid_dates',
+  BOOKING_REQUEST_CREW_TOO_LARGE: 'location_booking_error_crew_too_large',
+  BOOKING_REQUEST_RANGE_TOO_LONG: 'error_booking_range_too_long',
+  BOOKING_REQUEST_PAST_DATE: 'error_booking_past_date',
   // recommendations
   CANNOT_RECOMMEND_SELF: 'error_cannot_recommend_self',
   ONBOARDING_INCOMPLETE: 'error_onboarding_incomplete',

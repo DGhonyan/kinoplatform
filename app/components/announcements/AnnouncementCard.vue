@@ -67,7 +67,7 @@
         v-else
         class="card-view"
       >
-        {{ $t('announcement_view') }}
+        <span>{{ $t('announcement_view') }}</span>
         <v-icon size="15">mdi-arrow-right</v-icon>
       </span>
     </div>
@@ -141,7 +141,9 @@ const isExpired = computed(
   gap: 4px;
   font-size: 13px;
   font-weight: 600;
-  color: color(--v-theme-primary);
+  span {
+    text-decoration: underline;
+  }
 }
 
 .card-title {

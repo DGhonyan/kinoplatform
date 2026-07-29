@@ -3,10 +3,14 @@ import { isOnboardingComplete } from '~/utils/onboarding';
 export default defineNuxtRouteMiddleware(async (to) => {
   // Public = reachable without login. '/' and '/about' are marketing pages that
   // anyone can see; the auth screens are public too (but bounce logged-in users).
-  const publicPaths = ['/', '/about', '/announcements', '/login', '/register', '/forgot-password', '/reset-password'];
+  const publicPaths = ['/', '/about', '/announcements', '/locations', '/login', '/register', '/forgot-password', '/reset-password'];
   const authOnlyScreens = ['/login', '/register'];
   const path = to.path.replace(/\/+$/, '') || '/';
-  const isPublic = publicPaths.includes(path);
+  // Location *detail* pages are public as well: the marketplace is the shop
+  // window, so a guest reads a full listing and only meets /login when they
+  // actually send a booking request. Announcement details stay gated — hence a
+  // targeted prefix rather than "anything nested under a public parent".
+  const isPublic = publicPaths.includes(path) || path.startsWith('/locations/');
   const authStore = useAuthStore();
 
   // On gated pages, always validate the session. On public pages, only validate

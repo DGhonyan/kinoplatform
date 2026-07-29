@@ -32,13 +32,15 @@
  * Designed to cover every button shape so raw `<v-btn>` is never needed:
  *   - CTAs:    `<Button color="accent">Save</Button>` (filled, pill)
  *   - text:    `<Button variant="text" color="primary">Cancel</Button>`
- *   - outline: `<Button variant="secondary">Back</Button>`
+ *   - secondary: `<Button variant="secondary">Back</Button>` (white fill, accent label)
  *   - icon:    `<Button icon="mdi-close" variant="text" aria-label="…" />`
  *   - link:    `<Button to="/x">Go</Button>` (`to`/`href` fall through via $attrs)
  *
  * `variant` accepts the semantic names AND Vuetify's raw ones:
- *   - 'primary'   → filled (flat)
- *   - 'secondary' → outlined
+ *   - 'primary'   → filled, accent background + white label
+ *   - 'secondary' → neutral ghost: transparent fill, light border + label.
+ *                   Pass `color` only when the hue is meaningful (e.g. `error`
+ *                   on a destructive action).
  *   - 'text' | 'outlined' | 'flat' | 'tonal' | 'plain' | 'elevated' → passthrough
  *
  * Defaults suit a filled CTA, but they back off for icon buttons: an icon
@@ -89,6 +91,8 @@ const props = withDefaults(
   },
 );
 
+const isSecondary = computed(() => props.variant === 'secondary');
+
 // Semantic variants map to Vuetify's; raw Vuetify variants pass straight through.
 const vuetifyVariant = computed(() => {
   switch (props.variant) {
@@ -98,11 +102,33 @@ const vuetifyVariant = computed(() => {
   }
 });
 
-// Filled buttons default to primary; icon buttons inherit the ambient color
-// (most are unstyled and take their parent's text color).
-const effectiveColor = computed(
-  () => props.color ?? (props.icon ? undefined : 'primary'),
-);
+/*
+ * Secondary is a NEUTRAL ghost: transparent fill, light border, light label.
+ *
+ * It's a low-emphasis control, and on a near-black page a solid fill is the
+ * loudest treatment available — reserving that for utility actions inverts the
+ * hierarchy and makes a screenful of them (Change / Logout / Export) shout over
+ * the content they belong to.
+ *
+ * The original mistake was colour, not weight: border AND label were both
+ * `primary` (#810100), a very dark red on a very dark surface, so the button
+ * was quiet *and* unreadable. Neutral `on-surface` keeps it quiet and fixes the
+ * contrast. `color` still overrides for the cases where the hue is the point
+ * (a destructive `error` action).
+ */
+const effectiveColor = computed(() => {
+  if (isSecondary.value) {
+    // `white` was the workaround call sites used against the old unreadable
+    // outline; neutral is the default now, so treat it as "unset".
+    const tone = !props.color || props.color === 'white' ? 'on-surface' : props.color;
+    // Vuetify's `color` prop knows palette names ('primary', 'error') but not
+    // `on-*` tokens, so that one has to be handed over as a real CSS colour.
+    return resolveThemeColor(tone);
+  }
+  // Filled buttons default to primary; icon buttons inherit the ambient color
+  // (most are unstyled and take their parent's text color).
+  return props.color ?? (props.icon ? undefined : 'primary');
+});
 
 // Pill by default; icon buttons keep Vuetify's circular shape.
 const effectiveRounded = computed(
@@ -113,6 +139,8 @@ const effectiveRounded = computed(
 // template's slot fallback, since this wrapper's slot suppresses VBtn's own.
 const iconShape = computed(() => (props.icon ? true : undefined));
 
+// Outlined buttons take border AND label from `color`, so a secondary needs no
+// separate label class — effectiveColor already carries it.
 const textColorClass = computed(() =>
   props.textColor ? `text-${props.textColor}` : undefined,
 );

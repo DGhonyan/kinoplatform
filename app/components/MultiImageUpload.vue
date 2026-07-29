@@ -26,8 +26,8 @@
            in-flight multi-select crop queue isn't torn down. Each pick crops +
            uploads; a multi-select is capped to the remaining slots. -->
       <FileUpload
-        kind="actor_photo"
-        :aspect-ratio="ACTOR_PHOTO_ASPECT_RATIO"
+        :kind="kind"
+        :aspect-ratio="aspectRatio ?? undefined"
         accept="image/jpeg,image/png,image/webp"
         multiple
         :max-files="max - modelValue.length"
@@ -65,21 +65,41 @@
 </template>
 
 <script lang="ts" setup>
-import type { UploadedFile } from '~~/shared/types/file';
+import type { FileKind, UploadedFile } from '~~/shared/types/file';
 import { ACTOR_PHOTO_ASPECT_RATIO } from '~/utils/constants';
 import FileUpload from '~/components/FileUpload.vue';
 
 /**
- * Grid of actor photos with an add tile. Each add runs the standard crop+upload
- * flow (portrait ratio) and appends the confirmed public URL. min/max are the
- * product policy (2–6); min is enforced by the caller's validation.
+ * Grid of photos with an add tile. Each add uploads and appends the confirmed
+ * public URL. min/max are the caller's policy (2–6 for actors); min is enforced
+ * by the caller's validation.
+ *
+ * `aspectRatio` decides whether a crop step happens at all: set (the actor
+ * default) locks every photo to that ratio, `null` skips the cropper and stores
+ * the original. Location galleries want the latter — a shooting location is
+ * photographed in whatever framing the space needs, and forcing it through a
+ * portrait crop throws away the part of the room the photo was taken to show.
  */
 const modelValue = defineModel<string[]>({ required: true });
 
-const props = withDefaults(defineProps<{ min?: number; max?: number }>(), {
+const props = withDefaults(defineProps<{
+  min?: number;
+  max?: number;
+  /** Storage bucket the uploads land in — locations use their own kind. */
+  kind?: FileKind;
+  /** Crop ratio (w / h), or `null` to upload the original uncropped. */
+  aspectRatio?: number | null;
+}>(), {
   min: 2,
   max: 6,
+  kind: 'actor_photo',
+  aspectRatio: ACTOR_PHOTO_ASPECT_RATIO,
 });
+
+// The tile follows the crop ratio: with cropping OFF the photos are arbitrary
+// (often landscape), and a fixed 3:4 portrait box would letterbox a 16:9 room
+// shot down to ~40% of the tile — ten rooms would be indistinguishable.
+const tileRatio = computed(() => String(props.aspectRatio ?? 4 / 3));
 
 const onUploaded = (file: UploadedFile) => {
   // Selection is already capped in FileUpload; guard here too so a late upload
@@ -107,15 +127,19 @@ const removeAt = (i: number) => {
 
 .thumb {
   position: relative;
-  width: 84px;
-  height: 112px; // 3:4 portrait, matches the crop ratio
+  // Width is fixed; height follows the crop ratio via v-bind (see tileRatio),
+  // so a landscape gallery gets landscape tiles instead of letterboxed slivers.
+  width: 112px;
+  aspect-ratio: v-bind(tileRatio);
   border-radius: 10px;
   overflow: hidden;
 
   img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    // `contain`, not `cover`: with cropping off these are arbitrary ratios, and
+    // a cover thumb would re-crop exactly what we just chose not to crop.
+    object-fit: contain;
   }
 }
 
@@ -139,8 +163,8 @@ const removeAt = (i: number) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 84px;
-  height: 112px;
+  width: 112px;
+  aspect-ratio: v-bind(tileRatio);
   border: 1px dashed color(--v-theme-on-surface, 0.4);
   border-radius: 10px;
   cursor: pointer;

@@ -36,230 +36,184 @@
       </Button>
     </div>
 
-    <div class="filters">
-      <div class="filters-scroll">
-        <div class="filters-header">
-          <v-icon>custom:filter</v-icon>
-          <h2
-            :id="titleId"
-            class="filters-title"
-          >
-            {{ $t('crew_filters') }}
-          </h2>
-          <!-- CSS shows this only below tablet, where the panel stacks above the
-               results; `display: none` keeps it out of the desktop tab order. -->
-          <button
-            type="button"
-            class="filters-toggle"
-            :aria-expanded="filtersOpen"
-            :aria-controls="bodyId"
-            :aria-labelledby="titleId"
-            @click="filtersOpen = !filtersOpen"
-          >
-            <v-icon
-              class="filters-chevron"
-              :class="{ 'is-open': filtersOpen }"
-            >
-              mdi-chevron-down
-            </v-icon>
-          </button>
+    <FilterPanel
+      class="filters"
+      :clearable="hasActiveFilters"
+      show-apply
+      :apply-disabled="hasRangeErrors"
+      :apply-loading="loading"
+      @clear="clearFilters"
+    >
+      <!-- The section header is the facet's only visible name, so each
+           control gets an aria-label instead of its own visible label. -->
+      <FilterSection title="crew_filter_profession">
+        <Select
+          v-model="professions"
+          :items="professionItems"
+          :aria-label="$t('crew_filter_profession')"
+          multiple
+        />
+      </FilterSection>
+
+      <FilterSection title="crew_filter_location">
+        <Select
+          v-model="locations"
+          :items="locationOptions"
+          :aria-label="$t('crew_filter_location')"
+          multiple
+        />
+      </FilterSection>
+
+      <FilterSection title="register_education_label">
+        <Select
+          v-model="educations"
+          :items="educationOptions"
+          :aria-label="$t('register_education_label')"
+          multiple
+        />
+      </FilterSection>
+
+      <FilterSection title="crew_filter_languages">
+        <Select
+          v-model="languages"
+          :items="languageItems"
+          :aria-label="$t('crew_filter_languages')"
+          multiple
+        />
+      </FilterSection>
+
+      <FilterSection title="register_gender_label">
+        <Select
+          v-model="genders"
+          :items="genderItems"
+          :aria-label="$t('register_gender_label')"
+          multiple
+        />
+      </FilterSection>
+
+      <!-- Min and Max sit under one header, so the header alone would give
+           both fields the same name — rangeLabel() keeps them apart. -->
+      <FilterSection title="talent_filter_age">
+        <div class="range-row">
+          <Input
+            v-model="minAge"
+            type="number"
+            :min="AGE_RANGE.min"
+            :max="AGE_RANGE.max"
+            step="1"
+            :placeholder="$t('talent_filter_min')"
+            :aria-label="rangeLabel('talent_filter_age', 'talent_filter_min')"
+            :error-messages="rangeErrors.minAge"
+            hide-details="auto"
+            density="compact"
+          />
+          <Input
+            v-model="maxAge"
+            type="number"
+            :min="AGE_RANGE.min"
+            :max="AGE_RANGE.max"
+            step="1"
+            :placeholder="$t('talent_filter_max')"
+            :aria-label="rangeLabel('talent_filter_age', 'talent_filter_max')"
+            :error-messages="rangeErrors.maxAge"
+            hide-details="auto"
+            density="compact"
+          />
         </div>
+      </FilterSection>
 
-        <div
-          :id="bodyId"
-          class="filters-body"
-          :class="{ 'is-open': filtersOpen }"
-        >
-          <!-- The section header is the facet's only visible name, so each
-               control gets an aria-label instead of its own visible label. -->
-          <FilterSection title="crew_filter_profession">
-            <Select
-              v-model="professions"
-              :items="professionItems"
-              :aria-label="$t('crew_filter_profession')"
-              multiple
-            />
-          </FilterSection>
-
-          <FilterSection title="crew_filter_location">
-            <Select
-              v-model="locations"
-              :items="locationOptions"
-              :aria-label="$t('crew_filter_location')"
-              multiple
-            />
-          </FilterSection>
-
-          <FilterSection title="register_education_label">
-            <Select
-              v-model="educations"
-              :items="educationOptions"
-              :aria-label="$t('register_education_label')"
-              multiple
-            />
-          </FilterSection>
-
-          <FilterSection title="crew_filter_languages">
-            <Select
-              v-model="languages"
-              :items="languageItems"
-              :aria-label="$t('crew_filter_languages')"
-              multiple
-            />
-          </FilterSection>
-
-          <FilterSection title="register_gender_label">
-            <Select
-              v-model="genders"
-              :items="genderItems"
-              :aria-label="$t('register_gender_label')"
-              multiple
-            />
-          </FilterSection>
-
-          <!-- Min and Max sit under one header, so the header alone would give
-               both fields the same name — rangeLabel() keeps them apart. -->
-          <FilterSection title="talent_filter_age">
-            <div class="range-row">
-              <Input
-                v-model="minAge"
-                type="number"
-                :min="AGE_RANGE.min"
-                :max="AGE_RANGE.max"
-                step="1"
-                :placeholder="$t('talent_filter_min')"
-                :aria-label="rangeLabel('talent_filter_age', 'talent_filter_min')"
-                :error-messages="rangeErrors.minAge"
-                hide-details="auto"
-                density="compact"
-              />
-              <Input
-                v-model="maxAge"
-                type="number"
-                :min="AGE_RANGE.min"
-                :max="AGE_RANGE.max"
-                step="1"
-                :placeholder="$t('talent_filter_max')"
-                :aria-label="rangeLabel('talent_filter_age', 'talent_filter_max')"
-                :error-messages="rangeErrors.maxAge"
-                hide-details="auto"
-                density="compact"
-              />
-            </div>
-          </FilterSection>
-
-          <FilterSection title="appearance_height">
-            <div class="range-row">
-              <Input
-                v-model="minHeight"
-                type="number"
-                :min="HEIGHT_RANGE.min"
-                :max="HEIGHT_RANGE.max"
-                step="1"
-                :placeholder="$t('talent_filter_min')"
-                :aria-label="rangeLabel('appearance_height', 'talent_filter_min')"
-                :error-messages="rangeErrors.minHeight"
-                hide-details="auto"
-                density="compact"
-              />
-              <Input
-                v-model="maxHeight"
-                type="number"
-                :min="HEIGHT_RANGE.min"
-                :max="HEIGHT_RANGE.max"
-                step="1"
-                :placeholder="$t('talent_filter_max')"
-                :aria-label="rangeLabel('appearance_height', 'talent_filter_max')"
-                :error-messages="rangeErrors.maxHeight"
-                hide-details="auto"
-                density="compact"
-              />
-            </div>
-          </FilterSection>
-
-          <FilterSection title="appearance_weight">
-            <div class="range-row">
-              <Input
-                v-model="minWeight"
-                type="number"
-                :min="WEIGHT_RANGE.min"
-                :max="WEIGHT_RANGE.max"
-                step="1"
-                :placeholder="$t('talent_filter_min')"
-                :aria-label="rangeLabel('appearance_weight', 'talent_filter_min')"
-                :error-messages="rangeErrors.minWeight"
-                hide-details="auto"
-                density="compact"
-              />
-              <Input
-                v-model="maxWeight"
-                type="number"
-                :min="WEIGHT_RANGE.min"
-                :max="WEIGHT_RANGE.max"
-                step="1"
-                :placeholder="$t('talent_filter_max')"
-                :aria-label="rangeLabel('appearance_weight', 'talent_filter_max')"
-                :error-messages="rangeErrors.maxWeight"
-                hide-details="auto"
-                density="compact"
-              />
-            </div>
-          </FilterSection>
-
-          <!-- The colour facets drop `label` (now optional): the section header
-               already names the group, and each swatch carries its own
-               aria-label, so a second copy would just render the name twice. -->
-          <FilterSection title="appearance_hair_color">
-            <ColorMultiSelect
-              v-model="hairColors"
-              :colors="HAIR_COLORS"
-              other-label="talent_filter_other"
-            />
-          </FilterSection>
-
-          <FilterSection title="appearance_eye_color">
-            <ColorMultiSelect
-              v-model="eyeColors"
-              :colors="EYE_COLORS"
-            />
-          </FilterSection>
-
-          <FilterSection title="appearance_skin_color">
-            <ColorMultiSelect
-              v-model="skinColors"
-              :colors="SKIN_COLORS"
-            />
-          </FilterSection>
+      <FilterSection title="appearance_height">
+        <div class="range-row">
+          <Input
+            v-model="minHeight"
+            type="number"
+            :min="HEIGHT_RANGE.min"
+            :max="HEIGHT_RANGE.max"
+            step="1"
+            :placeholder="$t('talent_filter_min')"
+            :aria-label="rangeLabel('appearance_height', 'talent_filter_min')"
+            :error-messages="rangeErrors.minHeight"
+            hide-details="auto"
+            density="compact"
+          />
+          <Input
+            v-model="maxHeight"
+            type="number"
+            :min="HEIGHT_RANGE.min"
+            :max="HEIGHT_RANGE.max"
+            step="1"
+            :placeholder="$t('talent_filter_max')"
+            :aria-label="rangeLabel('appearance_height', 'talent_filter_max')"
+            :error-messages="rangeErrors.maxHeight"
+            hide-details="auto"
+            density="compact"
+          />
         </div>
-      </div>
+      </FilterSection>
 
-      <!-- Pinned so the actions are always reachable without scrolling the panel. -->
-      <div class="filters-footer">
+      <FilterSection title="appearance_weight">
+        <div class="range-row">
+          <Input
+            v-model="minWeight"
+            type="number"
+            :min="WEIGHT_RANGE.min"
+            :max="WEIGHT_RANGE.max"
+            step="1"
+            :placeholder="$t('talent_filter_min')"
+            :aria-label="rangeLabel('appearance_weight', 'talent_filter_min')"
+            :error-messages="rangeErrors.minWeight"
+            hide-details="auto"
+            density="compact"
+          />
+          <Input
+            v-model="maxWeight"
+            type="number"
+            :min="WEIGHT_RANGE.min"
+            :max="WEIGHT_RANGE.max"
+            step="1"
+            :placeholder="$t('talent_filter_max')"
+            :aria-label="rangeLabel('appearance_weight', 'talent_filter_max')"
+            :error-messages="rangeErrors.maxWeight"
+            hide-details="auto"
+            density="compact"
+          />
+        </div>
+      </FilterSection>
+
+      <!-- The colour facets drop `label` (now optional): the section header
+           already names the group, and each swatch carries its own
+           aria-label, so a second copy would just render the name twice. -->
+      <FilterSection title="appearance_hair_color">
+        <ColorMultiSelect
+          v-model="hairColors"
+          :colors="HAIR_COLORS"
+          other-label="talent_filter_other"
+        />
+      </FilterSection>
+
+      <FilterSection title="appearance_eye_color">
+        <ColorMultiSelect
+          v-model="eyeColors"
+          :colors="EYE_COLORS"
+        />
+      </FilterSection>
+
+      <FilterSection title="appearance_skin_color">
+        <ColorMultiSelect
+          v-model="skinColors"
+          :colors="SKIN_COLORS"
+        />
+      </FilterSection>
+
+      <!-- The range facets can conflict (min > max), so Apply is disabled and
+           says why rather than submitting a query that cannot match. -->
+      <template #note>
         <span
           v-if="hasRangeErrors"
           class="footer-error"
         >{{ $t('talent_filter_fix_ranges') }}</span>
-        <div class="footer-actions">
-          <Button
-            v-if="hasActiveFilters"
-            color="white"
-            text-color="primary"
-            @click="clearFilters"
-          >
-            {{ $t('crew_filter_clear_all') }}
-          </Button>
-          <Button
-            type="submit"
-            class="apply-btn"
-            color="primary"
-            :loading="loading"
-            :disabled="hasRangeErrors"
-          >
-            {{ $t('talent_filter_apply') }}
-          </Button>
-        </div>
-      </div>
-    </div>
+      </template>
+    </FilterPanel>
 
     <div
       v-if="results.length > 0"
@@ -295,6 +249,7 @@ import { LANGUAGE_CODES, getLanguageDisplayName } from '~/utils/languages';
 import Select from '~/components/Select.vue';
 import ColorMultiSelect from '~/components/ColorMultiSelect.vue';
 import FilterSection from '~/components/FilterSection.vue';
+import FilterPanel from '~/components/FilterPanel.vue';
 
 definePageMeta({
   header: { cover: true, slogan: 'talent_page_slogan', coverNav: false },
@@ -331,9 +286,6 @@ const skinColors = ref<string[]>([]);
 // state only drives the panel's own collapse. Above 960px the toggle is
 // `display: none` and the body never gets the collapsed rule, so it's inert
 // there. Each facet owns its own open/closed state inside FilterSection.
-const filtersOpen = ref(false);
-const titleId = useId();
-const bodyId = useId();
 
 // Numeric filter bounds — mirror the backend TalentSearchDto (integers, in range).
 const AGE_RANGE = { min: 0, max: 120 };
@@ -452,16 +404,18 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
+.filters {
+  grid-area: filters;
+}
+
 .talents {
-  // Two columns, with the sidebar spanning both rows so the search toolbar lines
-  // up with the panel header and the results fill everything under it. Named
-  // areas place the children, so the DOM can stay in reading order (search →
-  // filters → results) without `order` faking a different one for the eye.
   display: grid;
   grid-template-columns: 310px minmax(0, 1fr);
   grid-template-areas:
     "filters toolbar"
     "filters results";
+
+  grid-template-rows: auto 1fr;
   align-items: start;
   column-gap: 24px;
   row-gap: 16px;
@@ -476,86 +430,13 @@ onMounted(async () => {
   }
 }
 
-.filters {
-  grid-area: filters;
-  width: 310px;
-  min-width: 310px;
-  // Fit the panel below the cover header (~330px: nav + hero band + padding) so a
-  // long filter list scrolls INSIDE the panel instead of forcing the whole page to
-  // scroll. Once you scroll past the hero it sticks.
-  position: sticky;
-  top: 16px;
-  align-self: start;
-  max-height: calc(100vh - 330px);
-  // Column with a scrollable body + a pinned footer, so Apply is always reachable.
-  display: flex;
-  flex-direction: column;
-
-  // Stacked: a full-width block in the page flow — nothing to stick to and no
-  // reason to cap its height, since it no longer competes with the results column.
-  @include tablet-down {
-    width: 100%;
-    min-width: 0;
-    position: static;
-    max-height: none;
-  }
-}
-
-.filters-scroll {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  padding: 24px;
-
-  @include tablet-down {
-    overflow-y: visible;
-    gap: 8px;
-    // The page layout already supplies the horizontal padding.
-    padding: 0;
-  }
-}
-
-.filters-footer {
-  flex: 0 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 16px 24px;
-  border-top: 1px solid color(--v-theme-on-surface, 0.12);
-
-  @include tablet-down {
-    padding: 16px 0 0;
-    border-top: none;
-  }
-}
-
 .footer-error {
   font-size: 12px;
   text-align: center;
   color: color(--v-theme-error);
 }
 
-.footer-actions {
-  display: flex;
-  gap: 8px;
-
-  // Stacked: a centered pair of pills rather than a full-bleed Apply.
-  @include tablet-down {
-    justify-content: center;
-  }
-}
-
 // Apply grows to fill; Clear (white / primary text) sits to its left.
-.apply-btn {
-  flex: 1;
-
-  @include tablet-down {
-    flex: 0 0 auto;
-  }
-}
 
 .toolbar {
   grid-area: toolbar;
@@ -613,69 +494,8 @@ onMounted(async () => {
   color: color(--v-theme-on-surface, 0.6);
 }
 
-.filters-header {
-  display: flex;
-  gap: 12px;
-
-  @include tablet-down {
-    align-items: center;
-  }
-}
-
-.filters-title {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-}
-
 // Collapse control for the stacked panel. Hidden (and so untabbable) on desktop,
 // where the sidebar is always open.
-.filters-toggle {
-  display: none;
-
-  @include tablet-down {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: auto;
-    // 44px touch target: this is the ONLY control that opens the collapsed panel,
-    // and it is the last thing before eleven facets — a near-miss on a 32px box
-    // costs the user a scroll back up to try again.
-    width: 44px;
-    height: 44px;
-    margin-right: -10px; // keep the glyph optically aligned with the edge
-    padding: 0;
-    border: 0;
-    background: none;
-    color: inherit;
-    cursor: pointer;
-    outline-offset: -2px;
-  }
-}
-
-.filters-chevron {
-  transition: transform 0.2s ease;
-
-  &.is-open {
-    transform: rotate(180deg);
-  }
-}
-
-.filters-body {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-
-  // Collapsed by default once stacked, so the results stay one scroll away.
-  @include tablet-down {
-    display: none;
-    gap: 8px;
-
-    &.is-open {
-      display: flex;
-    }
-  }
-}
 
 .range-row {
   display: flex;
@@ -684,15 +504,6 @@ onMounted(async () => {
   > * {
     flex: 1;
     min-width: 0;
-  }
-}
-
-@include tablet-down {
-  // Rules off eleven stacked facets. A child component's root element inherits
-  // this page's scope id, so `> *` reaches the FilterSection wrappers without
-  // this file depending on the class names inside that component.
-  .filters-body > * {
-    border-bottom: 1px solid color(--v-theme-on-surface, 0.24);
   }
 }
 </style>
