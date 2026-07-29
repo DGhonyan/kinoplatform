@@ -169,6 +169,13 @@ const emit = defineEmits<{
   gap: 16px;
   overflow-y: auto;
   padding-right: 12px;
+  /*
+   * Query anchor for the forms inside. A dialog's width is capped by `max-width`
+   * and stops tracking the viewport, so a media query in a popup fires at the
+   * wrong moment — paired fields stayed two-up and cramped well after the
+   * viewport "went mobile". Rows size themselves off THIS instead.
+   */
+  container-type: inline-size;
 }
 
 .popup-hidden-submit {

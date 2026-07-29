@@ -579,6 +579,8 @@ const submit = async () => {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  // Makes `.row` able to ask how much width IT actually has (see below).
+  container-type: inline-size;
 }
 
 .section-title {
@@ -601,10 +603,27 @@ const submit = async () => {
     min-width: 0;
   }
 
-  // Two-up leaves ~146px per field in a 360px dialog, which clips the number
-  // spinners and the unit suffix. Stack them, like every other popup row.
+  /*
+   * Stack on the ROW's width, not the viewport's.
+   *
+   * A media query is the wrong tool here: this form lives in a dialog capped at
+   * `max-width: 720px`, so its width stops tracking the viewport above ~750px
+   * and the two never line up — which is why paired fields still squeezed to
+   * ~250px between 600 and 960px even though the mobile rule "worked".
+   * 520px is roughly where two fields plus the gap stop fitting a number
+   * spinner, a unit suffix or a native time control side by side.
+   */
+  @container (max-width: 520px) {
+    flex-direction: column;
+    // The bottom-align only exists to reconcile labels of different heights
+    // side by side; stacked, it would right-align a short field.
+    align-items: stretch;
+  }
+
+  // Floor for browsers without container query support.
   @include mobile {
     flex-direction: column;
+    align-items: stretch;
   }
 }
 </style>

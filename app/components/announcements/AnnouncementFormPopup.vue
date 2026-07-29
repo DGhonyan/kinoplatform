@@ -209,10 +209,21 @@ const submit = async () => {
     flex: 1;
   }
 
-  // Two-up leaves ~146px per field in a 360px dialog, which clips the formatted
-  // date and the CTA option titles. Stack them, like every other popup row.
+  /*
+   * Stack on the ROW's width, not the viewport's — this dialog is capped at
+   * 520px, so its width stops tracking the viewport and a media query fires at
+   * the wrong moment. Below ~460px the formatted date and the CTA option titles
+   * stop fitting side by side.
+   */
+  @container (max-width: 460px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  // Floor for browsers without container query support.
   @include mobile {
     flex-direction: column;
+    align-items: stretch;
   }
 }
 </style>
