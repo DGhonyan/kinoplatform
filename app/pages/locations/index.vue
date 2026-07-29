@@ -34,30 +34,14 @@
          instead of tabbing through the whole facet list. Desktop puts it back in
          the right-hand column via grid areas — placement, not `order`, so the two
          orders can never diverge. -->
-    <div class="toolbar">
-      <Input
-        v-model="q"
-        class="search"
-        :placeholder="$t('locations_search_placeholder')"
-        prepend-inner-icon="mdi-magnify"
-        maxlength="100"
-        bg-color="on-surface"
-        color="background"
-        text-color="background"
-        rounded="pill"
-        density="comfortable"
-        hide-details
-      />
-      <Button
-        type="submit"
-        class="search-btn"
-        color="primary"
-        prepend-icon="mdi-magnify"
-        :loading="loading"
-      >
-        {{ $t('common_search') }}
-      </Button>
-    </div>
+    <SearchToolbar
+      v-model="q"
+      class="toolbar"
+      placeholder="locations_search_placeholder"
+      maxlength="100"
+      show-button
+      :loading="loading"
+    />
 
     <FilterPanel
       class="filters"
@@ -199,6 +183,7 @@ import Input from '~/components/Input.vue';
 import Select from '~/components/Select.vue';
 import FilterSection from '~/components/FilterSection.vue';
 import FilterPanel from '~/components/FilterPanel.vue';
+import SearchToolbar from '~/components/SearchToolbar.vue';
 import LocationCard from '~/components/locations/LocationCard.vue';
 import LocationFormPopup from '~/components/locations/LocationFormPopup.vue';
 
@@ -373,27 +358,9 @@ onMounted(async () => {
 
 // Apply grows to fill; Clear (white / primary text) sits to its left.
 
+// Placement only — the bar's own layout lives in SearchToolbar.
 .toolbar {
   grid-area: toolbar;
-  width: 100%;
-  display: flex;
-  gap: 12px;
-  align-items: center;
-
-  @include mobile {
-    gap: 8px;
-  }
-}
-
-// Input takes the slack, the Search button stays shrink-to-fit — the pair holds
-// one row all the way down to 320px.
-.search {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.search-btn {
-  flex: 0 0 auto;
 }
 
 .location-grid {

@@ -9,6 +9,7 @@
     :block="block"
     :loading="loading"
     :disabled="disabled"
+
     v-bind="$attrs"
   >
     <!-- Render the icon glyph ourselves. VBtn only falls back to its `icon` prop
@@ -160,6 +161,7 @@ const textColorClass = computed(() =>
   min-height: var(--v-btn-height);
   padding-top: 6px;
   padding-bottom: 6px;
+  text-transform: none;
 
   :deep(.v-btn__content) {
     white-space: normal;

@@ -1,19 +1,11 @@
 <template>
   <div class="directory">
-    <div class="toolbar">
-      <Input
-        v-model="search"
-        class="search"
-        :placeholder="$t(searchPlaceholder)"
-        prepend-inner-icon="mdi-magnify"
-        bg-color="on-surface"
-        color="background"
-        text-color="background"
-        rounded="pill"
-        density="comfortable"
-        hide-details
-      />
-    </div>
+    <!-- No Search button: this directory filters live as you type. -->
+    <SearchToolbar
+      v-model="search"
+      class="toolbar"
+      :placeholder="searchPlaceholder"
+    />
 
     <!-- No Apply: this panel filters client-side as you change it. -->
     <FilterPanel
@@ -95,6 +87,7 @@ import {
 import Select from '~/components/Select.vue';
 import FilterSection from '~/components/FilterSection.vue';
 import FilterPanel from '~/components/FilterPanel.vue';
+import SearchToolbar from '~/components/SearchToolbar.vue';
 
 /**
  * Shared crew/talents directory: filter sidebar (profession + location + language
@@ -236,19 +229,9 @@ const filteredUsers = computed(() => {
   }
 }
 
+// Placement only — the bar's own layout lives in SearchToolbar.
 .toolbar {
   grid-area: toolbar;
-  width: 100%;
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-
-.search {
-  // min-width:0 lets the field give way instead of pushing a sibling (e.g. a
-  // submit button) onto a second row at narrow widths.
-  flex: 1;
-  min-width: 0;
 }
 
 .user-grid {

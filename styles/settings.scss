@@ -12,4 +12,10 @@
   // notched-outline segments natively, so wrapper components (Input, Select,
   // TextArea) no longer need :deep(.v-field) / .v-field__outline overrides.
   $field-border-radius: 12px,
+  // Field heights are base + offset x 4px: default 56, comfortable 56-8=48,
+  // compact 56-16=40. Vuetify's scale has no 44 — but our toolbars pair a
+  // comfortable field with a 44px button, so nudge ONLY the comfortable step
+  // to -3 (56-12=44). Default and compact keep their stock values; this is
+  // the sanctioned override channel, not a class-level patch.
+  $input-density: ('default': 0, 'comfortable': -3, 'compact': -4),
 );
