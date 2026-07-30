@@ -316,7 +316,7 @@ const navSections = computed(() =>
     { id: 'profile-photos', label: 'actor_photos_title', show: hasPhotos.value },
     { id: 'profile-projects', label: 'common_projects', show: hasProjects.value },
     { id: 'profile-experience', label: 'profile_experience', show: hasExperience.value && !isMe.value },
-    { id: 'profile-recommendations', label: 'recommendation_title', show: showRecommendations.value },
+    { id: 'profile-recommendations', label: 'recommendation_title', show: showRecommendations.value && !isMe.value },
   ]
     .filter(s => s.show)
     .map(({ id, label }) => ({ id, label })),
