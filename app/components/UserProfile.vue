@@ -70,7 +70,7 @@
     >
       <div class="section-head">
         <h2 class="section-title">
-          {{ isMe ? 'and all the non-believers' : $t('common_projects') }}
+          {{ $t('common_projects') }}
         </h2>
         <div
           v-if="canEdit"
@@ -102,7 +102,7 @@
         v-if="!hasProjects"
         class="empty-state"
       >
-        {{ isMe ? 'the plans that they have made' : $t('profile_no_projects_yet') }}
+        {{ $t('profile_no_projects_yet') }}
       </p>
 
       <div

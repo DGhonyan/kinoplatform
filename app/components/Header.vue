@@ -127,7 +127,7 @@ type NavLink = { path: string; label: string; public: boolean };
 const headerLinks: NavLink[] = [
   { path: '/', label: 'common_home', public: true },
   { path: '/about', label: 'common_about', public: true },
-  { path: '/crew', label: 'common_crew', public: false },
+  { path: '/crew', label: 'common_crew', public: true },
   { path: '/talents', label: 'common_talents', public: false },
   { path: '/announcements', label: 'common_announcements', public: true },
   { path: '/locations', label: 'common_locations', public: true },
