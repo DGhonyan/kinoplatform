@@ -3,12 +3,14 @@
 For the startup-convention demo, several surfaces are deliberately public that
 may go back behind login later. The full revert checklist:
 
-- Backend `@Public()` on: `GET /users/profile/:id` (user.controller.ts),
+- Backend `@Public()` on: `GET /users/profile/:id`, `GET /users/search`,
+  `POST /users/talents/search`, `GET /users/talents/meta` (user.controller.ts),
   `GET /availability/user/:userId` (availability.controller.ts). Location
-  browse routes (`GET /locations`, `/locations/:id`, `/locations/cities`) are
-  public by design and likely stay.
-- Frontend `app/middleware/auth.global.ts`: the `/users/` prefix in `isPublic`
-  (and `/locations` + `/locations/` if locations ever get gated).
+  browse routes (`GET /locations`, `/locations/:id`, `/locations/cities`) and
+  `GET /users/recent` are public by design and likely stay.
+- Frontend `app/middleware/auth.global.ts`: `/crew` and `/talents` in
+  `publicPaths`, and the `/users/` prefix in `isPublic` (plus `/locations` +
+  `/locations/` if locations ever get gated).
 
 Booking, posting, and all writes still require login; only reads were opened.
 

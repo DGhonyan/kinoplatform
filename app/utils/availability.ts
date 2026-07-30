@@ -11,11 +11,8 @@ export const groupWindowsByDate = (
   return map;
 };
 
-/**
- * A day's status from its windows (whitelist model): an all-day window → fully
- * available, any partial window → partially available, none → unavailable.
- * Shared so the owner editor and a future booker view derive it identically.
- */
+// Whitelist model: an all-day window → available, any partial window → partially
+// available, none → unavailable.
 export const dayStatus = (windows: Availability[] | undefined): DayStatus => {
   if (!windows || windows.length === 0) return 'unavailable';
   if (windows.some(w => w.allDay)) return 'available';

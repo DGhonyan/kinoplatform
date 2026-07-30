@@ -49,10 +49,8 @@ import {
 } from '~/utils/bodyMap';
 import { toggleInArray } from '~/utils/toggleInArray';
 
-/**
- * Front + back body figures where each part is a clickable region. v-model is the
- * list of selected region ids (e.g. 'front_left_forearm') — tattoo locations.
- */
+// Front + back body figures with clickable regions. v-model is the list of
+// selected region ids (e.g. 'front_left_forearm') — tattoo locations.
 const modelValue = defineModel<string[]>({ required: true });
 
 const { t } = useI18n();

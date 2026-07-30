@@ -37,18 +37,8 @@
 </template>
 
 <script lang="ts" setup>
-/**
- * One collapsible facet in a filter panel — the single accordion used by BOTH
- * directories (/crew via UserDirectory and /talents), so the two pages share one
- * interaction model and one a11y contract instead of hand-rolling their own.
- *
- * The header is the facet's ONLY visible name: give the control inside the slot
- * an `aria-label` with the same i18n key rather than its own visible label,
- * otherwise the name renders twice.
- *
- * Collapsing is purely a small-screen affair — above tablet the sidebar has room
- * for every facet, so the body is always shown and the toggle isn't rendered.
- */
+// One collapsible facet. The header is the facet's ONLY visible name — give the
+// slotted control an `aria-label`, not a visible label, or it renders twice.
 withDefaults(
   defineProps<{
     /** i18n key for the facet name. */
@@ -102,9 +92,8 @@ const bodyId = useId();
     justify-content: space-between;
     gap: 8px;
     width: 100%;
-    // Vuetify's reset doesn't zero a <button>'s background or border, so
-    // without these the header renders as a UA `ButtonFace` grey box with the
-    // dark theme's near-white text.
+    // Vuetify's reset doesn't zero a <button>'s background or border, so without
+    // these the header renders as a UA grey box under near-white dark-theme text.
     background: none;
     border: none;
     padding: 10px 0;

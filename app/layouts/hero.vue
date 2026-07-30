@@ -71,17 +71,15 @@ useHead({
   flex: 1 0 auto;
   width: 100%;
   padding: $base-padding;
-  // This element carries `v-theme--light` (see template), so on-surface
-  // re-resolves to the light value here — keeping plain text dark inside the
-  // white card even though the app default theme is dark.
+  // This element carries `v-theme--light`, so on-surface re-resolves light here —
+  // dark text inside the white card even though the app theme is dark.
   color: color(--v-theme-on-surface);
 }
 </style>
 
 <style lang="scss">
-/* Hero pages (home, login, register, forgot/reset password) sit on top of a
-   full-bleed cover image. Punch transparency through every Vuetify layer that
-   paints white so the image actually shows. */
+/* Hero pages sit on a full-bleed cover image, so punch transparency through
+   every Vuetify layer that paints white. */
 body.layout-hero,
 body.layout-hero .v-application,
 body.layout-hero .v-application__wrap,

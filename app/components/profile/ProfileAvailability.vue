@@ -252,12 +252,8 @@ import {
   type DayStatus,
 } from '~/utils/availability';
 
-/**
- * Availability calendar. A month grid of day tiles coloured by status —
- * available (an all-day window), partially available (some windows), or
- * unavailable (none) — derived from the user's availability windows. The owner
- * gets a per-day editor to add/remove windows; other viewers see it read-only.
- */
+// Month grid of day tiles coloured by status, derived from the user's windows.
+// The owner gets a per-day editor; other viewers see it read-only.
 const props = defineProps<{
   userId: string | undefined;
   canEdit: boolean;
@@ -294,9 +290,8 @@ const weekdays = computed(() =>
 
 const monthLabel = computed(() => formatMonthYear(focused.value, locale.value));
 
-// Always a fixed 6×7 grid (42 cells) so the calendar height — and the popup it
-// sits in — never changes between months. Leading/trailing slots are null (blank
-// tiles); 6 rows is the max any month needs, so nothing ever overflows.
+// Always a fixed 6×7 grid so the calendar (and its popup) never changes height
+// between months. Leading/trailing slots are null; 6 rows fits any month.
 const cells = computed(() => {
   const y = focused.value.getFullYear();
   const m = focused.value.getMonth();

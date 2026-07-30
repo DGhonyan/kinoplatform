@@ -1,12 +1,7 @@
 import type { Ref } from 'vue';
 
-/**
- * Run `callback` whenever any of the observed elements changes size — and once
- * on mount. This is how we collapse UI based on whether content actually *fits*
- * (measure natural widths, compare to available space) rather than guessing a
- * viewport breakpoint. Observing the content element too means locale switches
- * (which change label widths without resizing the container) re-trigger it.
- */
+// Runs `callback` on any observed element's resize, plus once on mount. Observing
+// the CONTENT too is what makes locale switches (new label widths) re-trigger it.
 export function useResizeObserver(
   targets: Ref<HTMLElement | null>[],
   callback: () => void,
@@ -14,11 +9,8 @@ export function useResizeObserver(
   let ro: ResizeObserver | null = null;
   let frame = 0;
 
-  // Coalesce a burst of notifications into one call per frame. Callers typically
-  // respond by toggling a class on an element they also observe (that's the
-  // point — measure the content, then restyle it), which would otherwise
-  // re-enter this observer synchronously and make Chrome log "ResizeObserver
-  // loop completed with undelivered notifications".
+  // One call per frame. Callers restyle the element they observe, which would
+  // otherwise re-enter synchronously and trip Chrome's "loop completed" warning.
   const schedule = () => {
     if (frame) return;
     frame = requestAnimationFrame(() => {

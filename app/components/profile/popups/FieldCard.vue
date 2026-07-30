@@ -41,16 +41,8 @@
 </template>
 
 <script lang="ts" setup>
-/**
- * Card-style profile field used in the completion popups: an icon on the left,
- * and title + explanation + the action control stacked on the right. The
- * "action" is whatever the caller drops in the default slot — a Select, an
- * Input, a TextArea, a file-upload activator, or a button that opens a
- * secondary popup.
- *
- * `icon` defaults to the profile-photo placeholder; per-field Figma icons get
- * swapped in later by passing `icon`.
- */
+// Card-style profile field for the completion popups: icon left, title +
+// explanation + the slotted action control right.
 withDefaults(
   defineProps<{
     /** i18n key for the field title. */

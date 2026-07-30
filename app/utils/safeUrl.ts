@@ -1,9 +1,5 @@
-/**
- * Guard external URLs from the backend before binding them into an `href`. A
- * `javascript:` (or `data:`) URL would execute on click, so only http/https pass;
- * anything else (or an unparseable string) returns `undefined` so callers can skip
- * rendering the link.
- */
+// Guards a backend URL before it reaches an href: a `javascript:`/`data:` URL
+// would execute on click, so only http/https pass; anything else → undefined.
 export const safeExternalUrl = (url?: string | null): string | undefined => {
   if (!url) return undefined;
   try {

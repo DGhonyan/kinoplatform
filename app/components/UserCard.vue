@@ -33,9 +33,8 @@ const avatarSrc = computed(
 
 <style scoped lang="scss">
 .user-card {
-  // Fixed size; `flex: none` keeps it from shrinking inside a flex-wrap grid.
-  // Containers that lay the cards out themselves — UserDirectory's responsive
-  // grid — override these two custom properties to let the track do the sizing.
+  // Fixed size; `flex: none` stops it shrinking in a flex-wrap grid. Containers
+  // that size the cards themselves override these two custom properties.
   flex: 0 0 auto;
   width: var(--user-card-width, 200px);
   height: var(--user-card-height, 290px);

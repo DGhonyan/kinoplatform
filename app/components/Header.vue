@@ -128,7 +128,7 @@ const headerLinks: NavLink[] = [
   { path: '/', label: 'common_home', public: true },
   { path: '/about', label: 'common_about', public: true },
   { path: '/crew', label: 'common_crew', public: true },
-  { path: '/talents', label: 'common_talents', public: false },
+  { path: '/talents', label: 'common_talents', public: true },
   { path: '/announcements', label: 'common_announcements', public: true },
   { path: '/locations', label: 'common_locations', public: true },
 ];
@@ -136,7 +136,6 @@ const visibleLinks = computed(() =>
   headerLinks.filter(link => link.public || isOnboarded.value),
 );
 
-// ── Intrinsic nav collapse ──────────────────────────────────────────────────
 // Collapse when the pieces stop fitting, not at a hardcoded breakpoint. Hidden
 // probes stay rendered so natural widths remain measurable (no oscillation).
 const barRef = ref<HTMLElement | null>(null);

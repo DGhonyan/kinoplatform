@@ -69,17 +69,8 @@ import type { FileKind, UploadedFile } from '~~/shared/types/file';
 import { ACTOR_PHOTO_ASPECT_RATIO } from '~/utils/constants';
 import FileUpload from '~/components/FileUpload.vue';
 
-/**
- * Grid of photos with an add tile. Each add uploads and appends the confirmed
- * public URL. min/max are the caller's policy (2–6 for actors); min is enforced
- * by the caller's validation.
- *
- * `aspectRatio` decides whether a crop step happens at all: set (the actor
- * default) locks every photo to that ratio, `null` skips the cropper and stores
- * the original. Location galleries want the latter — a shooting location is
- * photographed in whatever framing the space needs, and forcing it through a
- * portrait crop throws away the part of the room the photo was taken to show.
- */
+// Photo grid with an add tile. `aspectRatio` decides whether cropping happens at
+// all: set locks every photo to it, `null` skips the cropper and keeps originals.
 const modelValue = defineModel<string[]>({ required: true });
 
 const props = withDefaults(defineProps<{
@@ -96,9 +87,8 @@ const props = withDefaults(defineProps<{
   aspectRatio: ACTOR_PHOTO_ASPECT_RATIO,
 });
 
-// The tile follows the crop ratio: with cropping OFF the photos are arbitrary
-// (often landscape), and a fixed 3:4 portrait box would letterbox a 16:9 room
-// shot down to ~40% of the tile — ten rooms would be indistinguishable.
+// The tile follows the crop ratio. With cropping off the photos are arbitrary, and
+// a fixed 3:4 box letterboxes a 16:9 room shot down to ~40% of the tile.
 const tileRatio = computed(() => String(props.aspectRatio ?? 4 / 3));
 
 const onUploaded = (file: UploadedFile) => {

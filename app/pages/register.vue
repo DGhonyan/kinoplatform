@@ -34,9 +34,8 @@ definePageMeta({ layout: 'hero' });
 const authStore = useAuthStore();
 const appStore = useAppStore();
 
-// If the user is already signed in we shouldn't start them at step 1 of registration.
-// Fully-onboarded users go home; partially-onboarded users go to /user, where the
-// wizard / essentials popup resumes.
+// Already signed in: fully-onboarded users go home, partially-onboarded ones go
+// to /user, where the wizard / essentials popup resumes.
 if (import.meta.client && authStore.user) {
   navigateTo(isOnboardingComplete(authStore.user) ? '/' : '/user');
 }
@@ -50,9 +49,8 @@ const steps: RegisterStep[] = [
   stepConfigs[STEP_IDS.PROFESSION],
 ];
 
-// The wizard only covers the required pre-profile steps. The user still has the
-// required "essentials" popup (photo/bio/languages) to fill before onboarding
-// is complete, so send them to /user where that popup takes over.
+// The wizard only covers the pre-profile steps; the required essentials popup
+// still follows, so send them to /user where it takes over.
 const onCompleted = (_data: RegisterFormData) => {
   appStore.showMessage('auth_registration_success', 'success');
   navigateTo('/user');

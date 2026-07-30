@@ -1,6 +1,5 @@
-// Announcement board: industry postings (castings, crew calls, funding,
-// workshops, platform updates). Public list shows only `approved` posts; authed
-// users create posts as `pending` for admin moderation.
+// Announcement board: industry postings. The public list shows only `approved`
+// posts; authed users create posts as `pending` for admin moderation.
 
 export const ANNOUNCEMENT_CATEGORIES = [
   'casting',

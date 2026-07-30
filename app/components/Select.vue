@@ -112,10 +112,8 @@ const removeAt = (index: number) => {
   }
 };
 
-// Pin the dropdown to the field's width so its size doesn't track the option
-// text (the menu is shrink-to-fit, so wrapping alone won't stop it growing).
-// We feed the measured field width to the menu; wrapping then keeps long labels
-// inside that width. ResizeObserver keeps them in sync as the layout changes.
+// The menu is shrink-to-fit, so wrapping alone won't stop it tracking the option
+// text. Feed it the measured field width and keep that in sync on resize.
 const selectRef = ref();
 const menuWidth = ref<number>();
 let observer: ResizeObserver | undefined;
@@ -139,9 +137,8 @@ onBeforeUnmount(() => observer?.disconnect());
   gap: 8px;
 }
 
-// Vuetify's .v-input is `flex: 1 1 auto`, so inside a stretched flex row this
-// field grows to swallow any extra height a taller sibling has — e.g. a
-// neighbour whose label wraps to two lines. Mirrors the guard in Input.vue.
+// Vuetify's .v-input is `flex: 1 1 auto`, so in a stretched flex row this field
+// grows to match a taller sibling. Mirrors the guard in Input.vue.
 .select {
   flex: 0 0 auto;
 }

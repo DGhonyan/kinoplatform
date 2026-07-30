@@ -83,10 +83,8 @@ import { formatDate, todayLocalDate } from '~/utils/dates';
 const props = withDefaults(
   defineProps<{
     announcement: Announcement;
-    /**
-     * 'public' → CTA button; 'moderate' → admin approve/reject; 'mine' → the
-     * author's own post (status badge + delete). One field, no invalid combos.
-     */
+    // 'public' → CTA button; 'moderate' → admin approve/reject; 'mine' → the
+    // author's own post (status badge + delete). One field, no invalid combos.
     mode?: 'public' | 'moderate' | 'mine';
   }>(),
   { mode: 'public' },
@@ -114,9 +112,8 @@ const isExpired = computed(
   display: flex;
   flex-direction: column;
   gap: 10px;
-  // Containers that lay the cards out themselves (the detail page's related
-  // strip) override this to let their grid track own the width — same contract
-  // as UserCard's --user-card-width.
+  // Containers that lay the cards out themselves override this to let their track
+  // own the width — same contract as UserCard's --user-card-width.
   width: var(--announcement-card-width, 320px);
   max-width: 100%;
   min-width: 0;

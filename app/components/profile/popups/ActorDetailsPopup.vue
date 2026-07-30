@@ -41,15 +41,8 @@ import PopupShell from '~/components/profile/popups/PopupShell.vue';
 import ActorDetailsFields from '~/components/profile/popups/ActorDetailsFields.vue';
 import Button from '~/components/Button.vue';
 
-/**
- * Two modes:
- *  - forced (default) — persistent, only a Save button. Used when a user adds an
- *    acting role after onboarding and still lacks the mandatory details (see
- *    `needsActorDetails`); the only exit is completing them.
- *  - dismissable — a cancelable editor. Photos and appearance are displayed in
- *    separate places on the profile, but both edit affordances open this one
- *    popup so the owner manages them together.
- */
+// Two modes: forced (persistent, save-only — the exit is completing the
+// mandatory actor details) and dismissable (a cancelable editor).
 const open = defineModel<boolean>({ required: true });
 
 withDefaults(defineProps<{

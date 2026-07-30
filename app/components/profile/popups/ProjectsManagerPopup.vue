@@ -76,11 +76,8 @@ import ProfileListSection from '~/components/profile/popups/ProfileListSection.v
 import ProjectForm from '~/components/profile/popups/ProjectForm.vue';
 import Button from '~/components/Button.vue';
 
-/**
- * Profile-side manager for the user's projects: list with add/edit/remove, a
- * project form (reused from onboarding), and a single save through
- * `updateUser({ projects })`. `mode="add"` jumps straight to a blank form.
- */
+// Profile-side projects manager: list with add/edit/remove, the onboarding
+// ProjectForm, one save. `mode="add"` jumps straight to a blank form.
 const open = defineModel<boolean>({ required: true });
 
 const props = withDefaults(
@@ -136,9 +133,8 @@ const applyDraft = (): boolean => {
   return true;
 };
 
-// In list-mode the form is reached from the list, so committing returns there
-// (the list's Save persists). In add-mode the form IS the popup — commit then
-// save+close, and Cancel/close just dismisses (no back-to-a-list-never-seen).
+// List-mode: the form returns to the list, whose Save persists. Add-mode: the
+// form IS the popup, so commit saves and closes.
 const doneForm = async () => {
   if (!applyDraft()) return;
   if (props.mode === 'add') await save();

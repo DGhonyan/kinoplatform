@@ -1,14 +1,5 @@
-/**
- * Hierarchical source data for the gear ChipPicker (software tools + physical
- * equipment). A group has a `label` (an i18n key for categories, or a literal
- * brand name — both are rendered through `t()`, and literals pass through
- * unchanged) and EITHER nested `groups` (e.g. camera brands) OR leaf `items`
- * (the chip values). Depth is variable: software is one level deep, equipment
- * cameras are two (category → brand → chips).
- *
- * The user model stores a flat `string[]` of selected values — the hierarchy is
- * only for the picker UI.
- */
+// Hierarchy for the gear ChipPicker: a group has EITHER nested `groups` or leaf
+// `items`. Depth varies. The user model stores a flat string[] — UI only.
 export type ChipGroup = {
   label: string;
   groups?: ChipGroup[];

@@ -10,11 +10,8 @@ const toDate = (value: string | Date): Date => {
     : new Date(value);
 };
 
-/*
- * `toLocaleDateString(locale, options)` builds a fresh ICU formatter on every
- * call — the slow path, and these run once per card in a list. Cache one
- * formatter per (locale, shape) instead; there are only a handful of pairs.
- */
+// `toLocaleDateString` builds a fresh ICU formatter per call, and these run once
+// per card. Cache one per (locale, shape); there are only a handful of pairs.
 const formatters = new Map<string, Intl.DateTimeFormat>();
 
 const formatter = (

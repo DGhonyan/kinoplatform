@@ -45,12 +45,8 @@
 <script lang="ts" setup>
 import Button from '~/components/Button.vue';
 
-/**
- * A labelled row of outlined chips used across the profile (languages, gear,
- * practicalities). Optionally shows an edit pencil (`editable`) and, when the
- * list is empty, an "add" call-to-action (`addLabel`) — for owner-editable
- * sections that should still offer an entry point with nothing filled in yet.
- */
+// Labelled row of chips (languages, gear, practicalities), with an optional edit
+// pencil and an empty-state "add" CTA.
 defineProps<{
   label: string;
   items: string[];

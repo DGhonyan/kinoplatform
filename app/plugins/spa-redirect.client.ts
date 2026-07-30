@@ -1,9 +1,5 @@
-// Companion decoder for public/404.html.
-//
-// On GitHub Pages, requests for non-prerendered routes (e.g. /users/abc) fall
-// through to 404.html, which redirects to /?/<original-path>. This plugin runs
-// before the router and rewrites that query back into a real path so the SPA
-// boots at the intended route.
+// Companion decoder for public/404.html: rewrites the /?/<path> query that the
+// static host produces back into a real path, before the router boots.
 
 export default defineNuxtPlugin({
   name: 'spa-redirect',

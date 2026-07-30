@@ -59,11 +59,8 @@ import 'vue-advanced-cropper/dist/style.css';
 import PopupShell from '~/components/profile/popups/PopupShell.vue';
 import Button from '~/components/Button.vue';
 
-/**
- * Crop-before-upload dialog. Locks the crop box to the target container's aspect
- * ratio and shows a live preview at that ratio, then emits the cropped image
- * (re-encoded to WebP) so the caller can push it through the normal upload flow.
- */
+// Crop-before-upload dialog. Locks the crop box to the target's aspect ratio and
+// emits the result re-encoded to WebP for the normal upload flow.
 const open = defineModel<boolean>({ required: true });
 
 const props = defineProps<{

@@ -62,10 +62,8 @@ const ERROR_MESSAGE_KEYS: Partial<Record<ErrorCode, string>> = {
 /** Generic, always-translated fallback when no message is available at all. */
 export const GENERIC_ERROR_KEY = 'common_unexpected_error';
 
-/**
- * Resolve a backend error to display text: mapped code → i18n key, else the raw
- * backend message (dev-warn on unmapped codes), else the generic key.
- */
+// Resolve a backend error to display text: mapped code → i18n key, else the raw
+// backend message (dev-warn on unmapped codes), else the generic key.
 export const apiErrorMessageKey = (error: ApiError): string => {
   const mapped = error.code ? ERROR_MESSAGE_KEYS[error.code as ErrorCode] : undefined;
   if (mapped) {

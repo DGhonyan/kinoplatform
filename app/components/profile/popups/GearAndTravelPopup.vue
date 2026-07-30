@@ -298,9 +298,8 @@ const save = async () => {
   gap: 4px;
 }
 
-// Vuetify's switch control carries a negative inline inset (to align to a grid)
-// that makes the toggles spill past the container's left edge — zero it, and
-// keep the label from being clipped on the right.
+// Vuetify's switch carries a negative inline inset that spills the toggles past
+// the container's left edge. Zero it, and stop the label clipping on the right.
 .practicality-group :deep(.v-selection-control) {
   margin-inline-start: 0;
 }

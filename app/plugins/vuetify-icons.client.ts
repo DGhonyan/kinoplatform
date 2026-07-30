@@ -1,22 +1,7 @@
 import { h, type Component } from 'vue';
 
-/**
- * Registers a `custom:*` icon set with Vuetify, sourced from `app/assets/icons/`.
- *
- * Drop a new `.svg` in that folder → it's automatically available as
- * `<v-icon icon="custom:<filename-without-ext>" />`. Hardcoded stroke/fill
- * colors are folded to `currentColor` so v-icon's `color` prop themes the
- * icon, and width/height attrs are stripped so the icon scales with the
- * `size` prop.
- *
- * We register the set by mutating Vuetify's reactive IconOptions, which is
- * provided on the root Vue app via the symbol `Symbol.for('vuetify:icons')`.
- * Vuetify uses `reactive(...)` for that object in `createIcons()`, so adding
- * a key triggers v-icon's lookup to find it on subsequent renders.
- *
- * Using `import.meta.glob` (Vite-only) means this must run in runtime code,
- * not in vuetify-nuxt-module's config file (which is loaded by jiti).
- */
+// Registers a `custom:*` icon set from app/assets/icons/. Must live in runtime
+// code, not vuetify-nuxt-module's config: `import.meta.glob` is Vite-only.
 const modules = import.meta.glob<string>('../assets/icons/*.svg', {
   query: '?raw',
   import: 'default',
@@ -77,9 +62,8 @@ export default defineNuxtPlugin({
       console.info(`[custom icons] Discovered ${Object.keys(iconMap).length} icon(s):`, Object.keys(iconMap));
     }
 
-    // Plugin ordering via `enforce: 'post'` doesn't beat vuetify-nuxt-module's
-    // module-level plugin registration. Defer to `app:created`, which fires
-    // after *all* plugins (including Vuetify's) have completed their setup.
+    // `enforce: 'post'` doesn't beat vuetify-nuxt-module's registration. Defer to
+    // `app:created`, which fires after every plugin (Vuetify's included) is set up.
     nuxtApp.hook('app:created', () => {
       const provides = (nuxtApp.vueApp._context as { provides: Record<symbol, unknown> }).provides;
       const iconOptions = provides[ICON_SYMBOL] as VuetifyIconOptions | undefined;

@@ -51,12 +51,8 @@
 <script lang="ts" setup generic="T">
 import Button from '~/components/Button.vue';
 
-/**
- * Added-items list + an "Add" button, used as the action inside a FieldCard for
- * Projects and Experience. Parent owns the array; this renders rows (via the
- * `item` slot) and emits add/edit/remove intent. The field title/explanation
- * live on the surrounding FieldCard, so this no longer renders its own title.
- */
+// Items list + Add button, used as the action inside a FieldCard. The parent
+// owns the array; this renders rows and emits add/edit/remove intent.
 defineProps<{
   items: T[];
   addLabel: string;

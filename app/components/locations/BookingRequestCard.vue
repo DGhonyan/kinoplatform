@@ -72,17 +72,8 @@
 </template>
 
 <script lang="ts" setup>
-/**
- * The booking widget on the location detail page.
- *
- * The total shown here is a courtesy estimate only — the server recomputes it
- * from its own price and returns `quotedTotal`, so nothing money-shaped is ever
- * sent up.
- *
- * Guests see the full widget rather than a "log in first" stub: hiding it would
- * hide the price maths that makes the listing worth signing up for. Submitting
- * routes them through /login with a redirect back here.
- */
+// The total here is an estimate — the server recomputes `quotedTotal` from its
+// own price, so nothing money-shaped is ever sent up. Guests submit via /login.
 import type { BookingRequest, LocationDetail } from '~~/shared/types/location';
 import Button from '~/components/Button.vue';
 import DateInput from '~/components/DateInput.vue';
@@ -118,9 +109,8 @@ const totalText = computed(() =>
   formatPrice(props.location.pricePerHour * nights.value * 24, props.location.currency, locale.value),
 );
 
-// The calendar can't offer a same-day checkout — the shortest stay is one night.
-// Formatted from local components, not toISOString(), which would hand back the
-// previous day west of UTC.
+// Shortest stay is one night. Formatted from local components, not
+// toISOString(), which hands back the previous day west of UTC.
 const minCheckOut = computed(() => {
   if (!checkIn.value) return today;
   const next = new Date(`${checkIn.value}T00:00:00`);

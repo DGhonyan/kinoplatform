@@ -53,10 +53,8 @@
 import { isLightColor } from '~/utils/appearance';
 import { toggleInArray } from '~/utils/toggleInArray';
 
-/**
- * Multi-select color swatches for filters (v-model is a hex array). Shares the
- * swatch look with the single-select ColorSwatchGroup, but toggles membership.
- */
+// Multi-select color swatches for filters (v-model is a hex array). Same look as
+// the single-select ColorSwatchGroup, but toggles membership.
 const modelValue = defineModel<string[]>({ required: true });
 
 withDefaults(

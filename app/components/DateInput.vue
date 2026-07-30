@@ -72,24 +72,8 @@
 </template>
 
 <script lang="ts" setup>
-/**
- * Date input wrapper around v-text-field + v-date-picker.
- *
- * Why this exists: keeps Vuetify's date-picker dependency private, gives us
- * a consistent calendar UX across the app, and lets us swap implementations
- * later in one place.
- *
- * v-model contract: ISO 8601 date string (`"1990-05-15"`). Empty string when
- * cleared. The wrapper handles all conversion between ISO strings and the
- * Date objects v-date-picker wants — using local components so timezone
- * shifts don't bump the date by a day.
- *
- * `prependIcon` renders an icon inside the field on the left. For fully
- * custom content, use the `prepend-inner` slot.
- *
- * `label` (an i18n key, like Input's) renders above the field. Pass it whenever
- * this sits beside a labelled field — otherwise the two fields misalign.
- */
+// v-model is an ISO date string ('1990-05-15'), '' when cleared. Conversion
+// uses LOCAL date components so a timezone shift can't bump the day.
 const modelValue = defineModel<string>({ default: '' });
 
 const props = withDefaults(
@@ -119,9 +103,8 @@ const props = withDefaults(
 const menuOpen = ref(false);
 const viewMode = ref<'month' | 'months' | 'year'>('month');
 
-// Tapping the month/year label in the controls flips between the calendar
-// grid and the year picker — so users can jump decades for birthdates
-// without clicking the prev button 400 times.
+// Tapping the month/year label flips between the calendar grid and the year
+// picker, so birthdates don't need 400 clicks on the prev button.
 const toggleView = () => {
   viewMode.value = viewMode.value === 'month' ? 'year' : 'month';
 };

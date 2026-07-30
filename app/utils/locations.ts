@@ -1,23 +1,14 @@
-// Presentation helpers shared by the locations card, list and detail page —
-// one home for the price formatting and the amenity/safety glyph tables so the
-// three views can't drift apart.
+// Presentation helpers shared by the locations card, list and detail page, so the
+// price formatting and glyph tables can't drift apart.
 
 import type { LocationAmenity, LocationSafety } from '~~/shared/types/location';
 
-/*
- * `Intl.NumberFormat` builds a fresh ICU formatter per call — the slow path,
- * and this runs once per card. Cache one per (locale, currency) pair, the same
- * trick dates.ts uses.
- */
+// `Intl.NumberFormat` builds a fresh ICU formatter per call, and this runs once
+// per card. Cache one per (locale, currency) pair, like dates.ts does.
 const priceFormatters = new Map<string, Intl.NumberFormat>();
 
-/**
- * "45,000 AMD" — grouped amount plus the raw currency code.
- *
- * Deliberately NOT `style: 'currency'`: the backend stores a free-form code and
- * ICU renders unknown ones as-is but known ones as a symbol in a locale-specific
- * position, so prices would render inconsistently across the catalogue.
- */
+// "45,000 AMD". NOT `style: 'currency'` — the backend stores a free-form code,
+// and ICU would render known/unknown codes inconsistently across the catalogue.
 export const formatPrice = (amount: number, currency: string, locale: string): string => {
   let formatter = priceFormatters.get(locale);
   if (!formatter) {

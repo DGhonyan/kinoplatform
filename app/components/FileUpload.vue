@@ -197,9 +197,8 @@ const handlePicked = (file: File) => {
   }
 };
 
-// Multi-select: cap to the caller's remaining slots, then run each file through
-// the same crop→upload flow. Cropping is one-at-a-time, so the rest wait in a
-// queue and open as each crop dialog closes (see the cropOpen watcher).
+// Cap to the caller's remaining slots, then run each file through the crop→upload
+// flow. Cropping is one at a time, so the rest queue behind the cropOpen watcher.
 const cropQueue = ref<File[]>([]);
 
 const handleMultiplePicked = (files: File[]) => {

@@ -81,11 +81,8 @@
 <script lang="ts" setup>
 import { isLightColor } from '~/utils/appearance';
 
-/**
- * A grid of selectable 70×70 color circles. The stored value is the hex string
- * itself. With `custom`, an extra add-circle opens the native color picker and
- * the chosen hex is kept as its own selectable swatch (used for hair).
- */
+// Grid of selectable color circles; the stored value is the hex itself. With
+// `custom`, an add-circle opens the native picker and keeps the hex as a swatch.
 const modelValue = defineModel<string>({ required: true });
 
 const props = withDefaults(defineProps<{

@@ -50,13 +50,8 @@
 </template>
 
 <script setup lang="ts" generic="T">
-/**
- * Reusable strip carousel: renders each item through the `#item` scoped slot and
- * steps ONE item per arrow click (not a whole page), so items are never clipped
- * mid-view. `loop` wraps around at the ends; `controlColor` (a theme token or any
- * CSS color) tints the prev/next controls. Arrows only appear when the strip
- * overflows its viewport.
- */
+// Strip carousel: items render through the `#item` slot and step ONE per arrow
+// click, so nothing is clipped mid-view. Arrows appear only when it overflows.
 const props = withDefaults(defineProps<{
   items: readonly T[];
   keyField?: string;
@@ -200,9 +195,8 @@ watch(() => props.items.length, () => nextTick(measure));
   }
 }
 
-// Two inline 36px arrows plus gaps eat ~90px of a ~290px row, which is why they
-// used to be hidden outright on phones. Float them over the strip's edges
-// instead: still tappable, but they cost the viewport no width.
+// Two inline arrows plus gaps eat ~90px of a ~290px row, so float them over the
+// strip's edges instead: still tappable, but they cost the viewport no width.
 @include mobile {
   .carousel-control {
     position: absolute;

@@ -5,12 +5,8 @@ import type {
   UploadedFile,
 } from '~~/shared/types/file';
 
-/**
- * Raw PUT of the bytes straight to Azure using the backend-issued SAS URL.
- * Deliberately bypasses the app API client: no app cookies/credentials are sent
- * to blob storage — the SAS is the only authorization. Uses XHR for upload
- * progress (fetch can't report it). Resolves true on a 2xx response.
- */
+// Bypasses the app API client on purpose: no app cookies reach blob storage —
+// the SAS is the only authorization. XHR because fetch can't report progress.
 function putToAzure(
   init: InitiateUploadResponse,
   file: File,
@@ -39,22 +35,15 @@ function putToAzure(
 
 export const useFileStore = defineStore('file', {
   actions: {
-    /**
-     * Three-step direct-to-Azure upload:
-     *   1) POST /files/initiate  → short-lived, write-only SAS URL
-     *   2) PUT the bytes straight to Azure (progress via XHR)
-     *   3) POST /files/:id/confirm → backend verifies the blob, returns the file
-     * Returns the confirmed file (with an absolute `url`), or null on any failure
-     * (the error snackbar is already shown by `apiRequest` / the PUT handler).
-     */
+    // Direct-to-Azure upload: initiate (SAS URL) → PUT bytes → confirm.
+    // Returns the confirmed file, or null on any failure (snackbar already shown).
     async uploadFile(
       file: File,
       kind: FileKind,
       onProgress?: (percent: number) => void,
     ): Promise<UploadedFile | null> {
-      // No blanket errorMessage here: let the specific backend code surface its
-      // own message (FILE_INVALID_TYPE → "use JPG/PNG/WebP", FILE_TOO_LARGE, …)
-      // instead of a generic "upload failed".
+      // No blanket errorMessage: let the specific backend code surface its own
+      // message (FILE_INVALID_TYPE, FILE_TOO_LARGE) instead of "upload failed".
       const init = await apiRequest('/files/initiate').post<InitiateUploadResponse>({
         kind,
         contentType: file.type,

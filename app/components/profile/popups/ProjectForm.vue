@@ -159,11 +159,8 @@ import Select from '~/components/Select.vue';
 import FileUpload from '~/components/FileUpload.vue';
 import Button from '~/components/Button.vue';
 
-/**
- * Reusable project form. Seeds an internal draft from `initial` (undefined = new)
- * and exposes `commit()` which validates and returns a Project, or null if
- * invalid. Shared by the onboarding popup and the profile's projects manager.
- */
+// Seeds a draft from `initial` (undefined = new) and exposes commit(), which
+// validates and returns a Project or null.
 const props = defineProps<{
   initial?: Project;
 }>();
@@ -206,9 +203,8 @@ const draft = ref<ProjectDraft>(
 );
 const errors = reactive({ name: '', type: '', position: '', date: '', link: '' });
 
-// FileUpload needs a v-model (the confirmed file id); the URL we actually store
-// arrives via @upload:complete. Seeded blank — an existing project's media is
-// already a URL in `draft.media`, no id needed to re-display it.
+// FileUpload needs a v-model (the file id), but the URL we store arrives via
+// @upload:complete. Seeded blank: existing media is already a URL in `draft`.
 const mediaFileId = ref('');
 
 // ALL_PROFESSIONS, not just crew: an actor's credit on a project is as real

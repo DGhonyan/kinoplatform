@@ -14,10 +14,8 @@ const displayNamesFor = (locale: string): Intl.DisplayNames => {
   return instance;
 };
 
-/**
- * Localized name with active-locale → English fallback; `null` when neither
- * covers the code — callers should drop it rather than show a raw code.
- */
+// Localized name with an English fallback; `null` when neither covers the code,
+// so callers drop it rather than show a raw code.
 export const getLanguageDisplayName = (code: string, locale: string): string | null => {
   try {
     return displayNamesFor(locale).of(code)

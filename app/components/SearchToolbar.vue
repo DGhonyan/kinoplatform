@@ -35,19 +35,8 @@
 </template>
 
 <script lang="ts" setup>
-/**
- * The directory search bar shared by /crew (via UserDirectory), /talents and
- * /locations — one pill input plus an optional submit button.
- *
- * Extracted for the same reason as FilterPanel: the identical markup and CSS
- * had been copy-pasted into three files and was already drifting (one copy had
- * no maxlength, one button had lost its icon). Pages keep only their own
- * `grid-area` placement on the wrapper class they pass in.
- *
- * `showButton` is off by default: a directory that filters client-side as you
- * type (crew) has nothing to submit, and a Search button that appears to do
- * nothing is worse than no button.
- */
+// Shared directory search bar (/crew, /talents, /locations). `showButton` is off
+// by default: a client-side-filtering directory has nothing to submit.
 import Input from '~/components/Input.vue';
 import Button from '~/components/Button.vue';
 

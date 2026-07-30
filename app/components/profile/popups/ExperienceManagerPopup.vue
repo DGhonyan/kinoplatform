@@ -76,11 +76,8 @@ import ProfileListSection from '~/components/profile/popups/ProfileListSection.v
 import ExperienceForm from '~/components/profile/popups/ExperienceForm.vue';
 import Button from '~/components/Button.vue';
 
-/**
- * Profile-side manager for the user's work experience: list with add/edit/remove,
- * an experience form (reused from onboarding), and a single save through
- * `updateUser({ experience })`. `mode="add"` jumps straight to a blank form.
- */
+// Profile-side experience manager: list with add/edit/remove, the onboarding
+// ExperienceForm, one save. `mode="add"` jumps straight to a blank form.
 const open = defineModel<boolean>({ required: true });
 
 const props = withDefaults(

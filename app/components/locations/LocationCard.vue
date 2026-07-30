@@ -98,9 +98,8 @@ const facts = computed(() => {
 
 <style scoped lang="scss">
 .location-card {
-  // Same sizing contract as UserCard: fixed by default, but a container that
-  // lays the cards out itself (the directory grid) overrides the custom
-  // property and lets its track own the width.
+  // Same sizing contract as UserCard: fixed by default, but a container that lays
+  // the cards out itself overrides the custom property to own the width.
   width: var(--location-card-width, 280px);
   max-width: 100%;
   min-width: 0;
@@ -127,10 +126,8 @@ const facts = computed(() => {
 .card-image {
   width: 100%;
   aspect-ratio: 4 / 3;
-  // `contain` so the card shows the whole photo. Location shots are uploaded
-  // uncropped in whatever framing the space needed, and `cover` would silently
-  // crop the very thing the photo was taken to show. The tinted backdrop turns
-  // the resulting letterbox into a deliberate frame rather than a gap.
+  // `contain`, not `cover`: location shots are uploaded uncropped, so cover would
+  // crop the very thing the photo was taken to show. The tint frames the letterbox.
   object-fit: contain;
   display: block;
   background-color: color(--v-theme-on-surface, 0.06);

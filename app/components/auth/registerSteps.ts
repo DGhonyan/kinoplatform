@@ -7,9 +7,8 @@ import RegisterStepName from './registerSteps/Name.vue';
 import RegisterStepLocation from './registerSteps/Location.vue';
 import RegisterStepProfession from './registerSteps/Profession.vue';
 
-// Re-export the pure onboarding constants/predicate so component-layer callers
-// keep importing them from here. Always-loaded consumers (middleware, Header)
-// import directly from '~/utils/onboarding' to avoid bundling the step SFCs.
+// Re-exported for component-layer callers. Always-loaded consumers (middleware,
+// Header) import '~/utils/onboarding' directly to avoid bundling the step SFCs.
 export {
   STEP_IDS,
   WIZARD_STEP_IDS,
@@ -40,31 +39,19 @@ export type RegisterStep = {
   id: WizardStepId;
   component: Component;
   onAdvance?: (formData: RegisterFormData) => Promise<boolean> | boolean;
-  /**
-   * Optional steps render a "Skip for now" link above the action row. When
-   * skipped, `onSkip` runs instead of `onAdvance`. Steps marked `optional: true`
-   * must provide `onSkip`. (None of the current wizard steps are optional —
-   * the optional bits moved to the profile popups.)
-   */
+  // Optional steps render "Skip for now" and run `onSkip` instead of `onAdvance`,
+  // so `optional: true` requires an `onSkip`.
   optional?: boolean;
   onSkip?: (formData: RegisterFormData) => Promise<boolean> | boolean;
-  /**
-   * One-way doors. `onAdvance` has a non-idempotent side effect (creates an
-   * account, verifies an email) and the user can't redo it. The wizard hides
-   * the Back button on the *next* step so the user can't end up on a step whose
-   * `onAdvance` would fail if re-fired. Reversible steps (the default) are plain
-   * PATCHes — safe to revisit.
-   */
+  // One-way door: `onAdvance` has a non-idempotent side effect (creates an
+  // account, verifies an email), so the wizard hides Back on the NEXT step.
   irreversible?: boolean;
 };
 
 export const RegisterFormDataKey: InjectionKey<RegisterFormData> = Symbol('RegisterFormData');
 
-/**
- * Single source of truth for the registration wizard steps. Pages (`/register`,
- * `/user`) pick the subset they want and assemble their own steps array. Must be
- * called from a setup context (uses Pinia stores internally).
- */
+// The registration wizard steps; pages pick the subset they want. Must be called
+// from a setup context (uses Pinia stores).
 export const useRegisterSteps = (): Record<WizardStepId, RegisterStep> => {
   const authStore = useAuthStore();
   const userStore = useUserStore();
@@ -90,9 +77,8 @@ export const useRegisterSteps = (): Record<WizardStepId, RegisterStep> => {
           return false;
         }
 
-        // rememberMe: true so subsequent steps have a refresh token — without it
-        // the user only has a 15-minute access token, and close-and-reopen
-        // mid-wizard would lock them out.
+        // rememberMe so later steps have a refresh token; otherwise a 15-minute
+        // access token means close-and-reopen mid-wizard locks the user out.
         const loginRes = await authStore.login(data.email, data.password, true);
         if (loginRes.error) {
           appStore.showMessage(apiErrorMessageKey(loginRes.error), 'error');

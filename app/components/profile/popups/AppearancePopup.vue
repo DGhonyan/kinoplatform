@@ -151,11 +151,8 @@ import BodyTattooMap from '~/components/profile/BodyTattooMap.vue';
 import Select from '~/components/Select.vue';
 import Button from '~/components/Button.vue';
 
-/**
- * Actor appearance editor. Mandatory (height/weight/hair/eye/skin) are validated
- * on Done; optional fields flow through untouched. Emits the built Appearance
- * back to the parent, which owns persistence (essentials save / profile edit).
- */
+// Actor appearance editor. Validates height/weight/hair/eye/skin on Done and
+// emits the built Appearance; the parent owns persistence.
 const open = defineModel<boolean>({ required: true });
 
 const props = defineProps<{
@@ -174,9 +171,8 @@ const draft = reactive({
   hairColor: props.appearance?.hairColor ?? '',
   eyeColor: props.appearance?.eyeColor ?? '',
   skinColor: props.appearance?.skinColor ?? '',
-  // toArray, not `?? []` — see toArray's docs: these arrive over the wire and a
-  // non-array value would slip past `??` and throw on the spread, taking the
-  // whole popup down before it renders.
+  // toArray, not `?? []`: these arrive over the wire, and a non-array value would
+  // slip past `??` and throw on the spread before the popup renders.
   tattoos: toArray<string>(props.appearance?.tattoos),
   physicalCharacteristics: toArray<string>(props.appearance?.physicalCharacteristics),
   otherCharacteristic: props.appearance?.otherCharacteristic ?? '',

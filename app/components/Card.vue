@@ -9,14 +9,8 @@
 </template>
 
 <script lang="ts" setup>
-/**
- * The translucent rounded card used as the surface for auth pages and the
- * onboarding wizard. One place owns the look (background, radius, default
- * sizing) so changing it later is a one-file edit.
- *
- * `gap`, `maxWidth`, and `padding` are configurable per-instance; everything
- * else (color, radius, flex layout, self-centering) is opinionated.
- */
+// Translucent rounded surface for auth pages and the onboarding wizard.
+// gap/maxWidth/padding are per-instance; the rest is opinionated.
 const props = withDefaults(
   defineProps<{
     /** Vertical gap between direct children, in pixels. */
@@ -58,11 +52,8 @@ const styles = computed(() => ({
   border-radius: 24px;
 }
 
-// Frosted-glass variant (registration wizard). The card sits over the hero
-// cover image, so a translucent fill + backdrop blur lets the image show
-// through, blurred. Figma's "background blur" is a 20→60 vertical ramp; CSS
-// `backdrop-filter` is uniform, so we use the mid value. Alpha stays high
-// enough (0.6) that the dark cover doesn't sink the card's dark text.
+// Frosted-glass variant (registration wizard). Figma ramps the blur 20→60 down
+// the card; `backdrop-filter` is uniform, so we take the mid value.
 .card.card-glass {
   background-color: color(--v-theme-white, 0.5);
   backdrop-filter: blur(10px);

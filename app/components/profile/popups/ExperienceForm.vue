@@ -107,12 +107,8 @@ import { EMPLOYMENT_TYPES } from '~/utils/constants';
 import { monthOptions, yearOptions } from '~/utils/dateOptions';
 import Select from '~/components/Select.vue';
 
-/**
- * Reusable work-experience form. Seeds an internal draft from `initial`
- * (undefined = new) and exposes `commit()` which validates and returns an
- * Experience, or null if invalid. Shared by the onboarding popup and the
- * profile's experience manager.
- */
+// Seeds a draft from `initial` (undefined = new) and exposes commit(), which
+// validates and returns an Experience or null.
 const props = defineProps<{
   initial?: Experience;
 }>();

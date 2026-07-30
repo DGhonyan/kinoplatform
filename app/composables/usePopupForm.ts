@@ -2,14 +2,8 @@ import type { Ref } from 'vue';
 import type { ApiError } from '~/utils/api';
 import { apiErrorMessageKey } from '~/utils/apiErrors';
 
-/**
- * Shared scaffolding for the settings dialogs: a reactive `form` + `errors`, a
- * `busy` flag, auto-reset when the popup closes, and `applyError` — which routes
- * an API error to an inline field (via a code→field map, or a `fallbackField`
- * for flows where every error is inline) and otherwise shows a snackbar. Each
- * popup passes factories so it keeps its own field shape; `onReset` covers any
- * extra state (e.g. a wizard step).
- */
+// Popup form scaffolding: reactive form + errors, busy flag, auto-reset on
+// close, and applyError (routes an API error inline, else shows a snackbar).
 export function usePopupForm<F extends object, E extends object>(
   open: Ref<boolean>,
   makeForm: () => F,

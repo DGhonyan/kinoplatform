@@ -1,7 +1,5 @@
-/**
- * Select-item sources for month/year pickers, shared by the project and
- * experience forms.
- */
+// Select-item sources for month/year pickers, shared by the project and
+// experience forms.
 
 /** Localized month names → { value: '1'..'12', title }. */
 export const monthOptions = (locale: string) =>

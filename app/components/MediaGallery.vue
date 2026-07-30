@@ -48,12 +48,8 @@
 </template>
 
 <script lang="ts" setup>
-/**
- * Big active image with a thumbnail strip underneath. The gallery owns the
- * selection; the strip is a plain `Carousel` rendering thumbs through its
- * `#item` slot, so the scrolling/arrow behaviour stays in one component and
- * this one only adds "which image is showing".
- */
+// Active image + thumbnail strip. The gallery owns only the selection; the strip
+// is a plain Carousel, so scroll/arrow behaviour stays in one component.
 import Carousel from '~/components/Carousel.vue';
 
 const props = withDefaults(

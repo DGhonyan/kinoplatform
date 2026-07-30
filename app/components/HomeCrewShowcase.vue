@@ -74,10 +74,8 @@ onMounted(async () => {
   justify-content: center;
   gap: 16px;
 
-  // Opt into UserCard's sizing contract on phones. The fixed 200x290 fits only
-  // one card per row here (this section adds its own padding on top of the
-  // layout's), while /crew and /talents both go 2-up — and UserCard's mobile
-  // type trims would otherwise leave dead space inside a still-290px box.
+  // Opt into UserCard's mobile sizing. The fixed 200x290 fits only one per row
+  // here (this section adds padding on top of the layout's), unlike /crew.
   @include mobile {
     --user-card-width: auto;
     --user-card-height: auto;

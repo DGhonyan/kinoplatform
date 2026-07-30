@@ -36,11 +36,8 @@
 <script lang="ts" setup>
 import Button from '~/components/Button.vue';
 
-/**
- * Gentle nudge shown above the profile when optional sections are unfilled.
- * Parent owns the completeness math + dismissal state; this is presentation
- * plus two intents (open the completion flow, dismiss the banner).
- */
+// Nudge shown when optional profile sections are unfilled. The parent owns the
+// completeness math and dismissal state.
 defineProps<{
   remaining: number;
 }>();

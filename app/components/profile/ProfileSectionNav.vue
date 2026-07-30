@@ -14,12 +14,8 @@
 </template>
 
 <script lang="ts" setup>
-/**
- * In-profile section tabs. Scrolls to a section by its DOM id — ids are global,
- * so the nav can reach the sections that live in the parent without any events —
- * and highlights whichever section is currently in view via an IntersectionObserver
- * scroll-spy. The parent decides which sections exist and passes them in.
- */
+// Section tabs. Scrolls by DOM id (global, so no events needed to reach the
+// parent's sections) and scroll-spies the active one via IntersectionObserver.
 const props = defineProps<{
   sections: { id: string; label: string }[];
 }>();
@@ -104,10 +100,8 @@ onBeforeUnmount(() => observer?.disconnect());
     flex-wrap: nowrap;
     overflow-x: auto;
     scrollbar-width: none;
-    // A scroll container clips its overflow on both axes, which would eat the
-    // active tab's indicator (it hangs 2px below the row via a negative margin).
-    // Paint the collective line as a background instead — it's anchored to the
-    // border box, so it stays put while the tabs scroll over it.
+    // A scroll container would clip the active tab's indicator (it hangs 2px
+    // below the row), so paint the collective line as a background instead.
     border-bottom: none;
     background: linear-gradient(to top, color(--v-theme-on-surface, 0.4) 2px, transparent 2px);
 

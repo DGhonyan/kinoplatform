@@ -16,14 +16,8 @@
 <script lang="ts" setup>
 import type { AnnouncementCategory, AnnouncementStatus } from '~~/shared/types/announcement';
 
-/**
- * The category pill (+ optional status badge) shown above an announcement's
- * title. Shared by the board card and the detail page — they previously kept
- * separate copies of these styles, which had already drifted apart.
- *
- * `status` is intentionally opt-in: the public board hides it, "Mine" shows it,
- * and the detail page shows it only when the post isn't live yet.
- */
+// Category pill + optional status badge, shared by the board card and the detail
+// page. `status` is opt-in: the public board hides it.
 defineProps<{
   category: AnnouncementCategory;
   status?: AnnouncementStatus;

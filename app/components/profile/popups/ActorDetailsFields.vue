@@ -42,12 +42,8 @@ import MultiImageUpload from '~/components/MultiImageUpload.vue';
 import AppearancePopup from '~/components/profile/popups/AppearancePopup.vue';
 import Button from '~/components/Button.vue';
 
-/**
- * The two actor-only inputs — additional photos + appearance — shared by the
- * onboarding EssentialsPopup and the standalone ActorDetailsPopup (forced when a
- * user adds an acting role post-onboarding). Owns the appearance sub-popup; the
- * parent owns persistence and the validation error strings.
- */
+// The two actor-only inputs (photos + appearance), shared by EssentialsPopup and
+// ActorDetailsPopup. Owns the appearance sub-popup; the parent owns persistence.
 const photos = defineModel<string[]>('photos', { required: true });
 const appearance = defineModel<Appearance | null>('appearance', { required: true });
 

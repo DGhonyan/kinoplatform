@@ -3,10 +3,8 @@ import type { Recommendation } from '~~/shared/types/user';
 
 export const useRecommendationStore = defineStore('recommendation', {
   actions: {
-    /**
-     * Create or update the current user's recommendation for `targetId`.
-     * The backend upserts on (authorId, targetId), so this both adds and edits.
-     */
+    // Create or update the current user's recommendation for `targetId` — the
+    // backend upserts on (authorId, targetId), so this both adds and edits.
     async save(targetId: string, text: string) {
       return apiRequest('/recommendations', {
         loader: true,

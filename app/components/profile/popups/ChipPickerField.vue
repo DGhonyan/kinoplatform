@@ -95,11 +95,8 @@ import PopupShell from '~/components/profile/popups/PopupShell.vue';
 import ChipPicker from '~/components/profile/popups/ChipPicker.vue';
 import Button from '~/components/Button.vue';
 
-/**
- * A closed, select-like field (selected chips + a chevron) that opens the
- * hierarchical ChipPicker in a popup — the in-wizard equivalent of the gear
- * popup's secondary chip-picker view. v-model is the flat selected array.
- */
+// A select-like field (chips + chevron) that opens the hierarchical ChipPicker
+// in a popup. v-model is the flat selected array.
 const model = defineModel<string[]>({ required: true });
 
 const props = withDefaults(

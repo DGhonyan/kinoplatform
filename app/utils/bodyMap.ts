@@ -1,6 +1,5 @@
-// AUTO-GENERATED from the body SVGs (front + back). One entry per clickable body
-// part: its region id (view_side_part) and the SVG fill path(s) for that part.
-// Regenerate with scratchpad/gen-bodymap.cjs if the source SVGs change.
+// AUTO-GENERATED from the body SVGs — one entry per clickable part (region id +
+// fill paths). Regenerate with scratchpad/gen-bodymap.cjs if the SVGs change.
 
 export type BodyRegion = { id: string; paths: string[] };
 

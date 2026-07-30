@@ -68,12 +68,8 @@ const props = withDefaults(defineProps<{
   hideDetails?: boolean | 'auto';
   persistentHint?: boolean;
   hint?: string;
-  /**
-   * Color of the typed text, placeholder, and inner icons. A theme token
-   * (`background`, `on-surface`, …) or any CSS color. Use this instead of
-   * :deep(input) overrides at the call site (placeholder/icons get a softer
-   * opacity automatically).
-   */
+  // Text/placeholder/icon color. Use this instead of :deep(input) at call sites —
+  // placeholder and icons get a softer opacity automatically.
   textColor?: string;
 }>(), {
   color: 'primary',
@@ -129,9 +125,8 @@ const updateModelValue = (value: string) => {
   gap: 8px;
 }
 
-// Vuetify's .v-input is `flex: 1 1 auto`, so in a stretched flex row a field
-// with no label would grow to swallow the label height of its taller sibling.
-// A single-line field should always keep its natural height.
+// Vuetify's .v-input is `flex: 1 1 auto`, so in a stretched flex row an unlabelled
+// field would grow to match a labelled sibling's height.
 .input {
   flex: 0 0 auto;
 }

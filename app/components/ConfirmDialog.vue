@@ -35,13 +35,8 @@
 <script lang="ts" setup>
 import Button from '~/components/Button.vue';
 
-/**
- * Shared yes/no confirmation dialog for destructive/irreversible actions
- * (logout, clear availability, …). The caller owns the async work: it handles
- * `@confirm`, drives `loading`, and closes via `v-model` when done — so the
- * spinner shows and the dialog only dismisses on success. Labels are passed
- * already-translated (via `$t`) so this component stays copy-agnostic.
- */
+// Shared yes/no dialog for destructive actions. The CALLER owns the async work:
+// it handles @confirm, drives `loading`, and closes via v-model on success.
 const open = defineModel<boolean>({ required: true });
 
 withDefaults(

@@ -61,9 +61,8 @@ const emit = defineEmits<{
   unverified: [email: string];
 }>();
 
-// Where to go after login: the `?redirect=` the auth middleware set when it
-// bounced a guest off a gated page — but only same-origin internal paths (guard
-// against open redirect), else home.
+// The `?redirect=` the auth middleware set when it bounced a guest, but only
+// same-origin internal paths (open-redirect guard); else home.
 const postLoginTarget = (): string => {
   const raw = route.query.redirect;
   const path = Array.isArray(raw) ? raw[0] : raw;

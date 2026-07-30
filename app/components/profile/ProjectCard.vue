@@ -74,12 +74,8 @@
 import type { Project } from '~~/shared/types/user';
 import { safeExternalUrl } from '~/utils/safeUrl';
 
-/**
- * Fixed-size project card (218×397): a 218×255 media box up top — the uploaded
- * image cover-fit, or a clapperboard-on-gray placeholder when none — then the
- * name, a "type | role" line, the release year (italic, or "In progress"), and
- * an optional link pinned to the bottom.
- */
+// Fixed-size project card (218×397). The 218×255 media box must match
+// PROJECT_MEDIA_ASPECT_RATIO, or cropped uploads won't fill it.
 const props = defineProps<{
   project: Project;
 }>();
@@ -147,9 +143,8 @@ const projectUrl = computed(() => safeExternalUrl(props.project.link));
   overflow: hidden;
 }
 
-// Name: up to two lines, then an ellipsis (full value lives in the tooltip).
-// Sizes below are budgeted so name(2 lines) + type|role + year + link all fit
-// the ~118px body — otherwise the card's overflow eats the bottom rows.
+// Sizes below are budgeted so a 2-line name + type|role + year + link all fit the
+// ~118px body; anything taller and the card's overflow eats the bottom rows.
 .project-name {
   margin: 0;
   font-size: 19px;

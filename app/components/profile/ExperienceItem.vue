@@ -17,11 +17,8 @@
 <script lang="ts" setup>
 import type { Experience } from '~~/shared/types/user';
 
-/**
- * A single entry in the profile's experience timeline. Renders as an <li> so it
- * slots straight into the parent <ol class="timeline"> — the connecting line
- * (and its :last-child suppression) is scoped here on the item itself.
- */
+// One entry in the experience timeline. Renders as an <li> for the parent's
+// <ol class="timeline">; the connecting line is scoped here on the item.
 const props = defineProps<{
   experience: Experience;
   isMe: boolean;
