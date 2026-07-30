@@ -270,7 +270,7 @@ import GearAndTravelPopup from '~/components/profile/popups/GearAndTravelPopup.v
 import EditPersonalInfoPopup from '~/components/profile/popups/EditPersonalInfoPopup.vue';
 import ProjectsManagerPopup from '~/components/profile/popups/ProjectsManagerPopup.vue';
 import ExperienceManagerPopup from '~/components/profile/popups/ExperienceManagerPopup.vue';
-import { DGHONYAN_EMAIL } from '~/utils/constants';
+import { DGHONYAN_ID } from '~/utils/constants';
 
 const PROJECTS_PREVIEW = 3;
 const showAvailabilityPopup = ref(false);
@@ -283,7 +283,7 @@ const authStore = useAuthStore();
 const userStore = useUserStore();
 
 const user = ref<UserProfile | null>(null);
-const isMe = computed(() => user.value?.email === DGHONYAN_EMAIL);
+const isMe = computed(() => user.value?._id === DGHONYAN_ID);
 
 const canEdit = computed(() => user.value?._id === authStore.user?._id);
 

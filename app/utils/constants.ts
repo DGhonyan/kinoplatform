@@ -9,7 +9,7 @@ export const ACTOR_PHOTO_ASPECT_RATIO = 3 / 4;
 
 // used to turn the fields on my own profile to
 // welcome to the black parade lyrics
-export const DGHONYAN_EMAIL = 'david.ghonyan02@gmail.com';
+export const DGHONYAN_ID = '6a4951398de047fd3966959f';
 
 export const FIELD_IDS = [
   'field_directing_creative_leadership',

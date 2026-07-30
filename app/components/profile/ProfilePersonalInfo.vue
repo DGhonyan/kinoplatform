@@ -155,7 +155,7 @@ import { safeExternalUrl } from '~/utils/safeUrl';
 import Button from '~/components/Button.vue';
 import ProfileChipGroup from '~/components/profile/ProfileChipGroup.vue';
 import ProfileSectionNav from '~/components/profile/ProfileSectionNav.vue';
-import { DGHONYAN_EMAIL } from '~/utils/constants';
+import { DGHONYAN_ID } from '~/utils/constants';
 
 // Identity card: pure display derived from `user`; the owner's edit
 // affordances emit up so the parent keeps owning the popups.
@@ -174,7 +174,7 @@ const emit = defineEmits<{
 }>();
 
 const { t, locale } = useI18n();
-const isMe = computed(() => props.user?.email === DGHONYAN_EMAIL);
+const isMe = computed(() => props.user?._id === DGHONYAN_ID);
 const isActorProfile = computed(() => isActor(props.user?.profession));
 const portfolioUrl = computed(() => safeExternalUrl(props.user?.portfolio));
 const appearanceSet = computed(() => isAppearanceComplete(props.user?.appearance));
