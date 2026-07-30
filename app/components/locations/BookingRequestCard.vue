@@ -110,10 +110,12 @@ const submitting = ref(false);
 const nights = computed(() => nightsBetween(checkIn.value, checkOut.value));
 
 const priceText = computed(() =>
-  formatPrice(props.location.pricePerNight, props.location.currency, locale.value),
+  formatPrice(props.location.pricePerHour, props.location.currency, locale.value),
 );
 const totalText = computed(() =>
-  formatPrice(props.location.pricePerNight * nights.value, props.location.currency, locale.value),
+  // nights x 24: bookings span calendar days at an hourly rate, so a night is
+  // a full day's hire. MUST mirror the server's quotedTotal math.
+  formatPrice(props.location.pricePerHour * nights.value * 24, props.location.currency, locale.value),
 );
 
 // The calendar can't offer a same-day checkout — the shortest stay is one night.

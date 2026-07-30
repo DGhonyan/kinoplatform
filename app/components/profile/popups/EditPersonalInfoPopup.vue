@@ -77,9 +77,11 @@
           :error-messages="errors.gender"
           @update:model-value="errors.gender = ''"
         />
+        <!-- Labelled like its Select neighbour — an unlabelled field in a
+             stretch row absorbs the label height and sits visibly lower. -->
         <DateInput
           v-model="form.birthDate"
-          :placeholder="$t('register_birth_date_placeholder')"
+          label="register_birth_date_placeholder"
           :max="todayIsoDate"
           required
           :error-messages="errors.birthDate"
@@ -386,6 +388,9 @@ const save = async () => {
 .row {
   display: flex;
   gap: 12px;
+  // Bottom-align, so the paired fields line up even when one label or error
+  // message wraps taller than the other's.
+  align-items: flex-end;
 
   > * {
     flex: 1;

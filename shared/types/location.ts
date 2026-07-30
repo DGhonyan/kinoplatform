@@ -83,7 +83,7 @@ export type Location = {
   title: string;
   city: string;
   country: string;
-  pricePerNight: number;
+  pricePerHour: number;
   currency: string;
   images: string[];
   rooms: number | null;
@@ -100,6 +100,9 @@ export type Location = {
 /** Detail shape — everything the location page renders. */
 export type LocationDetail = Location & {
   address: string;
+  /** Raw display-host override values — the admin edit form prefills from these. */
+  hostName: string;
+  hostAvatar: string;
   lat: number | null;
   lng: number | null;
   houseArea: number | null;
@@ -117,7 +120,7 @@ export type LocationDetail = Location & {
 
 /**
  * Create/edit payload for the admin manager. Mirrors the backend's Create/Update
- * DTO pair: only `title` and `pricePerNight` are ever required, and PATCH writes
+ * DTO pair: only `title` and `pricePerHour` are ever required, and PATCH writes
  * exactly the keys it receives.
  *
  * `null` is meaningful on the nullable numbers — it CLEARS a spec back to "not
@@ -126,7 +129,7 @@ export type LocationDetail = Location & {
  */
 export type LocationInput = {
   title: string;
-  pricePerNight: number;
+  pricePerHour: number;
   city?: string;
   country?: string;
   address?: string;
@@ -140,6 +143,12 @@ export type LocationInput = {
   rooms?: number | null;
   bathrooms?: number | null;
   maxCrew?: number | null;
+  /**
+   * Display-host override: the admin creating the listing isn't the real host,
+   * so these carry the name/avatar the page shows. `''` clears, like the times.
+   */
+  hostName?: string;
+  hostAvatar?: string;
   /** `''` clears it — the update DTO allows the empty string for exactly that. */
   buildingType?: LocationBuildingType | '';
   description?: string;

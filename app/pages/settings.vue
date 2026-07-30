@@ -81,9 +81,6 @@
 
     <!-- Danger zone -->
     <section class="settings-section danger">
-      <h2 class="section-title">
-        {{ $t('settings_danger_zone') }}
-      </h2>
       <div class="settings-row">
         <div class="row-text">
           <span class="settings-label">{{ $t('settings_delete_account') }}</span>

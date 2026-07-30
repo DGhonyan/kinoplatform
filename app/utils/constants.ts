@@ -409,6 +409,11 @@ export const PROFESSION_GROUPS: ChipGroup[] = [
   VOICE_PROFESSION_GROUP,
 ];
 
+// Every profession id on the platform, flat — crew + performers + voice. For
+// pickers where any member could hold the credit (e.g. a project's "Your role":
+// an actor's credit on a film is as real as a gaffer's).
+export const ALL_PROFESSIONS = [...professions, ...TALENT_PROFESSIONS] as const;
+
 // Stored as the short enum value (matches User['gender']); display name comes
 // from the i18n key `gender_<value>` (e.g. 'male' → t('gender_male')).
 export const GENDERS = ['male', 'female', 'other'] as const;

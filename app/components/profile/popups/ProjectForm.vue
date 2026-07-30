@@ -153,7 +153,7 @@
 <script lang="ts" setup>
 import type { Project } from '~~/shared/types/user';
 import type { UploadedFile } from '~~/shared/types/file';
-import { professions, PRODUCTION_TYPES, PROJECT_MEDIA_ASPECT_RATIO } from '~/utils/constants';
+import { ALL_PROFESSIONS, PRODUCTION_TYPES, PROJECT_MEDIA_ASPECT_RATIO } from '~/utils/constants';
 import { monthOptions, yearOptions } from '~/utils/dateOptions';
 import Select from '~/components/Select.vue';
 import FileUpload from '~/components/FileUpload.vue';
@@ -211,7 +211,9 @@ const errors = reactive({ name: '', type: '', position: '', date: '', link: '' }
 // already a URL in `draft.media`, no id needed to re-display it.
 const mediaFileId = ref('');
 
-const professionItems = computed(() => professions.map(id => ({ value: id, title: t(id) })));
+// ALL_PROFESSIONS, not just crew: an actor's credit on a project is as real
+// as a gaffer's, and talents fill this form too.
+const professionItems = computed(() => ALL_PROFESSIONS.map(id => ({ value: id, title: t(id) })));
 const productionTypeItems = computed(() => PRODUCTION_TYPES.map(id => ({ value: id, title: t(id) })));
 const months = computed(() => monthOptions(locale.value));
 const years = yearOptions();

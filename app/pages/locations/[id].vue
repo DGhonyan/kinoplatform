@@ -218,12 +218,21 @@
                 class="host-avatar"
               >
               <span class="host-label">{{ $t('location_hosted_by') }}</span>
+              <!-- Admin-entered hosts carry no account (_id '') — plain text
+                   then, not a link to /users/ that goes nowhere. -->
               <NuxtLink
+                v-if="location.host._id"
                 :to="`/users/${location.host._id}`"
                 class="host-name"
               >
                 {{ location.host.firstName }} {{ location.host.lastName }}
               </NuxtLink>
+              <span
+                v-else
+                class="host-name"
+              >
+                {{ location.host.firstName }} {{ location.host.lastName }}
+              </span>
               <span
                 v-if="location.host.rating > 0"
                 class="host-rating"
@@ -367,7 +376,7 @@ const place = computed(() =>
 );
 const price = computed(() =>
   location.value
-    ? formatPrice(location.value.pricePerNight, location.value.currency, locale.value)
+    ? formatPrice(location.value.pricePerHour, location.value.currency, locale.value)
     : '',
 );
 const hasCoords = computed(

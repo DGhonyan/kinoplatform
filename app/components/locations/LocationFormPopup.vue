@@ -54,7 +54,7 @@
 
       <div class="row">
         <Input
-          v-model="form.pricePerNight"
+          v-model="form.pricePerHour"
           color="primary"
           type="number"
           min="0"
@@ -62,8 +62,8 @@
           label="locations_filter_price"
           required
           hide-details="auto"
-          :error-messages="errors.pricePerNight"
-          @update:model-value="errors.pricePerNight = ''"
+          :error-messages="errors.pricePerHour"
+          @update:model-value="errors.pricePerHour = ''"
         />
         <Input
           v-model="form.currency"
@@ -74,6 +74,35 @@
           hide-details="auto"
         />
       </div>
+    </section>
+
+    <!-- ── Host ── -->
+    <section class="section">
+      <h3 class="section-title">
+        {{ $t('location_form_section_host') }}
+      </h3>
+      <p class="section-hint">
+        {{ $t('location_form_host_hint') }}
+      </p>
+
+      <Input
+        v-model="form.hostName"
+        color="primary"
+        type="text"
+        label="location_form_field_host_name"
+        :maxlength="120"
+        hide-details="auto"
+      />
+
+      <!-- Square crop: this renders as the round "Hosted by" avatar, so an
+           uncropped landscape shot would show mostly wall. Single slot. -->
+      <MultiImageUpload
+        v-model="form.hostAvatar"
+        kind="location_photo"
+        :aspect-ratio="1"
+        :min="0"
+        :max="1"
+      />
     </section>
 
     <!-- ── Map ── -->
@@ -363,8 +392,10 @@ type FormState = {
   city: string;
   country: string;
   address: string;
-  pricePerNight: string;
+  pricePerHour: string;
   currency: string;
+  hostName: string;
+  hostAvatar: string[]; // MultiImageUpload models string[]; 0 or 1 entry here
   lat: string;
   lng: string;
   houseArea: string;
@@ -393,10 +424,12 @@ const toForm = (location: LocationDetail | null): FormState => ({
   city: location?.city ?? '',
   country: location?.country ?? '',
   address: location?.address ?? '',
-  pricePerNight: numStr(location?.pricePerNight),
+  pricePerHour: numStr(location?.pricePerHour),
   // The backend defaults new listings to AMD; mirror it so the field is never
   // submitted blank on create.
   currency: location?.currency || 'AMD',
+  hostName: location?.hostName ?? '',
+  hostAvatar: location?.hostAvatar ? [location.hostAvatar] : [],
   lat: numStr(location?.lat),
   lng: numStr(location?.lng),
   houseArea: numStr(location?.houseArea),
@@ -420,7 +453,7 @@ const { form, errors, busy } = usePopupForm(
   () => toForm(props.location),
   () => ({
     title: '',
-    pricePerNight: '',
+    pricePerHour: '',
     lat: '',
     lng: '',
     maxCrew: '',
@@ -464,7 +497,7 @@ const toFloatOrNull = (raw: string): number | null => {
 };
 
 const validate = (): boolean => {
-  errors.title = errors.pricePerNight = errors.lat = errors.lng = '';
+  errors.title = errors.pricePerHour = errors.lat = errors.lng = '';
   errors.maxCrew = errors.checkInAfter = errors.checkoutBefore = '';
   let ok = true;
 
@@ -473,9 +506,9 @@ const validate = (): boolean => {
     ok = false;
   }
 
-  const price = toIntOrNull(form.pricePerNight);
+  const price = toIntOrNull(form.pricePerHour);
   if (price === null || price < 0) {
-    errors.pricePerNight = t('location_form_error_price');
+    errors.pricePerHour = t('location_form_error_price');
     ok = false;
   }
 
@@ -517,7 +550,7 @@ const submit = async () => {
   const payload: LocationInput = {
     title: form.title.trim(),
     // validate() already proved this parses to a non-negative integer.
-    pricePerNight: toIntOrNull(form.pricePerNight) as number,
+    pricePerHour: toIntOrNull(form.pricePerHour) as number,
   };
 
   // Free text and the multi-selects always ride along: emptying one of these is
@@ -551,6 +584,10 @@ const submit = async () => {
   // outright, so a null would bypass validation and land in Mongo as null —
   // contradicting the schema default and the `string` on the wire type.
   payload.buildingType = (form.buildingType ?? '') as LocationBuildingType | '';
+  // Same clearable-string contract as the times: '' wipes the override so the
+  // listing falls back to the linked account (or no host block at all).
+  payload.hostName = form.hostName.trim();
+  payload.hostAvatar = form.hostAvatar[0] ?? '';
   payload.checkInAfter = form.checkInAfter.trim();
   payload.checkoutBefore = form.checkoutBefore.trim();
 
@@ -581,6 +618,12 @@ const submit = async () => {
   gap: 16px;
   // Makes `.row` able to ask how much width IT actually has (see below).
   container-type: inline-size;
+}
+
+.section-hint {
+  margin: -8px 0 0;
+  font-size: 13px;
+  opacity: 0.65;
 }
 
 .section-title {

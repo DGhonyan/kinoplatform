@@ -81,7 +81,7 @@ const place = computed(() =>
   [props.location.city, props.location.country].filter(Boolean).join(', '),
 );
 const price = computed(() =>
-  formatPrice(props.location.pricePerNight, props.location.currency, locale.value),
+  formatPrice(props.location.pricePerHour, props.location.currency, locale.value),
 );
 
 const facts = computed(() => {

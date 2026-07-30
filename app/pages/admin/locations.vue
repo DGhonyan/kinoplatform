@@ -144,7 +144,7 @@ const locations = ref<Location[]>([]);
 const loading = ref(true);
 
 const priceOf = (location: Location) =>
-  formatPrice(location.pricePerNight, location.currency, locale.value);
+  formatPrice(location.pricePerHour, location.currency, locale.value);
 
 const load = async () => {
   loading.value = true;
