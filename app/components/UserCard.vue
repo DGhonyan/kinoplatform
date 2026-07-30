@@ -11,9 +11,13 @@
       class="avatar"
     >
     <div class="user-info">
-      <h3 class="user-name">
+      <h3 v-if="!isMe" class="user-name">
         {{ user.firstName }} {{ user.lastName }}
       </h3>
+      <div v-else class="user-name me">
+        <span>{{ user.firstName }}</span>
+        <span>{{ user.lastName }}</span>
+      </div>
       <p class="user-profession">
         {{ (user.profession ?? []).map(p => $t(p)).join(' | ') }}
       </p>
@@ -26,6 +30,7 @@ import type { User } from '~~/shared/types/user';
 
 const props = defineProps<{ user: User }>();
 
+const isMe = computed(() => props.user._id === DGHONYAN_ID);
 const avatarSrc = computed(
   () => props.user.avatar || new URL('@/assets/default.jpg', import.meta.url).href,
 );
@@ -81,6 +86,13 @@ const avatarSrc = computed(
   line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.me {
+  font-size: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .user-profession {
