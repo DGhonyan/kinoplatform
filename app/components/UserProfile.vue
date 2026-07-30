@@ -271,7 +271,6 @@ import ProjectsManagerPopup from '~/components/profile/popups/ProjectsManagerPop
 import ExperienceManagerPopup from '~/components/profile/popups/ExperienceManagerPopup.vue';
 
 const PROJECTS_PREVIEW = 3;
-// Availability is hidden for now (kept as a component) — flip to show it again.
 const showAvailabilityPopup = ref(false);
 
 const props = defineProps<{
@@ -306,9 +305,8 @@ const hasExperience = computed(() => (user.value?.experience?.length ?? 0) > 0);
 const hasTools = computed(() => (user.value?.tools?.length ?? 0) > 0);
 const hasEquipment = computed(() => (user.value?.equipment?.length ?? 0) > 0);
 
-// Scroll-to tabs rendered in the personal-info card. Only sections that actually
-// exist appear — each id matches a section's DOM id below. Recommendations tracks
-// its own section's visibility (which can be false for an owner with no recs).
+// Scroll-to tabs rendered in the personal-info card. Each id matches a section
+// DOM id below; only sections that actually exist appear.
 const navSections = computed(() =>
   [
     { id: 'profile-about', label: 'profile_nav_about', show: !!user.value?.bio },
@@ -376,16 +374,13 @@ const showBanner = computed(() =>
   canEdit.value && !bannerDismissed.value && remainingOptional.value > 0,
 );
 
-// Gear can always be opened standalone (the section shows an entry point for the
-// owner even when empty) — no dependency on the banner flow.
+// Gear opens standalone — no dependency on the banner flow.
 const openGear = () => {
   showGearPopup.value = true;
 };
 
-// The banner walks the incomplete sections in order: it opens the first one, and
-// finishing OR skipping the details step advances to gear (details is flow-only,
-// so both its Save and Skip route through here). Gear is the last step — its Save
-// just refreshes, and Skip/close simply ends the flow.
+// The banner walks incomplete sections in order; finishing OR skipping the
+// details step advances to gear (both its Save and Skip route through here).
 const openCompletionFlow = () => {
   if (!detailsComplete.value) showDetailsPopup.value = true;
   else if (!gearComplete.value) showGearPopup.value = true;
@@ -409,17 +404,14 @@ const loadUserData = async () => {
   const profile = await userStore.getUserProfile(targetId);
   if (!profile) return;
 
-  // UserProfile is a superset of User (it carries `recommendations`); availability
-  // lives in its own component + endpoint now.
+  // UserProfile is a superset of User (it carries `recommendations`).
   user.value = profile;
 
   if (targetId === authStore.user?._id) authStore.setUser(profile);
 };
 
-// The essentials popup lives in the page *alongside* this component, not inside
-// it, so it can't call onSaved. Mirror any change to your own auth-store user —
-// avatar attach, essentials completion, edits — straight into the view so it
-// appears without needing a refresh. (No-op when viewing someone else's profile.)
+// The essentials popup lives in the page alongside this component and can't
+// call onSaved — mirror auth-store changes into the view (no-op for others' profiles).
 watch(() => authStore.user, () => {
   if (canEdit.value) syncProfileFromAuth();
 });

@@ -103,8 +103,7 @@
 </template>
 
 <script lang="ts" setup>
-// Auth-gated by middleware (settings is not in the public-paths allowlist).
-// Uses the default layout. LanguageSelector + Settings* components are auto-imported.
+// Auth-gated by middleware (not in the public-paths allowlist).
 const authStore = useAuthStore();
 const accountStore = useAccountStore();
 
@@ -121,7 +120,6 @@ const exportData = async () => {
     const data = await accountStore.exportData();
     if (!data) return;
 
-    // Build the download client-side from the JSON payload.
     const blob = new Blob([JSON.stringify(data, null, 2)], {
       type: 'application/json',
     });

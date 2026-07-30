@@ -1,25 +1,13 @@
-/**
- * Language list + display helpers, backed by `Intl.DisplayNames`.
- *
- * Storage: ISO 639-1 two-letter codes (`'en'`, `'hy'`, `'fr'`, ...). What we
- * persist server-side and what backend agents should treat as the contract.
- *
- * Display: localized to the current UI locale via `Intl.DisplayNames`. So
- * Armenian users see "Անգլերեն" for `'en'` while English users see "English".
- *
- * Search: matches against the code, the English name, the native name, and
- * the current-locale name — so "armenian", "հայերեն", and "hy" all find `hy`.
- */
+// ISO 639-1 codes are the stored contract; names localize via Intl.DisplayNames,
+// and search matches the code plus the English, native, and current-locale names.
 
 const DISPLAY_NAMES_CACHE = new Map<string, Intl.DisplayNames>();
 
 const displayNamesFor = (locale: string): Intl.DisplayNames => {
   let instance = DISPLAY_NAMES_CACHE.get(locale);
   if (!instance) {
-    // `fallback: 'none'` makes `.of(code)` return `undefined` when the browser's
-    // CLDR data has no translation for that code in this locale. With the default
-    // (`'code'`) it would return the code itself, which surfaces as raw "aa",
-    // "ab", etc. in the dropdown — we want to detect and skip those instead.
+    // fallback: 'none' → `.of()` is undefined when CLDR lacks a translation;
+    // the default ('code') would surface raw "aa"/"ab" in the dropdown.
     instance = new Intl.DisplayNames([locale], { type: 'language', fallback: 'none' });
     DISPLAY_NAMES_CACHE.set(locale, instance);
   }
@@ -27,11 +15,8 @@ const displayNamesFor = (locale: string): Intl.DisplayNames => {
 };
 
 /**
- * Returns a localized language name, or `null` if neither the active locale
- * nor English has a translation. The two-stage fallback (active locale → en)
- * means Armenian users still see "Avestan" rather than "ae" for languages
- * that hy CLDR doesn't cover. `null` callers should drop the language from
- * the visible list — showing a raw code helps no one.
+ * Localized name with active-locale → English fallback; `null` when neither
+ * covers the code — callers should drop it rather than show a raw code.
  */
 export const getLanguageDisplayName = (code: string, locale: string): string | null => {
   try {
@@ -51,9 +36,8 @@ export const getLanguageSearchHaystack = (code: string, locale: string): string 
   let haystack = HAYSTACK_CACHE.get(key);
   if (!haystack) {
     const english = displayNamesFor('en').of(code) ?? '';
-    // Some codes aren't valid as locale tags themselves (very obscure ones),
-    // which would make the `Intl.DisplayNames` constructor throw. Treat those
-    // as having no native name and move on.
+    // Obscure codes aren't valid locale tags and make the constructor throw —
+    // treat those as having no native name.
     let native = '';
     try {
       native = displayNamesFor(code).of(code) ?? '';
@@ -68,9 +52,7 @@ export const getLanguageSearchHaystack = (code: string, locale: string): string 
   return haystack;
 };
 
-// Full ISO 639-1 set. Cheap (a string array), and lets `Intl.DisplayNames`
-// do the rest. Trim later if we decide the long tail (Avestan, Volapük, ...)
-// is more noise than signal.
+// Full ISO 639-1 set — trim the long tail later if it's more noise than signal.
 export const LANGUAGE_CODES: readonly string[] = [
   'aa', 'ab', 'ae', 'af', 'ak', 'am', 'an', 'ar', 'as', 'av',
   'ay', 'az', 'ba', 'be', 'bg', 'bh', 'bi', 'bm', 'bn', 'bo',

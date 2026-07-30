@@ -76,7 +76,7 @@ defineProps<{
   margin: 0;
   font-family: 'Bebas Neue', sans-serif;
   text-transform: uppercase;
-  font-size: 56px;
+  font-size: 64px;
   line-height: 1.05;
   font-weight: 400;
   letter-spacing: 1px;

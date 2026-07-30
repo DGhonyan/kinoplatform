@@ -1,18 +1,9 @@
 import type { User } from '~~/shared/types/user';
 
-/**
- * Pure onboarding constants + gate predicate. Lives here (not in
- * registerSteps.ts) so always-loaded consumers — the global middleware and the
- * Header — can import the gate WITHOUT pulling the five wizard step SFCs into
- * their bundle. registerSteps.ts re-exports these for the component layer.
- */
+// Lives here (not registerSteps.ts) so the global middleware and Header can
+// import the gate without pulling the wizard step SFCs into their bundle.
 
-/**
- * Every completable onboarding step. The first six (REQUIRED_ONBOARDING_STEPS)
- * gate `onboardingComplete`; the wizard owns the first five and the required
- * "essentials" popup owns the sixth. The last two are optional profile popups
- * tracked here only so the profile-completion banner knows what's left.
- */
+/** Every completable onboarding step; the first six gate `onboardingComplete`. */
 export const STEP_IDS = {
   CREDENTIALS: 'credentials',
   CODE: 'code',
@@ -37,11 +28,7 @@ export const WIZARD_STEP_IDS = [
 
 export type WizardStepId = typeof WIZARD_STEP_IDS[number];
 
-/**
- * Steps that must be done before `onboardingComplete` is true. Mirrors the
- * backend's REQUIRED_ONBOARDING_STEPS — keep them in sync. The two optional
- * popups (BACKGROUND_DETAILS, GEAR) are deliberately absent.
- */
+/** Keep in sync with the backend's REQUIRED_ONBOARDING_STEPS. */
 export const REQUIRED_ONBOARDING_STEPS: StepId[] = [
   STEP_IDS.CREDENTIALS,
   STEP_IDS.CODE,
@@ -51,12 +38,7 @@ export const REQUIRED_ONBOARDING_STEPS: StepId[] = [
   STEP_IDS.ESSENTIALS,
 ];
 
-/**
- * Whether the user has finished mandatory onboarding. Prefers the backend's
- * explicit `onboardingComplete` flag; falls back to deriving it from
- * `completedSteps` so the frontend behaves correctly even before the backend
- * ships the flag.
- */
+/** Whether mandatory onboarding is done — backend flag first, derived from `completedSteps` otherwise. */
 export const isOnboardingComplete = (
   user: Pick<User, 'onboardingComplete' | 'completedSteps'> | null | undefined,
 ): boolean => {

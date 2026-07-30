@@ -102,8 +102,7 @@ import HeaderMobileMenu from './header/MobileMenu.vue';
 import HeaderHero from './header/Hero.vue';
 import { isOnboardingComplete } from '~/utils/onboarding';
 
-// Keep in sync with HeaderConfig (shared/types/header.ts). Stays inline — the
-// SFC compiler can't reliably resolve a props type imported via `~~/`.
+// Keep in sync with HeaderConfig (shared/types/header.ts); inline because the SFC compiler can't resolve `~~/` props types.
 const props = withDefaults(
   defineProps<{
     cover?: boolean;
@@ -274,17 +273,8 @@ const confirmLogout = async () => {
   gap: 16px;
 }
 
-/*
- * Collapsed pieces stay in the DOM (measurable natural width) but out of flow
- * and invisible, so the fit check never oscillates.
- *
- * `width: max-content` is load-bearing: an absolutely-positioned grid child
- * takes its own grid area as containing block, and that track collapses to 0
- * once the child leaves the flow. Shrink-to-fit against 0 would squeeze the
- * probe to min-content and report a bogus width — under-measuring, which lets
- * the bar un-collapse at a size where it doesn't fit, then re-collapse. Pinning
- * max-content makes the probe report its true natural width regardless.
- */
+// `width: max-content` is load-bearing: the abspos probe's grid-area containing
+// block collapses to 0, and shrink-to-fit against it would under-measure.
 .measuring {
   position: absolute;
   top: 0;

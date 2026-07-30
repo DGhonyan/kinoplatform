@@ -51,8 +51,7 @@
         </p>
       </div>
 
-      <!-- Body is a <form> so children get Enter-to-submit; the hidden button
-           enables implicit submission and the consumer listens via @submit. -->
+      <!-- Body is a <form> for Enter-to-submit; the hidden button enables implicit submission. -->
       <form
         class="popup-body"
         @submit.prevent="emit('submit')"
@@ -77,15 +76,8 @@
 </template>
 
 <script lang="ts" setup>
-/**
- * Shared modal shell for the profile-completion popups. Wraps a theme-aware
- * v-card in a v-dialog and standardizes header (title + optional back/close),
- * an optional description line, a scrollable body, and an actions row.
- *
- * Nested-page UX (Projects/Experience) is the consumer's concern: it keeps its
- * own `view` ref, swaps the body slot's content, and toggles `showBack` +
- * listens to `@back` to return to the list view — no second dialog.
- */
+// Shared modal shell: standardized header, optional description, scrollable
+// body, actions row. Nested-page UX (`showBack` + `@back`) is the consumer's concern.
 const open = defineModel<boolean>({ required: true });
 
 withDefaults(
@@ -98,11 +90,8 @@ withDefaults(
     showBack?: boolean;
     /** Force a Vuetify theme on the card (e.g. 'light' when launched from a light page). */
     theme?: string;
-    /**
-     * Show a language switch in the header. For persistent onboarding popups
-     * (e.g. Essentials), where the dialog scrim buries the header switch and the
-     * user has no other language control yet.
-     */
+    // Language switch in the header — for persistent onboarding popups, where
+    // the scrim buries the app header's switch and no other control exists yet.
     languageSwitch?: boolean;
   }>(),
   {
@@ -169,12 +158,8 @@ const emit = defineEmits<{
   gap: 16px;
   overflow-y: auto;
   padding-right: 12px;
-  /*
-   * Query anchor for the forms inside. A dialog's width is capped by `max-width`
-   * and stops tracking the viewport, so a media query in a popup fires at the
-   * wrong moment — paired fields stayed two-up and cramped well after the
-   * viewport "went mobile". Rows size themselves off THIS instead.
-   */
+  // Query anchor for the forms inside: a dialog's width stops tracking the
+  // viewport, so rows size themselves off THIS instead of media queries.
   container-type: inline-size;
 }
 
@@ -219,9 +204,7 @@ const emit = defineEmits<{
 }
 </style>
 
-<!-- Not scoped: the overlay is teleported out of this component's subtree, so the
-     scope attribute never reaches it — `content-class` is the only handle. The
-     selector outweighs Vuetify's own `.v-dialog > .v-overlay__content` sizing. -->
+<!-- Not scoped: the overlay is teleported out of this subtree, so `content-class` is the only handle. -->
 <style lang="scss">
 @include mobile {
   .v-dialog > .v-overlay__content.popup-shell-dialog {

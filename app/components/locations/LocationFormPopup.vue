@@ -94,8 +94,7 @@
         hide-details="auto"
       />
 
-      <!-- Square crop: this renders as the round "Hosted by" avatar, so an
-           uncropped landscape shot would show mostly wall. Single slot. -->
+      <!-- Square crop — renders as the round "Hosted by" avatar. -->
       <MultiImageUpload
         v-model="form.hostAvatar"
         kind="location_photo"
@@ -266,8 +265,7 @@
         hide-details="auto"
       />
 
-      <!-- `type="time"` so the browser itself produces the HH:mm the backend
-           regex demands; validate() still checks it for the text fallback. -->
+      <!-- `type="time"` yields the HH:mm the backend regex demands; validate() covers the text fallback. -->
       <div class="row">
         <Input
           v-model="form.checkInAfter"
@@ -310,10 +308,7 @@
       <h3 class="section-title">
         {{ $t('location_form_section_photos') }}
       </h3>
-      <!-- `:aspect-ratio="null"` skips the crop dialog entirely. A location is
-           shot in whatever framing the space needs — a wide room, a tall
-           stairwell — so locking it to the actor portrait ratio would crop away
-           the subject. The card and gallery `contain` it instead. -->
+      <!-- `:aspect-ratio="null"` skips the crop dialog — the card and gallery `contain` instead. -->
       <MultiImageUpload
         v-model="form.images"
         kind="location_photo"
@@ -365,14 +360,8 @@ import TextArea from '~/components/TextArea.vue';
 import Button from '~/components/Button.vue';
 import MultiImageUpload from '~/components/MultiImageUpload.vue';
 
-/**
- * Admin create/edit form for a catalogue listing. One component covers both:
- * `location` present means edit (prefilled, PATCH), absent means create (POST).
- *
- * Every numeric field lives in state as a STRING. That's what keeps "" (blank)
- * distinguishable from "0" all the way to the payload — a numeric ref would
- * collapse both to 0 and stamp "Number of floors: 0" onto the detail page.
- */
+// `location` present = edit (PATCH), absent = create (POST). Numeric fields
+// live in state as STRINGS so "" (blank) stays distinguishable from "0".
 const open = defineModel<boolean>({ required: true });
 
 const props = withDefaults(
@@ -425,8 +414,7 @@ const toForm = (location: LocationDetail | null): FormState => ({
   country: location?.country ?? '',
   address: location?.address ?? '',
   pricePerHour: numStr(location?.pricePerHour),
-  // The backend defaults new listings to AMD; mirror it so the field is never
-  // submitted blank on create.
+  // Mirror the backend's AMD default so create never submits a blank currency.
   currency: location?.currency || 'AMD',
   hostName: location?.hostName ?? '',
   hostAvatar: location?.hostAvatar ? [location.hostAvatar] : [],
@@ -462,9 +450,8 @@ const { form, errors, busy } = usePopupForm(
   }),
 );
 
-// The page keeps this popup mounted and swaps `location` between opens (Add,
-// then Edit A, then Edit B), so the prefill has to run per open — the factory
-// above only covers construction and the on-close reset.
+// The page keeps this popup mounted and swaps `location` between opens, so the
+// prefill must run per open — the factory only covers construction and reset.
 watch(open, (isOpen) => {
   if (isOpen) Object.assign(form, toForm(props.location));
 });
@@ -512,8 +499,7 @@ const validate = (): boolean => {
     ok = false;
   }
 
-  // Range checks only bite when the field was actually filled in — a blank
-  // coordinate is a legitimate "no map marker".
+  // Range checks only bite when filled — a blank coordinate is a legitimate "no marker".
   const lat = toFloatOrNull(form.lat);
   if (form.lat.trim() && (lat === null || lat < -90 || lat > 90)) {
     errors.lat = t('location_form_error_lat');
@@ -564,9 +550,8 @@ const submit = async () => {
   payload.amenities = [...form.amenities];
   payload.safety = [...form.safety];
 
-  // Nullable numbers: `null` clears the spec. Assigned unconditionally so an
-  // emptied field actually reaches the server — omitting the key would leave
-  // the old value in place on a PATCH.
+  // `null` clears the spec; assigned unconditionally — omitting the key would
+  // leave the old value in place on a PATCH.
   payload.lat = toFloatOrNull(form.lat);
   payload.lng = toFloatOrNull(form.lng);
   payload.houseArea = toIntOrNull(form.houseArea);
@@ -576,23 +561,16 @@ const submit = async () => {
   payload.bathrooms = toIntOrNull(form.bathrooms);
   payload.maxCrew = toIntOrNull(form.maxCrew);
 
-  // Sent unconditionally, blank included: the update DTO accepts '' on these
-  // (see HHMM_OR_EMPTY and the buildingType @IsIn) precisely so a set value can
-  // be cleared again. Omitting a blank would silently leave the old value in
-  // place and make these the only fields on the form you can't undo.
-  // '' (not null) is the clear value the DTO allows: @IsOptional() skips null
-  // outright, so a null would bypass validation and land in Mongo as null —
-  // contradicting the schema default and the `string` on the wire type.
+  // Sent unconditionally with '' (not null) as the clear value: the DTO's
+  // @IsOptional() skips null, and omitting a blank would keep the old value on PATCH.
   payload.buildingType = (form.buildingType ?? '') as LocationBuildingType | '';
-  // Same clearable-string contract as the times: '' wipes the override so the
-  // listing falls back to the linked account (or no host block at all).
+  // '' wipes the host override so the listing falls back to the linked account.
   payload.hostName = form.hostName.trim();
   payload.hostAvatar = form.hostAvatar[0] ?? '';
   payload.checkInAfter = form.checkInAfter.trim();
   payload.checkoutBefore = form.checkoutBefore.trim();
 
-  // Currency is the exception — it has a real default ('AMD') rather than an
-  // "unset" state, so a blank keeps whatever is stored instead of blanking it.
+  // Currency has a real default ('AMD'), so a blank keeps the stored value.
   if (form.currency.trim()) payload.currency = form.currency.trim();
 
   busy.value = true;
@@ -637,8 +615,7 @@ const submit = async () => {
 .row {
   display: flex;
   gap: 12px;
-  // Bottom-align, so paired fields line up even when one label wraps to a
-  // second line (several Armenian spec labels do, in a half-width column).
+  // Bottom-align so paired fields line up when one label wraps to two lines.
   align-items: flex-end;
 
   > * {
@@ -646,20 +623,11 @@ const submit = async () => {
     min-width: 0;
   }
 
-  /*
-   * Stack on the ROW's width, not the viewport's.
-   *
-   * A media query is the wrong tool here: this form lives in a dialog capped at
-   * `max-width: 720px`, so its width stops tracking the viewport above ~750px
-   * and the two never line up — which is why paired fields still squeezed to
-   * ~250px between 600 and 960px even though the mobile rule "worked".
-   * 520px is roughly where two fields plus the gap stop fitting a number
-   * spinner, a unit suffix or a native time control side by side.
-   */
+  // Stack on the ROW's width, not the viewport's — the 720px dialog cap means
+  // a media query stops tracking; ~520px is where two fields stop fitting.
   @container (max-width: 520px) {
     flex-direction: column;
-    // The bottom-align only exists to reconcile labels of different heights
-    // side by side; stacked, it would right-align a short field.
+    // Stacked, flex-end would right-align a short field.
     align-items: stretch;
   }
 

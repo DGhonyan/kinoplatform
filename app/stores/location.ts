@@ -8,12 +8,8 @@ import type {
   LocationQuery,
 } from '~~/shared/types/location';
 
-/**
- * Serialize the filter panel's state into the query string the list endpoint
- * expects. Empty/absent facets are dropped rather than sent blank, so an
- * untouched panel produces a bare `/locations`; `amenities` repeats the key
- * (`?amenities=wifi&amenities=parking`), which is what the backend parses.
- */
+// Empty facets are dropped, so an untouched panel produces a bare `/locations`;
+// `amenities` repeats the key (`?amenities=a&amenities=b`) as the backend parses.
 const buildLocationQuery = (query: LocationQuery): string => {
   const params = new URLSearchParams();
 
@@ -46,23 +42,14 @@ export const useLocationStore = defineStore('location', {
       }).get<string[]>();
     },
 
-    /*
-     * Full detail — public, so guests can browse before signing up.
-     *
-     * No `errorMessage`: api.ts resolves `opts.errorMessage ?? apiErrorMessageKey(error)`,
-     * so an override always wins and would shadow LOCATION_NOT_FOUND,
-     * leaving that mapping dead. Same reasoning as
-     * announcement.ts — only the un-addressed list actions keep an override.
-     */
+    // No `errorMessage`: an override wins over apiErrorMessageKey and would
+    // shadow the LOCATION_NOT_FOUND mapping.
     async getLocation(id: string) {
       return apiRequest(`/locations/${id}`).get<LocationDetail>();
     },
 
-    /*
-     * Send a booking request. Authed. The server computes `quotedTotal` from its
-     * own price — the widget's total is display-only and is never submitted.
-     * No `errorMessage`, so BOOKING_REQUEST_INVALID_DATES survives.
-     */
+    // The server computes `quotedTotal` from its own price — the widget's total is
+    // display-only. No `errorMessage`, so BOOKING_REQUEST_INVALID_DATES survives.
     async requestBooking(id: string, payload: BookingRequestInput) {
       return apiRequest(`/locations/${id}/requests`, {
         loader: true,
@@ -70,14 +57,8 @@ export const useLocationStore = defineStore('location', {
       }).post<BookingRequest>(payload);
     },
 
-    /*
-     * ── Admin catalogue management (/admin/locations) ──
-     *
-     * None of the three passes an `errorMessage`, for the same reason
-     * `getLocation` doesn't: api.ts resolves `opts.errorMessage ?? apiErrorMessageKey(error)`,
-     * so an override always wins and would shadow LOCATION_NOT_FOUND —
-     * the code these endpoints actually return.
-     */
+    // ── Admin catalogue management (/admin/locations) ──
+    // No `errorMessage` on these either — an override would shadow LOCATION_NOT_FOUND.
     async createLocation(payload: LocationInput) {
       return apiRequest('/locations', {
         loader: true,

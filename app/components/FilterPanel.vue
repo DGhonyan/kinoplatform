@@ -1,14 +1,7 @@
 <template>
   <div class="filter-panel">
     <div class="panel-scroll">
-      <!--
-        Two headers, one per breakpoint. Above tablet the panel is a permanently
-        open sidebar, so the heading is just a heading and no toggle exists in
-        the DOM at all (display:none keeps it out of the tab order and the a11y
-        tree — an inert-but-focusable control would be worse than none).
-        Below tablet the ENTIRE bar is the button: a 24px chevron is a poor
-        target next to a label that reads like it should be tappable.
-      -->
+      <!-- Two headers, one per breakpoint: static heading on desktop, whole-bar toggle below tablet. -->
       <h2
         :id="titleId"
         class="panel-heading"
@@ -43,9 +36,7 @@
       </div>
     </div>
 
-    <!-- Pinned so the primary action stays reachable without scrolling the
-         facets. Collapses with the body: offering Apply under a folded panel
-         invites submitting filters you can't see. -->
+    <!-- Pinned outside the scroll area; collapses with the body. -->
     <div
       v-if="hasFooter"
       class="panel-footer"
@@ -63,14 +54,7 @@
           >
             {{ $t('crew_filter_clear_all') }}
           </Button>
-          <!--
-            `type="submit"` submits the consumer's surrounding <form>; the click
-            handler only collapses the panel. That matters below tablet, where
-            the panel sits ABOVE the results — leaving it open buries the very
-            results you just asked for behind the whole facet list. Desktop
-            ignores `open` entirely, so the same line is correct on both.
-            Clear deliberately does NOT close: you're usually mid-adjustment.
-          -->
+          <!-- `type="submit"` submits the consumer's <form>; the click only collapses the panel. Clear deliberately stays open. -->
           <Button
             v-if="showApply"
             type="submit"
@@ -89,20 +73,8 @@
 </template>
 
 <script lang="ts" setup>
-/**
- * The filter sidebar shell shared by every directory (/crew via UserDirectory,
- * /talents, /locations): sticky scrollable column on desktop, full-width
- * collapsible block below tablet.
- *
- * It owns the chrome only — the facets themselves come through the default slot
- * as `<FilterSection>`s, and the actions through `#footer`. This exists because
- * the same ~135 lines of markup and SCSS had been copy-pasted into three files
- * and had already drifted apart (three different `max-height` values), so a fix
- * to the collapse behaviour or the aria wiring had to be made and re-tested
- * three times.
- *
- * The footer is deliberately NOT part of the scroll area.
- */
+// Shared filter sidebar shell (/crew, /talents, /locations). Chrome only —
+// facets come via the default slot, actions via #footer (never scrolled).
 import Button from '~/components/Button.vue';
 
 const props = withDefaults(
@@ -111,11 +83,7 @@ const props = withDefaults(
     title?: string;
     /** Show "Clear all" — the consumer decides when any facet is set. */
     clearable?: boolean;
-    /**
-     * Show "Apply". Off by default: a panel that filters client-side as you
-     * type (see UserDirectory) has nothing to submit, and a button that appears
-     * to do nothing is worse than no button.
-     */
+    // Show "Apply". Off by default: a client-side-filtering panel has nothing to submit.
     showApply?: boolean;
     applyDisabled?: boolean;
     applyLoading?: boolean;
@@ -136,9 +104,8 @@ const hasFooter = computed(
   () => !!slots.footer || props.clearable || props.showApply,
 );
 
-// Collapsed by default: below tablet the panel sits above the results, so an
-// open one would push them off-screen. Desktop ignores this entirely — the CSS
-// only honours it inside the tablet-down block.
+// Collapsed by default — below tablet the panel sits above the results.
+// Desktop ignores this; the CSS only honours it inside the tablet-down block.
 const open = ref(false);
 
 const titleId = useId();
@@ -151,19 +118,14 @@ const bodyId = useId();
   min-width: 310px;
   display: flex;
   flex-direction: column;
-  // Sticky and independently scrollable, so a long facet list scrolls IN the
-  // panel rather than growing the page.
+  // Sticky and independently scrollable so a long facet list scrolls in the panel.
   position: sticky;
   top: 16px;
   align-self: start;
-  // Derived from `top`, not from a guessed header height: 16px above + 16px of
-  // breathing room below. The three copies this replaces used 330px, 330px and
-  // 120px — magic numbers nobody could reconcile.
+  // Derived from `top`: 16px above + 16px of breathing room below.
   max-height: calc(100vh - 32px);
 
   @include tablet-down {
-    // Full-width block in the page flow: nothing to stick to, and no reason to
-    // cap the height once it no longer competes with the results column.
     width: 100%;
     min-width: 0;
     position: static;
@@ -182,8 +144,7 @@ const bodyId = useId();
 
   @include tablet-down {
     overflow: visible;
-    // The page supplies the edge padding once the panel goes full-width, so the
-    // facets line up with the toolbar and the results.
+    // The page supplies the edge padding once the panel goes full-width.
     padding: 0;
   }
 }
@@ -254,8 +215,7 @@ const bodyId = useId();
       display: flex;
     }
 
-    // Stacked, the facets read as one undifferentiated list; a rule between
-    // them restores the separation the sidebar gets from its own whitespace.
+    // A rule between stacked facets restores the separation the sidebar gets from whitespace.
     > * + * {
       border-top: 1px solid color(--v-theme-on-surface, 0.24);
     }

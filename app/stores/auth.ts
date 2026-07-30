@@ -69,7 +69,6 @@ export const useAuthStore = defineStore('auth', {
           this.user = JSON.parse(savedUser);
         }
 
-        // Cookie rides along automatically. apiFetch handles refresh-on-401.
         // showError: false — a logged-out cold start gets a quiet null, not a
         // "Session expired" snackbar on every load.
         const data = await apiRequest('/users/me', { showError: false }).get<User>();
@@ -99,15 +98,13 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async logout() {
-      // showError: false — logging out shouldn't nag if the server call fails;
-      // we clear local auth regardless.
+      // showError: false — local auth is cleared regardless of the server call.
       await apiRequest('/auth/logout', { showError: false }).post();
       this.clearAuth();
     },
 
-    // Change password (logged-in). Step-up = current password. The backend keeps
-    // THIS session alive (re-issues the access cookie) and revokes the others, so
-    // no re-login. useApi: the popup shows INVALID_CURRENT_PASSWORD inline.
+    // The backend keeps THIS session alive and revokes the others, so no
+    // re-login. useApi: the popup shows INVALID_CURRENT_PASSWORD inline.
     async changePassword(currentPassword: string, newPassword: string) {
       return useApi('/auth/password').patch<{ message: string }>({
         currentPassword,
@@ -124,9 +121,8 @@ export const useAuthStore = defineStore('auth', {
       });
     },
 
-    // Step 2: confirm with the code from the new address. On success, patch the
-    // one changed field locally (mirrors the backend's lowercase normalization)
-    // rather than refetching the whole profile.
+    // Step 2: confirm with the code. On success patch the one field locally,
+    // mirroring the backend's lowercase normalization.
     async confirmEmailChange(code: string, newEmail: string) {
       const res = await useApi('/auth/email/verify-change').post<{ message: string }>({ code });
 

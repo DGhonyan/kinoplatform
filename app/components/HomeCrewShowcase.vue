@@ -53,7 +53,7 @@ onMounted(async () => {
   margin: 0;
   font-family: 'Bebas Neue', sans-serif;
   text-transform: uppercase;
-  font-size: 48px;
+  font-size: 64px;
   font-weight: 400;
   letter-spacing: 1px;
   line-height: 1.05;

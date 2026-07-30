@@ -1,11 +1,8 @@
 import type { ApiError } from './api';
 import type { ErrorCode } from './errorCodes';
 
-/**
- * Central map of backend error `code`s → i18n keys. The backend's `code` is the
- * stable contract; the frontend owns the localized text. Whenever the backend
- * gains a new error code, add a row here and the matching locale entry.
- */
+// Backend error `code` → i18n key. When the backend gains a new code, add a
+// row here and the matching locale entry.
 const ERROR_MESSAGE_KEYS: Partial<Record<ErrorCode, string>> = {
   // auth
   EMAIL_NOT_VERIFIED: 'error_email_not_verified',
@@ -58,8 +55,7 @@ const ERROR_MESSAGE_KEYS: Partial<Record<ErrorCode, string>> = {
   FILE_NOT_UPLOADED: 'error_file_not_uploaded',
   FILE_NOT_READY: 'error_file_not_ready',
   UPLOAD_VERIFICATION_FAILED: 'error_file_verification_failed',
-  // validation — forms validate client-side, so this is a rare fallback; the
-  // per-field detail is on `error.errors` for callers that want to show it inline.
+  // rare fallback — forms validate client-side; per-field detail is on `error.errors`
   VALIDATION_ERROR: 'error_validation',
 };
 
@@ -67,22 +63,10 @@ const ERROR_MESSAGE_KEYS: Partial<Record<ErrorCode, string>> = {
 export const GENERIC_ERROR_KEY = 'common_unexpected_error';
 
 /**
- * Resolve a backend error to the text to display. Pass the result to `t()` for
- * inline errors, or straight to `showMessage` (which `Message.vue` translates).
- *
- * Resolution order:
- *   1. mapped code  → i18n key (localized)
- *   2. unmapped/absent code → raw backend message (English, graceful during
- *      migration; `Message.vue` renders non-keys verbatim). A dev-only warning
- *      fires for *unmapped* codes so missing mappings surface.
- *   3. no message at all → generic localized key
- *
- * Once every backend throw carries a mapped code, step 2's raw fallback should
- * stop firing — flip it to `GENERIC_ERROR_KEY` then if you want strict mode.
+ * Resolve a backend error to display text: mapped code → i18n key, else the raw
+ * backend message (dev-warn on unmapped codes), else the generic key.
  */
 export const apiErrorMessageKey = (error: ApiError): string => {
-  // `error.code` is an arbitrary wire string; the Partial map returns
-  // `string | undefined`, so an unknown code simply misses.
   const mapped = error.code ? ERROR_MESSAGE_KEYS[error.code as ErrorCode] : undefined;
   if (mapped) {
     return mapped;

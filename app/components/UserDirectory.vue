@@ -13,8 +13,7 @@
       :clearable="activeDrawerFilterCount > 0"
       @clear="clearDrawerFilters"
     >
-      <!-- The section header is the facet's only visible name, so each
-           control gets an aria-label instead of its own visible label. -->
+      <!-- Section headers name the facet, so each control gets an aria-label instead. -->
       <FilterSection title="crew_filter_profession">
         <Select
           v-model="selectedProfessions"
@@ -89,15 +88,8 @@ import FilterSection from '~/components/FilterSection.vue';
 import FilterPanel from '~/components/FilterPanel.vue';
 import SearchToolbar from '~/components/SearchToolbar.vue';
 
-/**
- * Shared crew/talents directory: filter sidebar (profession + location + language
- * + any page-specific toggles) and a grid of UserCards. The page owns the base
- * list (`users`, already scoped to crew or talents) and the profession options;
- * this component owns the client-side filtering and layout.
- *
- * Layout is a two-column grid on desktop (sidebar | search + results) that
- * collapses to a single stacked column below tablet — see the styles below.
- */
+// Shared crew/talents directory: the page owns the base list and profession
+// options; this component owns the client-side filtering and layout.
 type ToggleFilter = { key: string; label: string; predicate: (user: User) => boolean };
 
 const props = withDefaults(defineProps<{
@@ -130,8 +122,7 @@ const languageItems = computed(() =>
     .sort((a, b) => a.title.localeCompare(b.title, locale.value)),
 );
 
-// Location options are derived from the data we have — every distinct
-// `user.location` string. Cheap autocomplete without a separate dataset.
+// Derived from the data itself — cheap autocomplete without a separate dataset.
 const locationOptions = computed(() => {
   const locations = props.users
     .map(u => u.location?.trim())
@@ -201,27 +192,20 @@ const filteredUsers = computed(() => {
 }
 
 .directory {
-  // The sidebar spans both rows so the search bar lines up with its header and
-  // the results fill everything under it.
   display: grid;
   grid-template-columns: 310px minmax(0, 1fr);
   grid-template-areas:
     "filters toolbar"
     "filters results";
-  // The filter sidebar spans BOTH rows. Whenever it's taller than the toolbar
-  // and results combined — the normal case on a wide screen, where every card
-  // fits on one short row — the grid grows the spanned rows to fit it and the
-  // surplus inflates the TOOLBAR row, opening a gap under the search bar.
-  // Pinning the first row to its content sends that slack into the results row,
-  // where it's invisible (`align-items: start` keeps the cards top-aligned).
+  // Pin the toolbar row to its content: the sidebar spans both rows, and when
+  // it's taller the surplus would otherwise open a gap under the search bar.
   grid-template-rows: auto 1fr;
   align-items: start;
   column-gap: 24px;
   row-gap: 16px;
   width: 100%;
 
-  // No room for a sidebar below tablet — everything stacks in DOM order
-  // (search, filter panel, results), matching the mobile design.
+  // No room for a sidebar below tablet — everything stacks in DOM order.
   @include tablet-down {
     display: flex;
     flex-direction: column;
@@ -236,16 +220,12 @@ const filteredUsers = computed(() => {
 
 .user-grid {
   grid-area: results;
-  // Fixed-width cards (see UserCard) packed with even 16px gutters.
   display: grid;
   grid-template-columns: repeat(auto-fill, 200px);
   gap: 16px;
 
-  // Below tablet the cards stretch to fill their track instead of holding their
-  // desktop width. A 160px floor rather than a fixed 4 columns: at 600px a hard
-  // 4-up gives ~130px cards (clipped names, tiny avatars) and UserCard's mobile
-  // type trims don't apply until 599.98px. Same track as /talents, so the two
-  // directories render the identical card at the identical size.
+  // 160px floor rather than a fixed column count — a hard 4-up at 600px gives
+  // ~130px cards. Same track as /talents so both directories match.
   @include tablet-down {
     --user-card-width: auto;
     --user-card-height: auto;
@@ -266,11 +246,6 @@ const filteredUsers = computed(() => {
   padding: 64px 16px;
   color: color(--v-theme-on-surface, 0.6);
 }
-
-// Drawer
-
-// Collapse control for the stacked panel. Hidden (and so untabbable) on desktop,
-// where the sidebar is always open.
 
 .filters-section {
   display: flex;

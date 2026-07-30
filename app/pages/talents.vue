@@ -1,15 +1,9 @@
 <template>
-  <!-- One form: Enter from any field runs the search; submit buttons disable while
-       a range is invalid, so the action is never silently dead. -->
+  <!-- One form: Enter from any field runs the search. -->
   <form
     class="talents"
     @submit.prevent="applyFilters"
   >
-    <!-- The search row comes FIRST in the DOM. Stacked (below 960px) it is also
-         visually first, so keyboard and screen-reader users reach it immediately
-         instead of tabbing through fifteen filter controls to get to the box that
-         looks first. Desktop puts it back in the right-hand column via grid
-         areas — placement, not `order`, so the two orders can never diverge. -->
     <SearchToolbar
       v-model="q"
       class="toolbar"
@@ -28,8 +22,6 @@
       :apply-loading="loading"
       @clear="clearFilters"
     >
-      <!-- The section header is the facet's only visible name, so each
-           control gets an aria-label instead of its own visible label. -->
       <FilterSection title="crew_filter_profession">
         <Select
           v-model="professions"
@@ -75,8 +67,6 @@
         />
       </FilterSection>
 
-      <!-- Min and Max sit under one header, so the header alone would give
-           both fields the same name — rangeLabel() keeps them apart. -->
       <FilterSection title="talent_filter_age">
         <div class="range-row">
           <Input
@@ -164,9 +154,6 @@
         </div>
       </FilterSection>
 
-      <!-- The colour facets drop `label` (now optional): the section header
-           already names the group, and each swatch carries its own
-           aria-label, so a second copy would just render the name twice. -->
       <FilterSection title="appearance_hair_color">
         <ColorMultiSelect
           v-model="hairColors"
@@ -189,8 +176,6 @@
         />
       </FilterSection>
 
-      <!-- The range facets can conflict (min > max), so Apply is disabled and
-           says why rather than submitting a query that cannot match. -->
       <template #note>
         <span
           v-if="hasRangeErrors"
@@ -265,19 +250,10 @@ const hairColors = ref<string[]>([]);
 const eyeColors = ref<string[]>([]);
 const skinColors = ref<string[]>([]);
 
-// ── Stacked panel (below 960px) ──
-// The sidebar turns into a full-width block above the results, collapsed by
-// default so the grid stays one scroll away. The layout switch is pure CSS; this
-// state only drives the panel's own collapse. Above 960px the toggle is
-// `display: none` and the body never gets the collapsed rule, so it's inert
-// there. Each facet owns its own open/closed state inside FilterSection.
-
-// Numeric filter bounds — mirror the backend TalentSearchDto (integers, in range).
+// Bounds mirror the backend TalentSearchDto.
 const AGE_RANGE = { min: 0, max: 120 };
 
-// Min and Max share a FilterSection header, so each field needs a name that
-// distinguishes it. Composed from keys we already ship (facet first, matching
-// the visual order) rather than adding six near-duplicate ones.
+// Per-field aria name for facets whose single header covers two controls.
 const rangeLabel = (facetKey: string, boundKey: string) => `${t(facetKey)} ${t(boundKey)}`;
 
 const rangeFieldError = (value: string, bound: { min: number; max: number }): string => {
@@ -289,8 +265,7 @@ const rangeFieldError = (value: string, bound: { min: number; max: number }): st
   return '';
 };
 
-// Live validation — errors surface inline as the user types (not on submit), and
-// gate the submit buttons, so a bad range is obvious rather than silently blocking.
+// Live validation — errors surface inline as the user types and gate submit.
 const rangeErrors = computed(() => ({
   minAge: rangeFieldError(minAge.value, AGE_RANGE),
   maxAge: rangeFieldError(maxAge.value, AGE_RANGE),
@@ -406,8 +381,6 @@ onMounted(async () => {
   row-gap: 16px;
   width: 100%;
 
-  // Below the tablet breakpoint the sidebar stops being a sidebar — everything
-  // stacks into one column, in DOM order.
   @include tablet-down {
     display: flex;
     flex-direction: column;
@@ -421,22 +394,18 @@ onMounted(async () => {
   color: color(--v-theme-error);
 }
 
-// Placement only — the bar's own layout lives in SearchToolbar.
 .toolbar {
   grid-area: toolbar;
 }
 
 .user-grid {
   grid-area: results;
-  // Fixed-width cards (see UserCard) packed with even 16px gutters.
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
 
-  // Below 960px the cards go fluid so every row divides the viewport evenly —
-  // roughly 4 up at tablet widths, exactly 2 up on phones. UserCard reads these
-  // custom properties (its 200x290 fallback still governs the desktop packing
-  // above), so the grid track can own the width and the content the height.
+  // Cards go fluid below 960px: UserCard reads these custom properties (its
+  // 200x290 fallback still governs desktop packing), so the track owns the width.
   @include tablet-down {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -458,9 +427,6 @@ onMounted(async () => {
   padding: 64px 16px;
   color: color(--v-theme-on-surface, 0.6);
 }
-
-// Collapse control for the stacked panel. Hidden (and so untabbable) on desktop,
-// where the sidebar is always open.
 
 .range-row {
   display: flex;

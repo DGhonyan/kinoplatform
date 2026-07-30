@@ -94,8 +94,7 @@
         @edit="emit('editGear')"
       />
 
-      <!-- Appearance is owner-only and never shown publicly — it powers casting
-           filters. This is the private edit entry point. -->
+      <!-- Appearance is owner-only, never public — it powers casting filters. -->
       <div
         v-if="canEdit && isActorProfile"
         class="appearance-owner"
@@ -156,12 +155,8 @@ import Button from '~/components/Button.vue';
 import ProfileChipGroup from '~/components/profile/ProfileChipGroup.vue';
 import ProfileSectionNav from '~/components/profile/ProfileSectionNav.vue';
 
-/**
- * The profile's identity card: name, professions, experience level, avatar, bio,
- * meta lines (location / education / portfolio) and the gear/languages chip
- * groups. Pure display derived from `user`; the owner's edit affordances emit
- * up so the parent keeps owning the popups.
- */
+// Identity card: pure display derived from `user`; the owner's edit
+// affordances emit up so the parent keeps owning the popups.
 const props = defineProps<{
   user: UserProfile | null;
   canEdit: boolean;
@@ -224,9 +219,8 @@ const practicalityLabels = computed(() =>
 }
 
 .personal {
-  // Flex items default to min-width:auto (won't shrink below content), which
-  // lets wide text push the fixed-width avatar off-screen. min-width:0 lets this
-  // column shrink so its text wraps within the available space instead.
+  // Flex items default to min-width:auto, letting wide text push the
+  // fixed-width avatar off-screen; min-width:0 lets this column shrink.
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -262,7 +256,6 @@ const practicalityLabels = computed(() =>
   line-height: 1.05;
   letter-spacing: 0.02em;
   margin: 0;
-  // Wrap (and break long unbreakable words) rather than force the row wider.
   overflow-wrap: anywhere;
 }
 
@@ -300,10 +293,8 @@ const practicalityLabels = computed(() =>
 
 .availability-btn {
   margin-bottom: 10px;
-  // Vuetify's `block` is `flex: 1 0 auto`. `.side` is a column that stretches to
-  // the height of the identity column beside it, so without this the button
-  // swallows all the leftover height and visibly inflates as the bio grows.
-  // `block` should mean full width; `min-width: 100%` still delivers that.
+  // Vuetify's `block` is `flex: 1 0 auto`, so in this stretched column the
+  // button would swallow the leftover height; `min-width: 100%` keeps it full-width.
   flex-grow: 0;
 }
 
@@ -390,9 +381,8 @@ const practicalityLabels = computed(() =>
     gap: 14px;
   }
 
-  // The photo has to land between the name and the professions, which live in
-  // the *other* desktop column. Dropping the two columns' boxes makes all of
-  // their children direct flex items of the card, so `order` can interleave them.
+  // The photo must land between the name and the professions, which live in the
+  // other desktop column — `display: contents` lets `order` interleave their children.
   .personal,
   .personal-top,
   .identity,
@@ -400,9 +390,8 @@ const practicalityLabels = computed(() =>
     display: contents;
   }
 
-  // Only the identity block is re-ordered (negatively, so everything else keeps
-  // the default 0 and follows in DOM order — bio, nav, meta, chips, then the
-  // availability button that trailed the photo in the desktop column).
+  // Only the identity block is re-ordered (negatively, so everything else
+  // keeps the default 0 and follows in DOM order).
   .name-row {
     order: -4;
   }
@@ -430,9 +419,8 @@ const practicalityLabels = computed(() =>
     order: -1;
   }
 
-  // `.personal-top` lost its box (and with it the rule closing the identity
-  // block) to `display: contents` — redraw it as a flex item. A pseudo-element
-  // sorts ahead of its order-0 siblings, so it lands right after the identity.
+  // `.personal-top` lost its box (and its closing rule) to `display: contents`;
+  // a pseudo-element sorts ahead of order-0 siblings, landing right after the identity.
   .personal-card::before {
     content: '';
     height: 0;

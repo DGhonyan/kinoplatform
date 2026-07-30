@@ -9,11 +9,7 @@
   >
     <div class="register-wizard">
       <div class="header">
-        <!--
-        Top-left back icon only appears on optional steps, where Skip has
-        displaced Back from the actions row. On non-optional steps Back keeps
-        its original slot in the actions row.
-      -->
+        <!-- Back icon appears only on optional steps, where Skip displaces Back from the actions row. -->
         <Button
           v-if="canGoBack && currentStep.optional"
           class="back-icon"
@@ -32,8 +28,7 @@
         </h2>
       </div>
 
-      <!-- A real <form> so Enter submits the step. Only Next is type="submit";
-         Skip/Back are type="button" so they never submit on Enter or click. -->
+      <!-- Real <form> so Enter submits the step; only Next is type="submit". -->
       <form
         class="wizard-form"
         @submit.prevent="next"
@@ -104,23 +99,13 @@ const props = withDefaults(
     steps: RegisterStep[];
     title?: string;
     initialFormData?: Partial<RegisterFormData>;
-    /**
-     * Total step count in the full flow. Defaults to `steps.length`. Pass this
-     * when `steps` is a filtered subset (resumption flow on /user) so the
-     * progress bar reflects the user's true position in the wizard, not their
-     * position within the remaining tail.
-     */
+    // Total step count in the full flow — pass when `steps` is a filtered
+    // subset (resume flow) so the progress bar reflects the true position.
     progressTotal?: number;
-    /**
-     * Number of steps already completed before this wizard mounted. Combined
-     * with `currentIndex` to compute the true progress position. Defaults to 0.
-     */
+    /** Steps already completed before this wizard mounted (resume flow). */
     progressOffset?: number;
-    /**
-     * Step index to start on. Used by the resume flow (/user) to land on the
-     * first incomplete step while keeping earlier (completed, reversible) steps
-     * in the array so Back still works.
-     */
+    // Step index to start on — the resume flow lands on the first incomplete
+    // step while keeping earlier reversible steps so Back still works.
     initialIndex?: number;
   }>(),
   {
@@ -161,10 +146,8 @@ const isLastStep = computed(() => currentIndex.value === props.steps.length - 1)
 const effectiveProgressTotal = computed(() => props.progressTotal ?? props.steps.length);
 const effectiveProgressCurrent = computed(() => props.progressOffset + currentIndex.value);
 
-// You can go back only if the previous step is reversible. Irreversible steps
-// (credentials, code) have non-idempotent side effects (account creation, email
-// verification), so re-firing their `onAdvance` would error — better to hide
-// Back than to let the user walk into that wall.
+// Back is hidden when the previous step is irreversible (credentials, code) —
+// re-firing their non-idempotent `onAdvance` would error.
 const canGoBack = computed(() => {
   if (currentIndex.value === 0) return false;
   const previousStep = props.steps[currentIndex.value - 1];
@@ -172,9 +155,8 @@ const canGoBack = computed(() => {
 });
 
 const next = async () => {
-  // Guard re-entry: a <form> submit on Enter bypasses the button's loading
-  // state, so a second Enter could re-fire an irreversible step (account
-  // creation / email verification) before the first finishes.
+  // Guard re-entry: Enter submits bypass the button's loading state and could
+  // re-fire an irreversible step before the first finishes.
   if (busy.value) return;
   if (!stepRef.value?.validate()) return;
 
@@ -195,9 +177,8 @@ const next = async () => {
   }
 };
 
-// Skip bypasses validation by design — the user is opting out of providing
-// this step's data. We still call `onSkip` so the step can be marked complete
-// server-side and the user isn't re-prompted on resumption.
+// Skip bypasses validation by design; `onSkip` still runs so the step is
+// marked complete server-side and not re-prompted on resume.
 const skip = async () => {
   if (!currentStep.value.optional) return;
 
@@ -230,7 +211,6 @@ const back = () => {
   gap: 24px;
 }
 
-// The form wraps the step + actions; keep the same column spacing the wizard had.
 .wizard-form {
   display: flex;
   flex-direction: column;
@@ -258,9 +238,8 @@ const back = () => {
   color: color(--v-theme-primary);
 }
 
-// Per-step prompt = the step's "title". Each step renders it as `.description`;
-// its look (and the primary color) is owned here, in ONE place, so steps never
-// hardcode it. Restyle all registration step titles from this rule alone.
+// Each step renders its prompt as `.description`; the look is owned here in
+// ONE place so steps never hardcode it.
 .wizard-form :deep(.description) {
   margin: 0;
   text-align: center;

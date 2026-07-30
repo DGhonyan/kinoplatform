@@ -15,11 +15,8 @@ export const useAnnouncementStore = defineStore('announcement', {
       }).get<Announcement[]>();
     },
 
-    // Create — the backend stores it as `pending` for admin review. No
-    // `errorMessage`: POST returns ANNOUNCEMENT_FORBIDDEN (the server, not the
-    // client-side category filter, is what actually enforces admin-only
-    // categories) and ANNOUNCEMENT_CREATE_FAILED, both of which an override
-    // would shadow.
+    // Stored as `pending` for admin review. No `errorMessage`: an override would
+    // shadow ANNOUNCEMENT_FORBIDDEN / ANNOUNCEMENT_CREATE_FAILED.
     async createAnnouncement(payload: AnnouncementInput) {
       return apiRequest('/announcements', {
         loader: true,
@@ -27,16 +24,8 @@ export const useAnnouncementStore = defineStore('announcement', {
       }).post<Announcement>(payload);
     },
 
-    /*
-     * Full detail (with body) — authed only; drives the login funnel.
-     *
-     * Like the other id-addressed actions it passes NO `errorMessage`: api.ts
-     * resolves `opts.errorMessage ?? apiErrorMessageKey(error)`, so an override
-     * always wins and would shadow the ANNOUNCEMENT_NOT_FOUND /
-     * ANNOUNCEMENT_FORBIDDEN codes these endpoints return, leaving those
-     * mappings dead. Only the plain list actions keep an override — they
-     * surface no announcement-specific codes to lose.
-     */
+    // Authed only. No `errorMessage`: an override wins over apiErrorMessageKey
+    // and would shadow the ANNOUNCEMENT_NOT_FOUND / FORBIDDEN mappings.
     async getAnnouncement(id: string) {
       return apiRequest(`/announcements/${id}`).get<AnnouncementDetail>();
     },

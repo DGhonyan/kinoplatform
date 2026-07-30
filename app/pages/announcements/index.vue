@@ -225,9 +225,8 @@ onMounted(load);
   font-weight: 500;
   padding: 7px 16px;
   border-radius: 999px;
-  // Vuetify's reset doesn't zero a <button>'s background or border, so without
-  // this the inactive chips render as UA `ButtonFace` grey with the dark
-  // theme's near-white text — about 1.2:1 contrast.
+  // Vuetify's reset doesn't zero a <button>'s background/border — without this
+  // the inactive chips render as UA ButtonFace grey (~1.2:1 contrast).
   background: none;
   border: 1px solid color(--v-theme-on-surface, 0.25);
   color: color(--v-theme-on-surface, 0.85);

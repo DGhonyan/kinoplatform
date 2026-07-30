@@ -157,9 +157,8 @@ const relatedTo = (current: AnnouncementDetail, all: Announcement[]) =>
     )
     .slice(0, MORE_COUNT);
 
-// Re-fetch when navigating between detail pages (the "more" cards keep the user
-// on this route, so the component is reused and onMounted wouldn't fire again).
-// Guards against out-of-order responses when hopping quickly between posts.
+// Watched, not onMounted: the "more" cards reuse this route, so onMounted
+// wouldn't refire. loadSeq guards against out-of-order responses.
 let loadSeq = 0;
 watch(
   () => route.params.id,
@@ -169,8 +168,6 @@ watch(
     loading.value = true;
     more.value = [];
 
-    // The board listing doesn't depend on the detail response to be *issued* —
-    // only to be ordered — so both round trips overlap instead of stacking.
     const [data, all] = await Promise.all([
       announcementStore.getAnnouncement(String(id)),
       announcementStore.listAnnouncements(),
@@ -274,7 +271,6 @@ watch(
   line-height: 1.7;
   margin: 0;
   opacity: 0.85;
-  // Preserve the author's paragraph breaks.
   white-space: pre-line;
   overflow-wrap: anywhere;
 }

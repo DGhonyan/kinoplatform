@@ -1,12 +1,7 @@
 import type { ChipGroup } from '~/utils/gear';
 
-/**
- * Crop-before-upload aspect ratios (width / height). Each MUST match its display
- * container's box so a cropped image fills it via `object-fit: cover` with no
- * further cropping. If a box is resized in CSS, update the matching value here.
- *   AVATAR        → ProfilePersonalInfo `.avatar`   (320 × 400)
- *   PROJECT_MEDIA → ProjectCard `.project-media`    (218 × 255)
- */
+// Crop-before-upload ratios — each MUST match its display container's CSS box
+// (avatar: ProfilePersonalInfo 320×400; media: ProjectCard 218×255). Keep in sync.
 export const AVATAR_ASPECT_RATIO = 320 / 400;
 export const PROJECT_MEDIA_ASPECT_RATIO = 218 / 255;
 // Actor additional photos — portrait headshot crop.
@@ -130,12 +125,8 @@ export const professions = [
   'profession_interview_producer',
 ] as const;
 
-/**
- * The crew profession ids (== `professions`), grouped by department for the
- * ChipPicker. Purely a frontend presentation concern — the backend still stores
- * a flat `string[]` of profession ids. Category labels are the `field_*` i18n
- * keys (plus `field_camera`, added for the camera department).
- */
+// `professions` grouped by department for the ChipPicker — presentation only;
+// the backend stores a flat string[] of profession ids.
 export const CREW_PROFESSION_GROUPS: ChipGroup[] = [
   {
     label: 'field_directing_creative_leadership',
@@ -322,8 +313,7 @@ export const CREW_PROFESSION_GROUPS: ChipGroup[] = [
 ];
 
 // ── Actor / performer professions ──────────────────────────────────────────
-// A user is treated as an "actor" (unlocks appearance + additional photos, hides
-// gear) when any selected profession is in this set. See utils/persona.ts.
+// Any selected profession here makes the user an "actor" — see utils/persona.ts.
 export const ACTOR_PROFESSIONS = [
   'profession_actor',
   'profession_voice_actor',
@@ -378,9 +368,8 @@ export const ACTOR_PROFESSION_GROUPS: ChipGroup[] = [
   },
 ];
 
-// Voice & Audio talents. They register exactly like crew (no photos/appearance),
-// so they are NOT in ACTOR_PROFESSIONS, but they belong on the talents list — so
-// they ARE in TALENT_PROFESSIONS below.
+// Voice talents register like crew (no photos/appearance) — not in
+// ACTOR_PROFESSIONS, but they do belong in TALENT_PROFESSIONS below.
 export const VOICE_PROFESSIONS = [
   'profession_voiceover_artist',
   'profession_dubbing_artist',
@@ -392,30 +381,22 @@ export const VOICE_PROFESSION_GROUP: ChipGroup = {
   items: [...VOICE_PROFESSIONS],
 };
 
-// The crew list keeps the `professions` name for existing call sites; this alias
-// makes the crew/actor split explicit for the persona helpers.
+// Alias making the crew/actor split explicit for the persona helpers.
 export const CREW_PROFESSIONS = professions;
 
-// Everyone shown on the talents page: on-camera performers (who fill appearance)
-// plus voice talent (who don't). Membership, not the appearance gate — see
-// `isActor` vs `isTalent` in utils/persona.ts.
+// Talents-page membership, not the appearance gate — see `isActor` vs `isTalent`.
 export const TALENT_PROFESSIONS = [...ACTOR_PROFESSIONS, ...VOICE_PROFESSIONS] as const;
 
-// One picker for everything — crew departments first, then performer categories,
-// then voice/audio.
 export const PROFESSION_GROUPS: ChipGroup[] = [
   ...CREW_PROFESSION_GROUPS,
   ...ACTOR_PROFESSION_GROUPS,
   VOICE_PROFESSION_GROUP,
 ];
 
-// Every profession id on the platform, flat — crew + performers + voice. For
-// pickers where any member could hold the credit (e.g. a project's "Your role":
-// an actor's credit on a film is as real as a gaffer's).
+// Every profession id, flat — for pickers where any member could hold the credit.
 export const ALL_PROFESSIONS = [...professions, ...TALENT_PROFESSIONS] as const;
 
-// Stored as the short enum value (matches User['gender']); display name comes
-// from the i18n key `gender_<value>` (e.g. 'male' → t('gender_male')).
+// Stored value; display name comes from the i18n key `gender_<value>`.
 export const GENDERS = ['male', 'female', 'other'] as const;
 
 // Each id is both the stored value and its i18n key.

@@ -61,9 +61,8 @@ export type Recommendation = {
   createdAt: string;
 };
 
-// One availability window on a single day. Whitelist model: a day is unavailable
-// by default; `allDay` covers the whole day, otherwise it's the startTime–endTime
-// slot. A day may hold several windows (the gaps between them stay unavailable).
+// Whitelist model: a day is unavailable by default; `allDay` covers the whole
+// day, else the startTime–endTime slot. A day may hold several windows.
 export type Availability = {
   _id?: string;
   date: string; // YYYY-MM-DD
@@ -73,12 +72,8 @@ export type Availability = {
   note?: string;
 };
 
-/**
- * Actor/performer appearance. Mandatory fields (height…skinColor) are required
- * for actors during onboarding; the rest are optional. Color fields hold a
- * predefined id (see utils/appearance.ts) — `hairColor` may also hold a custom
- * free-text value.
- */
+// Actor/performer appearance. Color fields hold a predefined id (see
+// utils/appearance.ts) — `hairColor` may also hold custom free text.
 export type Appearance = {
   height?: number; // cm
   weight?: number; // kg
@@ -97,11 +92,7 @@ export type User = {
   _id: string;
   email: string;
   type: UserType;
-  /**
-   * Account-in-good-standing flag. `true` for new sign-ups; reserved for
-   * admin disable / soft-delete. Do NOT use as the onboarding gate — use
-   * `onboardingComplete` (see isOnboardingComplete in registerSteps.ts).
-   */
+  /** Admin disable / soft-delete flag. NOT the onboarding gate — use `onboardingComplete`. */
   active: boolean;
   /** True once all required onboarding steps are done. The onboarding gate. */
   onboardingComplete: boolean;
@@ -132,12 +123,8 @@ export type User = {
   completedSteps: string[];
 };
 
-/**
- * Talent-search filter payload (POST /users/talents/search). Mirrors the backend
- * TalentSearchDto. All fields optional — empty = all talents. Appearance is
- * filtered server-side and never returned; disability characteristics are not
- * filterable by design.
- */
+// Talent-search payload (POST /users/talents/search) — all optional, empty = all.
+// Disability characteristics are deliberately not filterable.
 export type TalentSearchFilters = {
   q?: string;
   professions?: string[];
@@ -158,8 +145,7 @@ export type TalentSearchFilters = {
   limit?: number;
 };
 
-// An active login session (one stored refresh token) for the settings page.
-// `current` marks the device making the request.
+// An active login session; `current` marks the device making the request.
 export type Session = {
   id: string;
   device: string;

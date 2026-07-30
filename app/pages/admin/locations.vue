@@ -125,12 +125,8 @@ import ConfirmDialog from '~/components/ConfirmDialog.vue';
 import LocationFormPopup from '~/components/locations/LocationFormPopup.vue';
 
 definePageMeta({
-  /*
-   * auth.global.ts only enforces *login* on non-public paths — it has no notion
-   * of roles — so admin-only is this page's own gate. Page middleware runs after
-   * the global one, which means initAuth() has already resolved `user` here.
-   * /admin/locations deliberately stays OUT of the middleware's publicPaths.
-   */
+  // auth.global.ts only enforces login (no roles), so admin-only is this page's
+  // own gate; page middleware runs after global, so initAuth resolved `user`.
   middleware: () => {
     const authStore = useAuthStore();
     if (authStore.user?.type !== 'admin') return navigateTo('/');
@@ -154,9 +150,7 @@ const load = async () => {
 };
 
 // ── Create / edit ──
-// The card payload is a subset of the detail one, so editing fetches the full
-// document first — otherwise the form would blank every detail-only field
-// (address, lat/lng, description, house rules) the moment it PATCHed.
+// Editing fetches the full detail first — PATCHing from the card subset would blank detail-only fields.
 const showForm = ref(false);
 const editTarget = ref<LocationDetail | null>(null);
 const editLoadingId = ref<string | null>(null);
@@ -166,11 +160,8 @@ const openCreate = () => {
   showForm.value = true;
 };
 
-// Last click wins. Without the guard, two overlapping Edit clicks can land out
-// of order: the popup opens on whichever detail arrives FIRST and fills its form
-// from that listing, then the slower response overwrites `editTarget` — but
-// `showForm` is already true, so the popup never refills. Save would then PATCH
-// one listing with another's content.
+// Last click wins: without the guard a slower detail response overwrites
+// `editTarget` after the popup filled, and Save would PATCH the wrong listing.
 let editSeq = 0;
 const openEdit = async (id: string) => {
   const seq = ++editSeq;
@@ -259,8 +250,7 @@ onMounted(load);
   border: 1px solid color(--v-theme-on-surface, 0.16);
   border-radius: 12px;
 
-  // A 320px-wide row can't hold thumb + text + two buttons. Let the actions drop
-  // to their own line under the text instead of squeezing the title to nothing.
+  // Actions drop to their own line instead of squeezing the title to nothing.
   @include mobile {
     flex-wrap: wrap;
     gap: 12px;

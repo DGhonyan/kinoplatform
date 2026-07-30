@@ -31,7 +31,6 @@
 
     <template v-else>
       <div class="detail-head">
-        <!-- Separate spans: the place drops out cleanly and lines wrap at the dashes. -->
         <h1 class="detail-title">
           <span>{{ location.title }}</span>
           <template v-if="place">
@@ -53,6 +52,14 @@
 
         <div class="detail-actions">
           <Button
+            v-if="isAdmin"
+            variant="secondary"
+            prepend-icon="mdi-pencil"
+            @click="showEdit = true"
+          >
+            {{ $t('common_edit') }}
+          </Button>
+          <Button
             variant="secondary"
             :prepend-icon="isSaved ? 'mdi-bookmark' : 'mdi-bookmark-outline'"
             :aria-pressed="isSaved"
@@ -70,13 +77,18 @@
         </div>
       </div>
 
-      <!-- Always rendered: MediaGallery owns its own "no photos yet" frame. -->
+      <LocationFormPopup
+        v-if="isAdmin && showEdit"
+        v-model="showEdit"
+        :location="location"
+        @saved="onEdited"
+      />
+
       <MediaGallery
         :images="location.images"
         :alt="location.title"
       />
 
-      <!-- Every block below renders only when it has content. -->
       <section
         v-if="infoItems.length"
         class="block"
@@ -269,7 +281,6 @@
           </div>
         </div>
 
-        <!-- Skipped without coords so the grid doesn't reserve an empty column. -->
         <LocationMap
           v-if="hasCoords"
           :lat="location.lat"
@@ -343,6 +354,7 @@ import Button from '~/components/Button.vue';
 import Carousel from '~/components/Carousel.vue';
 import MediaGallery from '~/components/MediaGallery.vue';
 import BookingRequestCard from '~/components/locations/BookingRequestCard.vue';
+import LocationFormPopup from '~/components/locations/LocationFormPopup.vue';
 import LocationMap from '~/components/locations/LocationMap.vue';
 import { AMENITY_ICONS, SAFETY_ICONS, formatPrice } from '~/utils/locations';
 import { formatDate } from '~/utils/dates';
@@ -350,6 +362,10 @@ import { formatDate } from '~/utils/dates';
 const route = useRoute();
 const { t, locale } = useI18n();
 const locationStore = useLocationStore();
+const authStore = useAuthStore();
+
+const isAdmin = computed(() => authStore.user?.type === 'admin');
+const showEdit = ref(false);
 
 const defaultAvatar = new URL('@/assets/default.jpg', import.meta.url).href;
 
@@ -378,13 +394,11 @@ const safety = computed(() => (location.value?.safety ?? []).filter(id => id in 
 const buildingTypeLabel = computed(() => {
   const type = location.value?.buildingType;
   if (!type) return '';
-  // An unrecognised type still says something useful; only known ones translate.
   return (LOCATION_BUILDING_TYPES as readonly string[]).includes(type)
     ? t(`location_building_${type}`)
     : type;
 });
 
-// Only specs the host actually filled in — a "—" row is worse than no row.
 const infoItems = computed(() => {
   const data = location.value;
   if (!data) return [];
@@ -415,8 +429,7 @@ const professionOf = (review: LocationReview) =>
 const scrollToBooking = () =>
   bookingRef.value?.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-// No favourites endpoint yet — "Save" is a browser-local bookmark. Swap for a
-// store action once the backend ships one.
+// TODO: "Save" is a browser-local bookmark until the backend ships a favourites endpoint.
 const SAVED_KEY = 'saved-locations';
 
 const savedIds = ref<string[]>([]);
@@ -437,7 +450,6 @@ onMounted(() => {
     savedIds.value = Array.isArray(stored) ? stored.filter(id => typeof id === 'string') : [];
   }
   catch {
-    // Hand-edited or half-written storage — start clean rather than blowing up.
     savedIds.value = [];
   }
 });
@@ -445,22 +457,27 @@ onMounted(() => {
 // Watched, not fetched in onMounted: in-page links reuse the component, so
 // onMounted wouldn't refire. loadSeq guards against out-of-order responses.
 let loadSeq = 0;
+const load = async (id: string) => {
+  const seq = ++loadSeq;
+  loading.value = true;
+  requestSent.value = false;
+
+  const data = await locationStore.getLocation(id);
+  if (seq !== loadSeq) return; // superseded by a newer navigation
+
+  location.value = data;
+  loading.value = false;
+};
+
 watch(
   () => route.params.id,
-  async (id) => {
-    if (!id) return;
-    const seq = ++loadSeq;
-    loading.value = true;
-    requestSent.value = false;
-
-    const data = await locationStore.getLocation(String(id));
-    if (seq !== loadSeq) return; // superseded by a newer navigation
-
-    location.value = data;
-    loading.value = false;
+  (id) => {
+    if (id) load(String(id));
   },
   { immediate: true },
 );
+
+const onEdited = () => load(String(route.params.id));
 </script>
 
 <style scoped lang="scss">
@@ -543,7 +560,6 @@ watch(
   @include mobile {
     width: 100%;
 
-    // Two equal pills rather than a cramped pair pushed against the edge.
     > * {
       flex: 1 1 0;
     }
@@ -619,7 +635,6 @@ watch(
 }
 
 .important {
-  // Columns collapse one at a time — a lone policy gets full width.
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 24px;
@@ -671,8 +686,6 @@ watch(
 }
 
 .stay {
-  // auto-fit rather than two fixed tracks: with no map the remaining column
-  // collapses and the host + booking pair spans the full width.
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 24px;
@@ -688,12 +701,9 @@ watch(
 
 .stay-map {
   min-width: 0;
-  // Match the column beside it rather than the component's stock height.
   --location-map-height: 340px;
 }
 
-// Portrait column beside the copy, per the design. `.block` sets column, so the
-// direction is overridden rather than re-declared.
 .host {
   flex-direction: row;
   align-items: flex-start;
@@ -751,6 +761,7 @@ watch(
 .host-body {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: 8px;
   flex: 1 1 auto;
   min-width: 0;
@@ -768,11 +779,8 @@ watch(
   display: flex;
   flex-direction: column;
   gap: 8px;
-  // Vuetify's .v-input is `flex: 1 1 auto`; the booking card is full of fields,
-  // so pin the wrapper's own sizing and let the card keep its natural height.
+  // Vuetify's .v-input is `flex: 1 1 auto` — pin the wrapper's own sizing.
   flex: 0 0 auto;
-  // Without a map the column collapses to the full page width — a 1100px-wide
-  // date pair reads as a form, not a booking widget.
   width: 100%;
   max-width: 520px;
 }
@@ -876,7 +884,6 @@ watch(
   font-size: 13px;
   line-height: 1.55;
   opacity: 0.85;
-  // Cap the card height so the strip stays even across wildly different reviews.
   display: -webkit-box;
   -webkit-line-clamp: 5;
   line-clamp: 5;

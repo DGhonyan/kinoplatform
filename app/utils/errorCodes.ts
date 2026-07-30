@@ -1,13 +1,5 @@
-/**
- * Backend error `code`s the frontend knows about. The wire value stays a plain
- * `string` (see `ApiError.code`) — these constants exist so references and
- * comparisons (`apiErrors.ts` map keys, `Login.vue` branch) are typo-checked at
- * build time. A code the backend adds but this list doesn't know simply falls
- * through to the generic message; that's intentional, so keep `ApiError.code`
- * typed as `string`, not `ErrorCode`.
- *
- * Mirror of the backend's `src/common/error-codes.ts` (separate repos, manual sync).
- */
+// Keep in sync with the backend's src/common/error-codes.ts (separate repos, manual sync).
+// Unknown codes intentionally fall through — keep `ApiError.code` typed `string`, not `ErrorCode`.
 export const ERROR_CODE = {
   // auth
   EMAIL_NOT_VERIFIED: 'EMAIL_NOT_VERIFIED',

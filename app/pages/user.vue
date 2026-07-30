@@ -47,10 +47,8 @@ import { needsActorDetails } from '~/utils/persona';
 const authStore = useAuthStore();
 const { user } = storeToRefs(authStore);
 
-// The wizard on /user resumes the post-auth required steps. Credentials + Code
-// are always done by the time the user is logged in, so we only offer the three
-// profile steps; the required "essentials" popup (photo/bio/languages) takes
-// over afterwards.
+// Credentials + Code are always done by login, so the resume wizard offers only
+// the three profile steps; the required essentials popup takes over afterwards.
 const stepConfigs = useRegisterSteps();
 const wizardStepList: RegisterStep[] = [
   stepConfigs[STEP_IDS.NAME],
@@ -58,24 +56,18 @@ const wizardStepList: RegisterStep[] = [
   stepConfigs[STEP_IDS.PROFESSION],
 ];
 
-// Keep ALL three reversible steps in the array (don't filter completed ones out)
-// and just start on the first incomplete one — so a resuming user can still go
-// Back to revise an already-completed step (each is an idempotent PATCH).
-// Snapshot at mount — completedSteps grows as steps finish, but the array stays
-// fixed so currentIndex never misaligns.
+// Keep all three steps so Back can revise a completed one (idempotent PATCHes);
+// snapshot at mount so currentIndex never misaligns as completedSteps grows.
 const completedAtMount = new Set(user.value?.completedSteps ?? []);
 const firstIncompleteIndex = Math.max(
   0,
   wizardStepList.findIndex(s => !completedAtMount.has(s.id)),
 );
 
-// Progress reflects the whole 5-step wizard (credentials + code + these three),
-// so a resuming user sees "step 4 of 5", not "step 1 of 3". credentials + code
-// are always done here, so the offset is constant.
+// Progress spans the whole 5-step wizard, so a resuming user sees "4 of 5".
 const progressTotal = WIZARD_STEP_IDS.length;
 const progressOffset = WIZARD_STEP_IDS.length - wizardStepList.length;
 
-// Wizard phase if any of the three steps is still incomplete.
 const allWizardStepsDone = wizardStepList.every(s => completedAtMount.has(s.id));
 const phase = ref<'wizard' | 'profile'>(allWizardStepsDone ? 'profile' : 'wizard');
 const essentialsOpen = ref(false);
@@ -83,10 +75,8 @@ const actorDetailsOpen = ref(false);
 
 const essentialsDone = () => (user.value?.completedSteps ?? []).includes(STEP_IDS.ESSENTIALS);
 
-// Decide which onboarding popup, if any, must be forced open. Essentials (the
-// required step) takes precedence; once it's done, an actor who still lacks the
-// mandatory appearance/photos — because they added an acting role after
-// onboarding — gets the actor-details popup instead.
+// Essentials (required) takes precedence; once done, an actor still missing the
+// mandatory appearance/photos gets the actor-details popup instead.
 const maybeForcePopups = () => {
   if (phase.value !== 'profile') return;
 
@@ -119,27 +109,21 @@ const onEssentialsCompleted = () => {
   essentialsOpen.value = false;
 };
 
-// Onboarding wants the hero look (cover image + white card) while the wizard
-// runs; the regular profile uses the default layout.
+// Hero look while the wizard runs; the regular profile uses the default layout.
 watch(phase, (p) => {
   setPageLayout(p === 'wizard' ? 'hero' : 'default');
 }, { immediate: true });
 
-// `setPageLayout` is imperative, and Nuxt does NOT reset it when the next route
-// doesn't declare its own layout (home, about, crew…). Without this, the hero
-// layout — and its fixed, full-page cover image — stays mounted and bleeds onto
-// the next page until a hard refresh. Reset to default as we navigate away.
+// Nuxt does NOT reset an imperative setPageLayout when the next route declares
+// no layout — without this the hero cover bleeds onto the next page.
 onBeforeRouteLeave(() => {
   setPageLayout('default');
 });
 
 onMounted(maybeForcePopups);
 
-// A profession edit after onboarding (via the profile's edit popup) can turn a
-// crew user into an actor who still lacks appearance/photos. `user` is replaced
-// wholesale on every store update, so this shallow watch catches that edit and
-// forces the actor-details popup. It never force-closes anything — each popup
-// owns its own dismissal once its fields are satisfied.
+// A post-onboarding profession edit can make a crew user an actor lacking
+// appearance/photos; `user` is replaced wholesale, so a shallow watch catches it.
 watch(user, () => nextTick(maybeForcePopups));
 </script>
 

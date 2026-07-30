@@ -10,9 +10,8 @@ export const useAccountStore = defineStore('account', {
       }).get<Record<string, unknown>>();
     },
 
-    // Full, immediate account deletion. Step-up = current password. The backend
-    // cascades across every collection + blobs and clears the auth cookies.
-    // useApi so the danger-zone dialog can show a bad password inline.
+    // Immediate deletion; the backend cascades everything and clears the auth
+    // cookies. useApi so the danger-zone dialog shows a bad password inline.
     async deleteAccount(password: string) {
       return useApi('/account').delete<{ message: string }>({ password });
     },

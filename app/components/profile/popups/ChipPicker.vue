@@ -78,18 +78,8 @@ import type { ChipGroup } from '~/utils/gear';
 import { toggleInArray } from '~/utils/toggleInArray';
 import Input from '~/components/Input.vue';
 
-/**
- * Searchable, hierarchical multi-select chip picker. Renders a group → optional
- * subgroup → chips tree (variable depth), with chips that wrap. v-model is the
- * flat array of selected values. Both group labels AND chip values run through
- * `display()`, so this works whether the values are literals (gear: "Sony FX3")
- * or i18n keys (professions: "profession_director"). Search matches the rendered
- * (translated) text of both chips and labels.
- *
- * Theme: defaults to the dark popup look (light text, outlined chips). Pass
- * `light` for the registration wizard's light card — red category titles and
- * white chips.
- */
+// Searchable hierarchical multi-select; v-model is the flat selected array.
+// Labels AND values run through `display()`, so literals and i18n keys both work.
 const model = defineModel<string[]>({ required: true });
 
 const props = withDefaults(
@@ -122,12 +112,9 @@ const toggle = (item: string) => {
 
 const chipProps = (item: string) => {
   const sel = isSelected(item);
-  // `chip-fill` adds a transparent 1px border to the filled (selected) chips so
-  // they keep the exact box size of the bordered/elevated unselected ones —
-  // otherwise switching variant on select makes the chip look smaller.
+  // `chip-fill` keeps selected chips the same box size as unselected (see styles).
   if (props.light) {
-    // White chips on the light card; elevated so unselected ones stay visible
-    // against a white surface. Selected → primary fill.
+    // Elevated so unselected chips stay visible against the white surface.
     return sel
       ? { variant: 'flat' as const, color: 'primary', class: 'chip-fill' }
       : { variant: 'elevated' as const, color: 'white' };

@@ -18,17 +18,8 @@
 </template>
 
 <script lang="ts" setup>
-/**
- * OpenStreetMap view of a single location, rendered with Leaflet.
- *
- * Leaflet is loaded dynamically inside `onMounted` because the module touches
- * `window` at import time — fine in this SPA today, but a static import would
- * break the moment SSR is switched on (see CLAUDE.md's deferred work).
- *
- * Tiles are CARTO's "dark_all" raster so the map sits in our dark theme instead
- * of glowing white; CARTO's terms require attributing both them and OSM, hence
- * the explicit `attribution` string below.
- */
+// Leaflet is imported dynamically in onMounted — it touches `window` at import
+// time, so a static import would break the moment SSR is switched on.
 import 'leaflet/dist/leaflet.css';
 import type { Map as LeafletMap } from 'leaflet';
 
@@ -44,6 +35,7 @@ const props = withDefaults(
 );
 
 const TILE_URL = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+// CARTO's terms require attributing both them and OSM.
 const TILE_ATTRIBUTION
   = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors '
     + '&copy; <a href="https://carto.com/attributions">CARTO</a>';
@@ -58,9 +50,8 @@ onMounted(async () => {
   if (!hasCoords.value) return;
 
   const L = await import('leaflet');
-  // The dynamic import is a microtask boundary — the component can be gone by
-  // the time it settles (fast back-navigation), and `containerRef` would then
-  // be detached.
+  // The dynamic import is a microtask boundary — the component can be gone
+  // (fast back-navigation) by the time it settles.
   if (disposed || !containerRef.value) return;
 
   map = L.map(containerRef.value, {
@@ -73,13 +64,8 @@ onMounted(async () => {
 
   L.tileLayer(TILE_URL, { attribution: TILE_ATTRIBUTION, maxZoom: 20 }).addTo(map);
 
-  // A circle marker rather than Leaflet's default pin: the default icon is a
-  // bundled PNG whose URL Leaflet resolves against the stylesheet, which breaks
-  // under Vite's asset hashing. A vector marker needs no asset at all.
-  //
-  // Leaflet paints SVG attributes, not CSS, so the theme token has to be read
-  // rather than referenced — otherwise the marker is the one hardcoded colour
-  // on the page.
+  // Vector marker — Leaflet's default pin PNG breaks under Vite asset hashing.
+  // Leaflet paints SVG attributes, not CSS, so the theme token must be read.
   const primary = getComputedStyle(containerRef.value).getPropertyValue('--v-theme-primary').trim();
   L.circleMarker([props.lat as number, props.lng as number], {
     radius: 9,

@@ -4,11 +4,7 @@ import type { Appearance } from '~~/shared/types/user';
 export const MIN_ACTOR_PHOTOS = 2;
 export const MAX_ACTOR_PHOTOS = 6;
 
-/**
- * Numeric bounds for appearance measurements (cm / kg). MIRROR the backend
- * AppearanceDto + TalentSearchDto so the appearance form and talent search reject
- * the same out-of-range values the server would.
- */
+/** Measurement bounds (cm / kg) — keep in sync with backend AppearanceDto + TalentSearchDto. */
 export const HEIGHT_RANGE = { min: 30, max: 300 };
 export const WEIGHT_RANGE = { min: 20, max: 500 };
 
@@ -20,10 +16,7 @@ export const isAppearanceComplete = (a?: Appearance | null): boolean =>
 export const hasRequiredActorPhotos = (photos?: string[] | null): boolean =>
   (photos?.length ?? 0) >= MIN_ACTOR_PHOTOS;
 
-/**
- * Whether a hex color reads as light — used to pick a contrasting checkmark on
- * the selected appearance swatch. Falls back to "dark" for anything unparseable.
- */
+/** Whether a hex color reads as light — picks a contrasting checkmark on the selected swatch. */
 export const isLightColor = (hex: string): boolean => {
   const value = /^#?([0-9a-f]{6})$/i.exec(hex.trim())?.[1];
   if (!value) return false;
@@ -35,11 +28,8 @@ export const isLightColor = (hex: string): boolean => {
   return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.6;
 };
 
-/**
- * Predefined appearance swatches — the stored value IS the hex string (not an
- * i18n key; the swatch is purely visual). `hairColor` additionally accepts a
- * custom hex from the color picker (see the AppearancePopup).
- */
+// Swatches: the stored value IS the hex string (not an i18n key).
+// `hairColor` additionally accepts a custom hex from the color picker.
 export const HAIR_COLORS = [
   '#D1C1A3', '#B0997B', '#7F6652', '#7A372E', '#885537', '#937D58',
   '#5A3E28', '#664F47', '#381F18', '#D9943B', '#276B1C', '#2B26B9',
@@ -56,10 +46,7 @@ export const SKIN_COLORS = [
   '#81543D', '#684332', '#4A2F24', '#3C1F11', '#2E2520',
 ] as const;
 
-/**
- * Visible physical characteristics (optional). The free-text "Other" is a
- * separate `otherCharacteristic` field on the appearance, not an entry here.
- */
+/** Free-text "Other" is a separate `otherCharacteristic` field, not an entry here. */
 export const PHYSICAL_CHARACTERISTICS = [
   'characteristic_amputee_upper',
   'characteristic_amputee_lower',
