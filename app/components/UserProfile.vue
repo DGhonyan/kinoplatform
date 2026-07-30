@@ -291,7 +291,7 @@ const hasRecommendations = computed(() => (user.value?.recommendations?.length ?
 const canLeaveRecommendation = computed(() =>
   !!user.value && !canEdit.value && isOnboardingComplete(authStore.user),
 );
-const showRecommendations = computed(() => hasRecommendations.value || canLeaveRecommendation.value);
+const showRecommendations = computed(() => !isMe.value && (hasRecommendations.value || canLeaveRecommendation.value));
 
 // ── Actor photos (public carousel) + appearance (owner-only, filter-only) ──
 const isActorProfile = computed(() => isActor(user.value?.profession));
@@ -316,7 +316,7 @@ const navSections = computed(() =>
     { id: 'profile-photos', label: 'actor_photos_title', show: hasPhotos.value },
     { id: 'profile-projects', label: 'common_projects', show: hasProjects.value },
     { id: 'profile-experience', label: 'profile_experience', show: hasExperience.value && !isMe.value },
-    { id: 'profile-recommendations', label: 'recommendation_title', show: showRecommendations.value && !isMe.value },
+    { id: 'profile-recommendations', label: 'recommendation_title', show: showRecommendations.value },
   ]
     .filter(s => s.show)
     .map(({ id, label }) => ({ id, label })),
