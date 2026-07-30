@@ -102,10 +102,8 @@ import HeaderMobileMenu from './header/MobileMenu.vue';
 import HeaderHero from './header/Hero.vue';
 import { isOnboardingComplete } from '~/utils/onboarding';
 
-// Mirrors HeaderConfig (shared/types/header.ts). Kept as an inline literal —
-// the Vue SFC compiler resolves prop names from this at compile time, and it
-// does NOT reliably resolve a type imported via the `~~/` alias (the props would
-// silently not register). Keep this in sync with HeaderConfig.
+// Keep in sync with HeaderConfig (shared/types/header.ts). Stays inline — the
+// SFC compiler can't reliably resolve a props type imported via `~~/`.
 const props = withDefaults(
   defineProps<{
     cover?: boolean;
@@ -140,11 +138,8 @@ const visibleLinks = computed(() =>
 );
 
 // ── Intrinsic nav collapse ──────────────────────────────────────────────────
-// Collapse the inline nav into a hamburger when the pieces stop fitting, rather
-// than at a hardcoded viewport width. The nav + actions stay rendered (just
-// visually hidden when collapsed) so their *natural* widths remain measurable —
-// that makes the check stable (no expand/collapse oscillation) and locale-aware
-// (Armenian labels are wider, so the collapse point shifts automatically).
+// Collapse when the pieces stop fitting, not at a hardcoded breakpoint. Hidden
+// probes stay rendered so natural widths remain measurable (no oscillation).
 const barRef = ref<HTMLElement | null>(null);
 const linksRef = ref<HTMLElement | null>(null);
 const actionsInnerRef = ref<HTMLElement | null>(null);
@@ -157,17 +152,13 @@ const measure = () => {
 
   const title = bar.querySelector<HTMLElement>('.title');
 
-  // Read the real gap/padding rather than hardcoding copies of the SCSS —
-  // `$base-padding` is a shared token, and a silent drift here would move the
-  // collapse threshold with no error anywhere.
+  // Read real gap/padding — hardcoded copies of the SCSS tokens would drift silently.
   const cs = getComputedStyle(bar);
   const gap = parseFloat(cs.columnGap) || 0;
   const padding = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
 
-  // `grid-template-columns: 1fr auto 1fr` forces the two side tracks to be
-  // EQUAL, so the bar needs twice the wider side — not title + actions. Using
-  // the sum under-estimates whenever the actions column outgrows the title
-  // (logged-in avatar, longer locale) and lets the nav overlap before collapsing.
+  // `1fr auto 1fr` forces the side tracks EQUAL, so the bar needs twice the
+  // wider side — summing title + actions would under-estimate and let the nav overlap.
   const side = Math.max(
     title?.offsetWidth ?? 0,
     actionsInnerRef.value?.offsetWidth ?? 0,
@@ -206,7 +197,6 @@ const confirmLogout = async () => {
   z-index: 1;
 }
 
-// Cover image fills the entire header (bar + hero band) on cover pages.
 .header-cover-image {
   position: absolute;
   inset: 0;
@@ -216,7 +206,6 @@ const confirmLogout = async () => {
   z-index: 0;
 }
 
-// Darken the image so the bar text, slogan and buttons stay legible on any cover.
 .header-cover-scrim {
   position: absolute;
   inset: 0;
@@ -229,22 +218,15 @@ const confirmLogout = async () => {
   );
 }
 
-/*
- * Skin tokens — override on an ancestor to recolor this header per-page.
- *   --header-fg     body text, link rest state
- *   --header-accent title, hover/active link state
- * Consumed by descendants (nav links here; the profile trigger and hamburger
- * in the header/* subcomponents), so they inherit it through the DOM.
- */
+// Skin tokens — override on an ancestor to recolor this header per-page.
+// Inherited through the DOM by the header/* subcomponents too.
 .header-content {
   --header-fg: #{color(--v-theme-on-surface)};
   --header-accent: #{color(--v-theme-accent)};
 
   position: relative;
-  // Fixed 3-column track (title | nav | actions). The side columns are equal
-  // (1fr), so the nav stays put no matter what the actions column holds — the
-  // login button, the profile menu, or nothing (home hero) — which kills the
-  // layout shift when auth state resolves or the route changes.
+  // Equal 1fr side columns keep the nav centered whatever the actions column
+  // holds — no layout shift when auth state resolves.
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
@@ -253,9 +235,7 @@ const confirmLogout = async () => {
   color: var(--header-fg);
   z-index: 2;
   // Clips the hidden measuring probes (see `.measuring`), which are wider than
-  // the bar by definition when collapsed — otherwise they'd push a horizontal
-  // scrollbar onto every page. Menus/dialogs are teleported, so nothing real
-  // gets clipped.
+  // the bar when collapsed. Menus/dialogs are teleported, so nothing real is clipped.
   overflow: hidden;
 }
 
@@ -264,14 +244,8 @@ const confirmLogout = async () => {
   background: color(--v-theme-background);
 }
 
-/*
- * Columns are assigned explicitly, never by auto-placement. When the nav
- * collapses, `.links` goes `position: absolute` (see `.measuring`) and an
- * absolutely-positioned grid child drops out of auto-placement entirely — which
- * would slide `.actions` from column 3 into the middle column and park the
- * hamburger in the centre of the bar. Same story when `visibleLinks` is empty
- * and `.links` never renders.
- */
+// Columns are assigned explicitly: an abspos grid child (`.measuring`) drops
+// out of auto-placement, which would slide `.actions` into the middle column.
 .title {
   grid-column: 1;
   justify-self: start;
@@ -325,8 +299,7 @@ const confirmLogout = async () => {
   text-decoration: none;
   font-weight: 500;
   color: inherit;
-  // Keep each link on one line: a wrappable label ("About us") would let the
-  // grid squeeze the nav column word-by-word instead of tripping the collapse.
+  // A wrappable label would squeeze the nav column instead of tripping the collapse.
   white-space: nowrap;
 
   &:visited {

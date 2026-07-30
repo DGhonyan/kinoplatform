@@ -31,10 +31,7 @@
 
     <template v-else>
       <div class="detail-head">
-        <!-- "Title – City, Country – 45,000 AMD per night" as separate spans
-             rather than one interpolated sentence: the place drops out cleanly
-             for a listing with no country, and the line wraps at the dashes
-             instead of mid-price. -->
+        <!-- Separate spans: the place drops out cleanly and lines wrap at the dashes. -->
         <h1 class="detail-title">
           <span>{{ location.title }}</span>
           <template v-if="place">
@@ -73,17 +70,13 @@
         </div>
       </div>
 
-      <!-- Always rendered: MediaGallery owns its own "no photos yet" frame, and
-           hosts routinely publish before uploading anything. -->
+      <!-- Always rendered: MediaGallery owns its own "no photos yet" frame. -->
       <MediaGallery
         :images="location.images"
         :alt="location.title"
       />
 
-      <!-- Every block below is gated on actually having content. Most fields on
-           the model are optional and real listings fill in a fraction of them,
-           so a sparse location renders as a short page rather than a long one
-           full of blank rows. -->
+      <!-- Every block below renders only when it has content. -->
       <section
         v-if="infoItems.length"
         class="block"
@@ -218,8 +211,7 @@
                 class="host-avatar"
               >
               <span class="host-label">{{ $t('location_hosted_by') }}</span>
-              <!-- Admin-entered hosts carry no account (_id '') — plain text
-                   then, not a link to /users/ that goes nowhere. -->
+              <!-- Admin-entered hosts have no account (_id '') — plain text, no dead link. -->
               <NuxtLink
                 v-if="location.host._id"
                 :to="`/users/${location.host._id}`"
@@ -277,8 +269,7 @@
           </div>
         </div>
 
-        <!-- LocationMap renders nothing without coordinates; skipping it here too
-             keeps the grid from reserving an empty column for it. -->
+        <!-- Skipped without coords so the grid doesn't reserve an empty column. -->
         <LocationMap
           v-if="hasCoords"
           :lat="location.lat"
@@ -315,8 +306,6 @@
                   class="review-avatar"
                 >
                 <span class="review-identity">
-                  <!-- An unattributed review still shows its text and rating;
-                       only the name is withheld. -->
                   <span
                     v-if="review.author"
                     class="review-name"
@@ -358,8 +347,6 @@ import LocationMap from '~/components/locations/LocationMap.vue';
 import { AMENITY_ICONS, SAFETY_ICONS, formatPrice } from '~/utils/locations';
 import { formatDate } from '~/utils/dates';
 
-// Public page (in the auth allowlist) — guests browse the listing in full and
-// are only sent to /login when they submit a booking request.
 const route = useRoute();
 const { t, locale } = useI18n();
 const locationStore = useLocationStore();
@@ -384,8 +371,7 @@ const hasCoords = computed(
 );
 const hostAvatar = computed(() => location.value?.host?.avatar || defaultAvatar);
 
-// The wire values are plain strings, so drop anything this build doesn't know
-// rather than printing a raw `location_amenity_*` key at the user.
+// Drop wire values this build doesn't know rather than printing raw i18n keys.
 const amenities = computed(() => (location.value?.amenities ?? []).filter(id => id in AMENITY_ICONS));
 const safety = computed(() => (location.value?.safety ?? []).filter(id => id in SAFETY_ICONS));
 
@@ -398,11 +384,7 @@ const buildingTypeLabel = computed(() => {
     : type;
 });
 
-/*
- * The Information strip carries only the specs the host actually filled in —
- * "Number of floors: —" is worse than no row at all, and two of the seeded
- * listings have almost none of these.
- */
+// Only specs the host actually filled in — a "—" row is worse than no row.
 const infoItems = computed(() => {
   const data = location.value;
   if (!data) return [];
@@ -433,11 +415,8 @@ const professionOf = (review: LocationReview) =>
 const scrollToBooking = () =>
   bookingRef.value?.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-/*
- * There is no favourites endpoint yet, so "Save" is a browser-local bookmark: it
- * survives a reload but never leaves this device. Swap the two helpers below for
- * a store action once the backend ships one.
- */
+// No favourites endpoint yet — "Save" is a browser-local bookmark. Swap for a
+// store action once the backend ships one.
 const SAVED_KEY = 'saved-locations';
 
 const savedIds = ref<string[]>([]);
@@ -463,10 +442,8 @@ onMounted(() => {
   }
 });
 
-// Watched rather than fetched in onMounted: the host link and any future
-// related-locations strip keep the user on this route, so the component is
-// reused and onMounted wouldn't fire again. The sequence guard keeps a slow
-// earlier response from clobbering a newer one.
+// Watched, not fetched in onMounted: in-page links reuse the component, so
+// onMounted wouldn't refire. loadSeq guards against out-of-order responses.
 let loadSeq = 0;
 watch(
   () => route.params.id,
@@ -616,7 +593,6 @@ watch(
   font-size: 15px;
   line-height: 1.7;
   opacity: 0.85;
-  // Preserve the host's paragraph breaks.
   white-space: pre-line;
   overflow-wrap: anywhere;
 }
@@ -643,8 +619,7 @@ watch(
 }
 
 .important {
-  // Three columns that collapse one at a time — a listing with only a
-  // cancellation policy gets a single full-width column, not a lonely third.
+  // Columns collapse one at a time — a lone policy gets full width.
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 24px;

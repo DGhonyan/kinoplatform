@@ -1,9 +1,5 @@
-// Shooting locations — the marketplace side of the platform. Hosts list places
-// (houses, studios, halls, outdoor sites) that productions book for shoots.
-//
-// Nearly every descriptive field is optional: real hosts fill in a fraction of
-// them, so both the card and the detail page render each block only when it has
-// content rather than showing empty rows.
+// Most descriptive fields are optional — hosts fill in a fraction of them, so
+// card and detail render each block only when it has content.
 
 /** KEEP IN SYNC with the backend's location.constants.ts. */
 export const LOCATION_AMENITIES = [
@@ -64,11 +60,7 @@ export type LocationHost = {
 };
 
 export type LocationReview = {
-  /**
-   * `null` when the author is deleted or not publicly visible. The review still
-   * counts toward the location's rating — only the attribution is withheld — so
-   * the displayed list always matches `reviewCount`.
-   */
+  /** `null` when the author is deleted or hidden — the review still counts toward the rating. */
   author: (Pick<LocationHost, '_id' | 'firstName' | 'lastName' | 'avatar'> & {
     profession: string[];
   }) | null;
@@ -118,15 +110,8 @@ export type LocationDetail = Location & {
   reviews: LocationReview[];
 };
 
-/**
- * Create/edit payload for the admin manager. Mirrors the backend's Create/Update
- * DTO pair: only `title` and `pricePerHour` are ever required, and PATCH writes
- * exactly the keys it receives.
- *
- * `null` is meaningful on the nullable numbers — it CLEARS a spec back to "not
- * provided", which an omitted key cannot express. That distinction is what keeps
- * a blank "floors" off the detail page instead of rendering "Number of floors: 0".
- */
+// Admin create/edit payload — PATCH writes exactly the keys it receives.
+// `null` on the nullable numbers clears a spec back to "not provided".
 export type LocationInput = {
   title: string;
   pricePerHour: number;
@@ -143,10 +128,7 @@ export type LocationInput = {
   rooms?: number | null;
   bathrooms?: number | null;
   maxCrew?: number | null;
-  /**
-   * Display-host override: the admin creating the listing isn't the real host,
-   * so these carry the name/avatar the page shows. `''` clears, like the times.
-   */
+  /** Display-host override shown instead of the real host; `''` clears. */
   hostName?: string;
   hostAvatar?: string;
   /** `''` clears it — the update DTO allows the empty string for exactly that. */

@@ -1,3 +1,17 @@
+# Demo-mode public access (revert after the convention)
+
+For the startup-convention demo, several surfaces are deliberately public that
+may go back behind login later. The full revert checklist:
+
+- Backend `@Public()` on: `GET /users/profile/:id` (user.controller.ts),
+  `GET /availability/user/:userId` (availability.controller.ts). Location
+  browse routes (`GET /locations`, `/locations/:id`, `/locations/cities`) are
+  public by design and likely stay.
+- Frontend `app/middleware/auth.global.ts`: the `/users/` prefix in `isPublic`
+  (and `/locations` + `/locations/` if locations ever get gated).
+
+Booking, posting, and all writes still require login; only reads were opened.
+
 # Verifying changes
 
 Use Node 22.12+ (this repo pins Node 24 via `.nvmrc`). Run `nvm use` before commands if your shell isn't already on it — `@nuxt/eslint` needs `Object.groupBy`, which Node 20 doesn't have.
