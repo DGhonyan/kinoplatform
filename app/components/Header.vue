@@ -223,10 +223,13 @@ const confirmLogout = async () => {
   --header-accent: #{color(--v-theme-accent)};
 
   position: relative;
-  // Equal 1fr side columns keep the nav centered whatever the actions column
-  // holds — no layout shift when auth state resolves.
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  // // Equal 1fr side columns keep the nav centered whatever the actions column
+  // // holds — no layout shift when auth state resolves.
+  // display: grid;
+  // grid-template-columns: 1fr auto 1fr;
+
+  display: flex;
+  justify-content: space-between;
   align-items: center;
   gap: 16px;
   padding: $base-padding;
