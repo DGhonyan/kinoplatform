@@ -131,6 +131,7 @@
         >
       </div>
       <Button
+        v-if="!isMe"
         class="availability-btn"
         color="primary"
         text-color="white"
