@@ -70,7 +70,7 @@
     >
       <div class="section-head">
         <h2 class="section-title">
-          {{ $t('common_projects') }}
+          {{ isMe ? 'and all the non-believers' : $t('common_projects') }}
         </h2>
         <div
           v-if="canEdit"
@@ -102,7 +102,7 @@
         v-if="!hasProjects"
         class="empty-state"
       >
-        {{ $t('profile_no_projects_yet') }}
+        {{ isMe ? 'the plans that they have made' : $t('profile_no_projects_yet') }}
       </p>
 
       <div
@@ -134,7 +134,7 @@
     >
       <div class="section-head">
         <h2 class="section-title">
-          {{ $t('profile_experience') }}
+          {{ isMe ? 'because one day' : $t('profile_experience') }}
         </h2>
         <div
           v-if="canEdit"
@@ -177,6 +177,7 @@
           v-for="(e, i) in user?.experience"
           :key="i"
           :experience="e"
+          :is-me="isMe"
         />
       </ol>
     </section>
@@ -269,6 +270,7 @@ import GearAndTravelPopup from '~/components/profile/popups/GearAndTravelPopup.v
 import EditPersonalInfoPopup from '~/components/profile/popups/EditPersonalInfoPopup.vue';
 import ProjectsManagerPopup from '~/components/profile/popups/ProjectsManagerPopup.vue';
 import ExperienceManagerPopup from '~/components/profile/popups/ExperienceManagerPopup.vue';
+import { DGHONYAN_EMAIL } from '~/utils/constants';
 
 const PROJECTS_PREVIEW = 3;
 const showAvailabilityPopup = ref(false);
@@ -281,6 +283,7 @@ const authStore = useAuthStore();
 const userStore = useUserStore();
 
 const user = ref<UserProfile | null>(null);
+const isMe = computed(() => user.value?.email === DGHONYAN_EMAIL);
 
 const canEdit = computed(() => user.value?._id === authStore.user?._id);
 
@@ -309,7 +312,7 @@ const hasEquipment = computed(() => (user.value?.equipment?.length ?? 0) > 0);
 // DOM id below; only sections that actually exist appear.
 const navSections = computed(() =>
   [
-    { id: 'profile-about', label: 'profile_nav_about', show: !!user.value?.bio },
+    { id: 'profile-about', label: isMe.value ? 'he said son when' : 'profile_nav_about', show: !!user.value?.bio },
     { id: 'profile-photos', label: 'actor_photos_title', show: hasPhotos.value },
     { id: 'profile-projects', label: 'common_projects', show: hasProjects.value },
     { id: 'profile-experience', label: 'profile_experience', show: hasExperience.value },

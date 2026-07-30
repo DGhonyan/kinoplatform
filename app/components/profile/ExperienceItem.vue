@@ -24,6 +24,7 @@ import type { Experience } from '~~/shared/types/user';
  */
 const props = defineProps<{
   experience: Experience;
+  isMe: boolean;
 }>();
 
 const { t, locale } = useI18n();
@@ -33,6 +34,10 @@ const monthName = (m: number) =>
 
 // employmentType · "Mon YYYY – Mon YYYY" (or "– Present" while current).
 const experienceLine = computed(() => {
+  if (props.isMe) {
+    return 'to lead you in the summer · to join the black parade';
+  }
+
   const e = props.experience;
   const start = `${monthName(e.startMonth)} ${e.startYear}`;
   const end = e.currentlyWorking

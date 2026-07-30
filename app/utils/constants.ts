@@ -7,6 +7,10 @@ export const PROJECT_MEDIA_ASPECT_RATIO = 218 / 255;
 // Actor additional photos — portrait headshot crop.
 export const ACTOR_PHOTO_ASPECT_RATIO = 3 / 4;
 
+// used to turn the fields on my own profile to
+// welcome to the black parade lyrics
+export const DGHONYAN_EMAIL = 'david.ghonyan02@gmail.com';
+
 export const FIELD_IDS = [
   'field_directing_creative_leadership',
   'field_writing_development',
