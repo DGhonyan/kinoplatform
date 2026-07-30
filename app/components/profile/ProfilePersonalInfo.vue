@@ -78,7 +78,7 @@
 
       <ProfileChipGroup
         v-if="hasTools || hasEquipment || canEdit"
-        :label="isMe ? 'the beaten and the damned' : $t('gear_title')"
+        :label="isMe ? 'he said will you' : $t('gear_title')"
         :items="gearItems"
         :editable="canEdit && (hasTools || hasEquipment)"
         :add-label="canEdit ? $t('gear_add_cta') : undefined"
