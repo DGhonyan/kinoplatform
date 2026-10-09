@@ -21,6 +21,7 @@ async function tryRefreshToken(): Promise<boolean> {
         method: 'POST',
         credentials: 'include',
       });
+      markAuthRefreshed();
       return true;
     }
     catch {
@@ -33,6 +34,41 @@ async function tryRefreshToken(): Promise<boolean> {
   })();
 
   return refreshPromise;
+}
+
+// Access tokens live 15 minutes (backend JWT_ACCESS_EXPIRATION). Refresh a
+// little before that. Refreshing early is always safe, so this only needs to
+// be short enough, not exact.
+const REFRESH_AFTER_MS = 14 * 60 * 1000;
+// localStorage, not a module variable: survives reloads and is shared between
+// tabs, so they don't each rotate the (single-use) refresh token.
+const AUTH_REFRESHED_AT_KEY = 'authRefreshedAt';
+
+/** Record that the auth cookies were just issued (login) or refreshed. */
+export function markAuthRefreshed() {
+  localStorage.setItem(AUTH_REFRESHED_AT_KEY, String(Date.now()));
+}
+
+// Public routes never answer 401: an expired access token just reads as an
+// anonymous visitor (own profile → public payload, own calendar → no notes),
+// so the 401 retry in apiFetch can't catch it there. While signed in, refresh
+// ahead of expiry instead. Never destructive: if it fails (no refresh token,
+// network), the request goes ahead and the usual 401 handling applies.
+async function refreshIfStale(): Promise<void> {
+  // A refresh already in flight (another request started it): wait for it so
+  // this request carries the new cookie too.
+  if (refreshPromise) {
+    await refreshPromise;
+    return;
+  }
+  if (!useAuthStore().user) return;
+
+  const last = Number(localStorage.getItem(AUTH_REFRESHED_AT_KEY)) || 0;
+  if (Date.now() - last < REFRESH_AFTER_MS) return;
+
+  const refreshed = await tryRefreshToken();
+  // Dead or unreachable session: back off instead of retrying on every request.
+  if (!refreshed) markAuthRefreshed();
 }
 
 export interface ApiError {
@@ -71,6 +107,8 @@ async function apiFetch<T>(
     credentials: 'include',
     ...options,
   };
+
+  await refreshIfStale();
 
   try {
     const data = await $fetch<T>(path, requestOptions);

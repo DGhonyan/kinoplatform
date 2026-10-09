@@ -66,8 +66,9 @@ export default defineNuxtConfig({
       include: [
         '@vue/devtools-core',
         '@vue/devtools-kit',
-        '@azure/storage-blob',
         'mime',
+        'marked',
+        'vue-advanced-cropper',
       ],
     },
   },

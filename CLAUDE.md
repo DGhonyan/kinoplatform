@@ -13,6 +13,19 @@ may go back behind login later. The full revert checklist:
   `/locations/` if locations ever get gated).
 
 Booking, posting, and all writes still require login; only reads were opened.
+The privacy policy's "What other people can see" section describes this public
+visibility — narrow it (and bump the version) if you re-gate profiles.
+
+# Privacy policy & consent
+
+- Text: one Markdown file per locale, `app/legal/privacy.{en,hy}.md`, rendered by
+  `pages/privacy.vue` with `marked`. Add/remove sections by editing the files.
+- `PRIVACY_POLICY_VERSION` (`app/utils/privacy.ts`) is the effective date. Bump it
+  (and the date in both files) on any material change: `PrivacyConsentDialog`
+  then blocks every signed-in user until they accept the new version.
+- Sign-up sends the accepted version + opt-in `marketingConsent` with
+  `POST /auth/register` (the backend requires the version); later changes go
+  through `PATCH /account/consent` (`accountStore.updateConsent`).
 
 # Verifying changes
 
@@ -31,6 +44,7 @@ errors and lint failures are the contract.
   - `components/` — auto-imported (subdir adds prefix: `auth/Login.vue` → `<AuthLogin>`)
   - `middleware/`, `stores/`, `utils/` — auto-imported by name
   - `assets/` — images and other transformed assets
+  - `legal/` — legal documents as per-locale Markdown (imported with `?raw`)
 - `shared/types/` — types shared between client and (future) server. Import via `~~/shared/types/...`
 - `i18n/locales/` — translation JSON, picked up by `@nuxtjs/i18n`
 - `styles/`, `design-system/` — build-time SCSS partials and Vuetify theme tokens, consumed by `nuxt.config.ts` only (not runtime code)

@@ -28,16 +28,21 @@ export const useAuthStore = defineStore('auth', {
       });
 
       if (res.data) {
+        markAuthRefreshed();
         this.setUser(res.data.user);
       }
 
       return res;
     },
 
-    async register(email: string, password: string) {
+    // The Credentials step won't advance until the privacy box is ticked, so
+    // reaching here means the current policy version was accepted.
+    async register(email: string, password: string, marketingConsent: boolean) {
       return apiRequest('/auth/register').post<{ user: User; message: string }>({
         email,
         password,
+        acceptedPrivacyVersion: PRIVACY_POLICY_VERSION,
+        marketingConsent,
       });
     },
 

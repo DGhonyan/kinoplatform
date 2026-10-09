@@ -410,7 +410,10 @@ const loadUserData = async () => {
   // UserProfile is a superset of User (it carries `recommendations`).
   user.value = profile;
 
-  if (targetId === authStore.user?._id) authStore.setUser(profile);
+  // Only an owner payload may replace the stored user. If the session lapsed,
+  // the public endpoint answers with the visitor view (no email, onboarding or
+  // consent fields), which would trip the onboarding gate and consent dialog.
+  if (targetId === authStore.user?._id && profile.email) authStore.setUser(profile);
 };
 
 // The essentials popup lives in the page alongside this component and can't

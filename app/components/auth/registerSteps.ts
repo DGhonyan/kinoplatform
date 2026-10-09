@@ -29,6 +29,8 @@ export type RegisterFormData = {
   location: string;
   birthDate: string;
   profession: string[];
+  acceptPrivacy: boolean;
+  marketingConsent: boolean;
 };
 
 export type RegisterStepInstance = {
@@ -63,7 +65,7 @@ export const useRegisterSteps = (): Record<WizardStepId, RegisterStep> => {
       component: RegisterStepCredentials,
       irreversible: true, // POST /auth/register creates an account — can't be redone.
       onAdvance: async (data) => {
-        return !!(await authStore.register(data.email, data.password));
+        return !!(await authStore.register(data.email, data.password, data.marketingConsent));
       },
     },
     [STEP_IDS.CODE]: {

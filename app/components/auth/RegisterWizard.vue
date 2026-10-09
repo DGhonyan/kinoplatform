@@ -131,6 +131,8 @@ const formData = reactive<RegisterFormData>({
   location: '',
   birthDate: '',
   profession: [],
+  acceptPrivacy: false,
+  marketingConsent: false,
   ...props.initialFormData,
 });
 

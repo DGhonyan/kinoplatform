@@ -121,6 +121,17 @@ export type User = {
   appearance?: Appearance;
   additionalPhotos?: string[];
   completedSteps: string[];
+  /** Opt-in for promotional emails; false unless the user ticked it. */
+  marketingConsent?: boolean;
+  /** PRIVACY_POLICY_VERSION the user last accepted; null = never accepted. */
+  acceptedPrivacyVersion?: string | null;
+  privacyAcceptedAt?: string | null;
+};
+
+// PATCH /account/consent — only the fields being changed.
+export type ConsentUpdate = {
+  marketingConsent?: boolean;
+  acceptedPrivacyVersion?: string;
 };
 
 // Talent-search payload (POST /users/talents/search) — all optional, empty = all.

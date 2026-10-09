@@ -2,8 +2,9 @@ import { isOnboardingComplete } from '~/utils/onboarding';
 
 export default defineNuxtRouteMiddleware(async (to) => {
   // Public = reachable without login. '/' and '/about' are marketing pages that
-  // anyone can see; the auth screens are public too (but bounce logged-in users).
-  const publicPaths = ['/', '/about', '/announcements', '/locations', '/crew', '/talents', '/login', '/register', '/forgot-password', '/reset-password'];
+  // anyone can see, '/privacy' must be readable before signing up; the auth
+  // screens are public too (but bounce logged-in users).
+  const publicPaths = ['/', '/about', '/privacy', '/announcements', '/locations', '/crew', '/talents', '/login', '/register', '/forgot-password', '/reset-password'];
   const authOnlyScreens = ['/login', '/register'];
   const path = to.path.replace(/\/+$/, '') || '/';
   // Location details and member profiles (/users/:id, NOT /user) are public too;

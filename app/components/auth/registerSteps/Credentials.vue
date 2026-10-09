@@ -28,6 +28,44 @@
       :hint="$t('register_password_requirements')"
       @update:model-value="passwordError = ''"
     />
+
+    <div class="consents">
+      <v-checkbox
+        v-model="formData.acceptPrivacy"
+        density="compact"
+        color="primary"
+        :error-messages="privacyError"
+        hide-details="auto"
+        @update:model-value="privacyError = ''"
+      >
+        <template #label>
+          <i18n-t
+            keypath="register_privacy_agree"
+            tag="span"
+          >
+            <template #policy>
+              <!-- New tab so the half-filled wizard isn't lost; .stop keeps the
+                   click from toggling the checkbox. -->
+              <NuxtLink
+                to="/privacy"
+                target="_blank"
+                class="link"
+                @click.stop
+              >
+                {{ $t('privacy_policy_inline') }}
+              </NuxtLink>
+            </template>
+          </i18n-t>
+        </template>
+      </v-checkbox>
+      <v-checkbox
+        v-model="formData.marketingConsent"
+        :label="$t('register_marketing_opt_in')"
+        density="compact"
+        color="primary"
+        hide-details
+      />
+    </div>
   </div>
 </template>
 
@@ -42,10 +80,12 @@ const { t } = useI18n();
 
 const emailError = ref('');
 const passwordError = ref('');
+const privacyError = ref('');
 
 const validate = (): boolean => {
   emailError.value = '';
   passwordError.value = '';
+  privacyError.value = '';
   let ok = true;
 
   const email = formData.email.trim();
@@ -67,6 +107,12 @@ const validate = (): boolean => {
     ok = false;
   }
 
+  // The backend refuses to create an account without an accepted policy version.
+  if (!formData.acceptPrivacy) {
+    privacyError.value = t('register_privacy_required');
+    ok = false;
+  }
+
   return ok;
 };
 
@@ -84,5 +130,20 @@ defineExpose({ validate });
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.consents {
+  display: flex;
+  flex-direction: column;
+}
+
+.link {
+  color: color(--v-theme-primary);
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 </style>

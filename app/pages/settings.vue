@@ -57,6 +57,44 @@
       <SettingsSessions />
     </section>
 
+    <!-- Privacy -->
+    <section class="settings-section">
+      <h2 class="section-title">
+        {{ $t('settings_privacy') }}
+      </h2>
+      <div class="settings-row">
+        <div class="row-text">
+          <span class="settings-label">{{ $t('common_privacy_policy') }}</span>
+          <span class="row-value muted">{{ privacyStatus }}</span>
+        </div>
+        <Button
+          variant="secondary"
+          color="white"
+          size="small"
+          to="/privacy"
+        >
+          {{ $t('settings_view') }}
+        </Button>
+      </div>
+      <div class="settings-row">
+        <div class="row-text">
+          <span class="settings-label">{{ $t('settings_marketing_emails') }}</span>
+          <span class="row-value muted">{{ $t('settings_marketing_emails_hint') }}</span>
+        </div>
+        <v-switch
+          :model-value="marketingConsent"
+          :loading="savingMarketing"
+          :disabled="savingMarketing"
+          color="primary"
+          density="compact"
+          hide-details
+          inset
+          class="flex-grow-0"
+          @update:model-value="setMarketingConsent"
+        />
+      </div>
+    </section>
+
     <!-- Your data -->
     <section class="settings-section">
       <h2 class="section-title">
@@ -108,6 +146,33 @@ const authStore = useAuthStore();
 const accountStore = useAccountStore();
 
 const email = computed(() => authStore.user?.email ?? '');
+
+const { t, locale } = useI18n();
+
+// "Accepted on …" only for the CURRENT version — an older acceptance means the
+// consent dialog is still waiting (it stays hidden on this page).
+const privacyStatus = computed(() => {
+  const user = authStore.user;
+  if (user?.acceptedPrivacyVersion !== PRIVACY_POLICY_VERSION || !user.privacyAcceptedAt) {
+    return t('settings_privacy_not_accepted');
+  }
+  return t('settings_privacy_accepted_on', { date: formatDate(user.privacyAcceptedAt, locale.value) });
+});
+
+// Bound one-way to the store: on a failed save the user is unchanged, so the
+// switch flips back by itself.
+const marketingConsent = computed(() => authStore.user?.marketingConsent ?? false);
+const savingMarketing = ref(false);
+
+const setMarketingConsent = async (value: boolean | null) => {
+  savingMarketing.value = true;
+  try {
+    await accountStore.updateConsent({ marketingConsent: !!value });
+  }
+  finally {
+    savingMarketing.value = false;
+  }
+};
 
 const emailOpen = ref(false);
 const passwordOpen = ref(false);
